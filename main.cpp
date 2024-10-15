@@ -18,7 +18,7 @@
 #include "escena.h"
 #include "main.h"
 
-
+std::vector<Planeta> PLANETES;
 void InitGL()
 {
 // TODO: agregar aquí el código de construcción
@@ -1162,6 +1162,8 @@ int shortCut_Objecte()
 	/*MAV MODIFIED*/case CILINDRE: auxObjecte = 15; break;
 	/*MAV MODIFIED*/case OBJECTE_T: auxObjecte = 16; break;
 	/*MAV MODIFIED*/case SPUTNIK: auxObjecte = 17; break;
+	case PROVA_PLANETA:
+		auxObjecte = 18; break;
 
 	default:			// Opció OBJECTE <Altres Objectes>
 		auxObjecte = 0;
@@ -1648,7 +1650,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)", "Cub (<Shift>+C)", "Cub RGB (<Shift>+D)", "Esfera (<Shift>+E)", "Tetera (<Shift>+T)",
 			"Arc (<Shift>+R)", "Matriu Primitives (<Shift>+M)", "Matriu Primitives VAO (<Shift>+V)", "Tie (<Shift>+I)", "Arxiu OBJ", 
 			"Bezier (<Shift>+F7)", "B-spline (<Shift>+F8)", "Lemniscata (<Shift>+F9)", "Hermitte (<Shift>+F10)", "Catmull-Rom (<Shift>+F11)",
-			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)" };
+			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)"};
 		//static int item_current = 0;
 		ImGui::Combo(" ", &oObjecte, items, IM_ARRAYSIZE(items));
 		ImGui::Spacing();
@@ -2005,7 +2007,25 @@ void ShowEntornVGIWindow(bool* p_open)
 				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.0f, 1.0f, 20, 1));
 			}
 			break;
-		}
+		case 18:
+			if (objecte != PROVA_PLANETA) {
+				objecte = PROVA_PLANETA;
+				netejaVAOList();			
+				// ISMAEL CONTINUAR
+				for (int i = 0; i < 9; i++)
+				{
+					vec3 pos = { 0.0f, 0.0f, 0.0f };
+					Planeta planeta(1.0f, 20, 20, pos);
+					PLANETES.push_back(planeta);
+				}
+				auto planeta = PLANETES[0];
+				vec4 color = planeta.getColor();
+				SetColor4d(color.r, color.g, color.b, color.a);
+				CVAO planetaC = loadgluSphere_EBO(planeta.getRadi(), planeta.getSlices(), planeta.getStacks());
+				Set_VAOList(3, planetaC);
+				
+			}
+}
 	}
 
 	// DESPLEGABLE VISTA

@@ -16,6 +16,8 @@
 #include "visualitzacio.h"
 #include "escena.h"
 
+
+
 // Dibuixa Eixos Coordenades Món i Reixes, activant un shader propi.
 void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, 
 	glm::mat4 MatriuProjeccio, glm::mat4 MatriuVista)
@@ -195,6 +197,28 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Desactivar transparència
 		glDisable(GL_BLEND);
 		break;
+
+	case PROVA_PLANETA:
+		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
+		// Activar transparència
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		// Dibuix geometria Mar
+		color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
+		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		SeleccionaColorMaterial(sh_programID, color_Mar, sw_mat);
+		// Pas ModelView Matrix a shader
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		// Pas NormalMatrix a shader
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+		// Desactivar transparència
+		glDisable(GL_BLEND);
+		break;
+
+		
 
 // Dibuix de l'objecte TIE (Nau enemiga Star Wars)
 	case TIE:
@@ -740,6 +764,102 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	draw_TriVAO_Object(GLUT_TEAPOT); //gluSphere(0.5, 20, 20);
 }
 
+void processaPlanetes()
+{
+	float radis[9] = { 100.0f, 5.0f, 10.0f, 9.0f, 7.0f, 25.0f, 20.0f, 9.0f, 9.0f };
+	float rotationSpeeds[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
+	
+	// Arrays to hold adjusted axial tilts and rotation directions
+	float adjustedTilts[9] = {
+		7.25f,    // Sun
+		0.03f,    // Mercury
+		2.64f,    // Venus (retrograde)
+		23.44f,   // Earth
+		25.19f,   // Mars
+		3.13f,    // Jupiter
+		26.73f,   // Saturn
+		82.23f,   // Uranus (retrograde)
+		28.32f    // Neptune
+	};
+
+	int rotationDirections[9] = {
+		1,  // Sun
+		1,  // Mercury
+	   -1,  // Venus (retrograde)
+		1,  // Earth
+		1,  // Mars
+		1,  // Jupiter
+		1,  // Saturn
+	   -1,  // Uranus (retrograde)
+		1   // Neptune
+	};
+
+	// Array to hold the rotation axes
+	glm::vec3 rotationAngles[9];
+
+	for (int i = 0; i < PLANETES.size(); ++i) {
+		float tiltRadians = glm::radians(adjustedTilts[i]);
+		glm::vec3 axis = glm::vec3(
+			0.0f,
+			cos(tiltRadians),
+			sin(tiltRadians)
+		);
+		glm::vec3 rotationAxis = glm::normalize(axis);
+
+		// Assign rotation axis and direction to each planet
+		PLANETES[i].setAngleRotacioPlaneta(rotationAxis);
+		PLANETES[i].setDireccioRotacio(rotationDirections[i]);
+	}
+
+	float margin = 20.0f;
+	float currPos = 0.0f;
+
+	for (int i = 0; i < PLANETES.size(); i++)
+	{
+		PLANETES[i].setRadi(radis[i]);
+
+		if (i == 0)
+		{
+			currPos = PLANETES[i].getRadi(); 
+			PLANETES[i].setPosition(glm::vec3(currPos, 0.0f, 0.0f));
+			currPos += PLANETES[i].getRadi() + margin*5;
+		}
+		else
+		{
+			currPos += PLANETES[i].getRadi();
+			PLANETES[i].setPosition(glm::vec3(currPos, 0.0f, 0.0f));
+			currPos += PLANETES[i].getRadi() + margin;
+		}
+		PLANETES[i].setVelocitatRotacio(rotationSpeeds[i]);
+	}
+}
+
+void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
+{
+	processaPlanetes();
+	for(auto planeta : PLANETES)
+	{
+		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
+
+		float rotationSpeed = planeta.getVelocitatRotacio();    // Degrees per second
+		int rotationDirection = planeta.getDireccioRotacio(); // 1 or -1
+		float angle = time * rotationSpeed * rotationDirection;
+
+		glm::vec3 rotationAxis = planeta.getAngleRotacioPlaneta();
+
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), rotationAxis);
+
+		float radi = planeta.getRadi();
+		ModelMatrix = glm::scale(ModelMatrix, vec3(radi, radi, radi));
+
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+		draw_TriEBO_Object(3);
+	}
+	
+}
 void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
 {
 	CColor col_object = { 0.0,0.0,0.0,1.0 };

@@ -8,6 +8,11 @@
 #ifndef CONST_H
 #define CONST_H
 
+#include <vector>
+#include "planeta.h"
+
+extern std::vector<Planeta> PLANETES;
+
 //--------------- VGI: Tipus de Càmera
 #define CAP ' '
 #define CAM_ESFERICA 'E'
@@ -56,6 +61,7 @@
 #define OBJOBJ '4'		// Objecte format OBJ
 #define OBJECTE_T 'z'
 #define SPUTNIK 'Q'
+#define PROVA_PLANETA '9'
 
 //-------------- VGI: Tipus d'Iluminacio
 #define PUNTS 'P'
@@ -94,6 +100,8 @@ const double p_far=50000.0;
 #define FITXER 'f'
 #define FITXERBMP 'f'
 #define FITXERIMA 'I'
+
+
 
 // --------------  VGI: NOMBRE DE LLUMS: Nombre de Llums de l'aplicació, les d'OpenGL
 const int NUM_MAX_LLUMS = 8;
