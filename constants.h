@@ -121,6 +121,57 @@ const int NUM_MAX_LLUMS = 8;
 #define PROG_BINARY_SHADER 'p'
 #define PROG_BINARY_SHADERW 'W'
 
+const float ESCALA_DISTANCIA = 1e-9f;
+const float ESCALA_MASSA = 1e-24f;
+
+const float MASSES[9] = {
+		1.989e30f,  // Sol
+		3.301e23f,  // Mercurio
+		4.867e24f,  // Venus
+		5.972e24f,  // Tierra
+		6.417e23f,  // Marte
+		1.898e27f,  // Júpiter
+		5.683e26f,  // Saturno
+		8.681e25f,  // Urano
+		1.024e26f   // Neptuno
+};
+
+const int DIRECCIONS_ROTACIO[9] = {
+		1,  // Sun
+		1,  // Mercury
+	   -1,  // Venus (retrograde)
+		1,  // Earth
+		1,  // Mars
+		1,  // Jupiter
+		1,  // Saturn
+	   -1,  // Uranus (retrograde)
+		1   // Neptune
+};
+
+const float ANGLES_INCLINACIO_ROTACIO[9] = {
+		7.25f,    // Sun
+		0.03f,    // Mercury
+		2.64f,    // Venus (retrograde)
+		23.44f,   // Earth
+		25.19f,   // Mars
+		3.13f,    // Jupiter
+		26.73f,   // Saturn
+		82.23f,   // Uranus (retrograde)
+		28.32f    // Neptune
+};
+
+const float RADI_ORBITAL[9] = {
+		0.0f,        // Sol
+		57.9e9f,     // Mercurio
+		108.2e9f,    // Venus
+		149.6e9f,    // Tierra
+		227.9e9f,    // Marte
+		778.5e9f,    // Júpiter
+		1.4335e12f,  // Saturno
+		2.8725e12f,  // Urano
+		4.4951e12f   // Neptuno
+};
+
 //--------------- VGI: Valor constant de pi
 const double PI=3.14159;
 const double TWOPI = 2 * PI;

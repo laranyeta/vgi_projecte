@@ -10,7 +10,8 @@ public:
 		m_slices = 20;
 		m_stacks = 20;
 		m_massa = 0.0f;
-		m_gravetat = 0.0f;
+		m_velocitat = 0.0f;
+		m_acceleracio = 0.0f;
 		m_angle_rotacio_orbita = 0.0f;
 		m_radi_orbita = 0.0f;
 		m_color = { 0.0,0.0,0.0,1.0 };
@@ -26,7 +27,7 @@ public:
 		m_slices = slices;
 		m_stacks = stacks;
 		m_massa = 0.0f;
-		m_gravetat = 0.0f;
+		m_velocitat = 0.0f;
 		m_angle_rotacio_orbita = 0.0f;
 		m_radi_orbita = 0.0f;
 		m_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -35,12 +36,12 @@ public:
 		m_direccio_rotacio = 1;
 	}
 
-	Planeta(float radi, int slices, int stacks, float massa, float gravetat, glm::vec3 position) {
+	Planeta(float radi, int slices, int stacks, float massa, float velocitat, glm::vec3 position) {
 		m_radi = radi;
 		m_slices = slices;
 		m_stacks = stacks;
 		m_massa = massa;
-		m_gravetat = gravetat;
+		m_velocitat = velocitat;
 		m_angle_rotacio_orbita = 0.0f;
 		m_radi_orbita = 0.0f;
 		m_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -50,12 +51,12 @@ public:
 		m_direccio_rotacio = 1;
 	}
 
-	Planeta(float radi, int slices, int stacks, float massa, float gravetat, float angleRotacio, float radiOrbita, glm::vec3 position) {
+	Planeta(float radi, int slices, int stacks, float massa, float velocitat, float angleRotacio, float radiOrbita, glm::vec3 position) {
 		m_radi = radi;
 		m_slices = slices;
 		m_stacks = stacks;
 		m_massa = massa;
-		m_gravetat = gravetat;
+		m_velocitat = velocitat;
 		m_angle_rotacio_orbita = angleRotacio;
 		m_radi_orbita = radiOrbita;
 		m_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -68,7 +69,7 @@ public:
 	float getRadi() { return m_radi; }
 	float getRadiOrbita() { return m_radi_orbita; }
 	float getMassa() { return m_massa; }
-	float getGravetat() { return m_gravetat; }
+	float getGravetat() { return m_velocitat; }
 	int getSlices() { return m_slices; }
 	int getStacks() { return m_stacks; }
 	float getAngleRotacio() { return m_angle_rotacio_orbita; }
@@ -76,13 +77,14 @@ public:
 	int getDireccioRotacio() {
 		return m_direccio_rotacio;
 	}
+	float getAcceleracio() { return m_acceleracio; }
 	glm::vec3 getAngleRotacioPlaneta() { return m_angle_rotacio_planeta; }
 	glm::vec4 getColor() { return m_color; }
 	glm::vec3 getPosition() { return m_position; }
 	void setRadi(float radi) { m_radi = radi; }
 	void setRadiOrbita(float radiOrbita) { m_radi_orbita = radiOrbita; }
 	void setMassa(float massa) { m_massa = massa; }
-	void setGravetat(float gravetat) { m_gravetat = gravetat; }
+	void setVelocitat(float velocitat) { m_velocitat = velocitat; }
 	void setSlices(int slices) { m_slices = slices; }
 	void setStacks(int stacks) { m_stacks = stacks; }
 	void setAngleRotacio(float angleRotacio) { m_angle_rotacio_orbita = angleRotacio; }
@@ -91,13 +93,15 @@ public:
 	void setVelocitatRotacio(float velocitat) { m_velocitat_rotacio = velocitat; }
 	void setDireccioRotacio(int direccio) { m_direccio_rotacio = direccio; }
 	void setAngleRotacioPlaneta(glm::vec3 angle_rotacio_planeta) { m_angle_rotacio_planeta = angle_rotacio_planeta; }
+	void setAcceleracio(float acceleracio) { m_acceleracio = acceleracio;  }
 private:
 	glm::vec3 m_position;
 	glm::vec4 m_color;
 	float m_radi;
 	float m_radi_orbita;
 	float m_massa;
-	float m_gravetat;
+	float m_velocitat;
+	float m_acceleracio;
 	int m_slices;
 	int m_stacks;
 	float m_angle_rotacio_orbita;

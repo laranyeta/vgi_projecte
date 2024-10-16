@@ -766,39 +766,12 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 
 void processaRotacions()
 {
-
 	float rotationSpeeds[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
 
-	// Arrays to hold adjusted axial tilts and rotation directions
-	float adjustedTilts[9] = {
-		7.25f,    // Sun
-		0.03f,    // Mercury
-		2.64f,    // Venus (retrograde)
-		23.44f,   // Earth
-		25.19f,   // Mars
-		3.13f,    // Jupiter
-		26.73f,   // Saturn
-		82.23f,   // Uranus (retrograde)
-		28.32f    // Neptune
-	};
-
-	int rotationDirections[9] = {
-		1,  // Sun
-		1,  // Mercury
-	   -1,  // Venus (retrograde)
-		1,  // Earth
-		1,  // Mars
-		1,  // Jupiter
-		1,  // Saturn
-	   -1,  // Uranus (retrograde)
-		1   // Neptune
-	};
-
-	// Array to hold the rotation axes
 	glm::vec3 rotationAngles[9];
 
 	for (int i = 0; i < PLANETES.size(); ++i) {
-		float tiltRadians = glm::radians(adjustedTilts[i]);
+		float tiltRadians = glm::radians(ANGLES_INCLINACIO_ROTACIO[i]);
 		glm::vec3 axis = glm::vec3(
 			0.0f,
 			cos(tiltRadians),
@@ -808,7 +781,7 @@ void processaRotacions()
 
 		// Assign rotation axis and direction to each planet
 		PLANETES[i].setAngleRotacioPlaneta(rotationAxis);
-		PLANETES[i].setDireccioRotacio(rotationDirections[i]);
+		PLANETES[i].setDireccioRotacio(DIRECCIONS_ROTACIO[i]);
 		PLANETES[i].setVelocitatRotacio(rotationSpeeds[i]);
 	}
 }
@@ -835,8 +808,14 @@ void processaPosicions()
 	}
 }
 
+void processaFisica()
+{
+	float G = 6.67430e-11f * (ESCALA_MASSA) * (ESCALA_DISTANCIA * ESCALA_DISTANCIA);
+}
+
 void processaPlanetes()
 {
+	processaFisica();
 	processaPosicions();
 	processaRotacions();
 }
