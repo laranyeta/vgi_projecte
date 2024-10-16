@@ -15,8 +15,7 @@
 #include "material.h"
 #include "visualitzacio.h"
 #include "escena.h"
-
-
+#include <iostream>
 
 // Dibuixa Eixos Coordenades Món i Reixes, activant un shader propi.
 void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, 
@@ -766,33 +765,31 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 
 void processaRotacions()
 {
-	float rotationSpeeds[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
-
-	glm::vec3 rotationAngles[9];
+	float velocitatsRotacio[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
 
 	for (int i = 0; i < PLANETES.size(); ++i) {
-		float tiltRadians = glm::radians(ANGLES_INCLINACIO_ROTACIO[i]);
+		float inclinacioRadians = glm::radians(ANGLES_INCLINACIO_ROTACIO[i]);
 		glm::vec3 axis = glm::vec3(
 			0.0f,
-			cos(tiltRadians),
-			sin(tiltRadians)
+			cos(inclinacioRadians),
+			sin(inclinacioRadians)
 		);
-		glm::vec3 rotationAxis = glm::normalize(axis);
+		glm::vec3 axisRotacio = glm::normalize(axis);
 
-		// Assign rotation axis and direction to each planet
-		PLANETES[i].setAngleRotacioPlaneta(rotationAxis);
+		// Assignem eix de rotació i direcció de rotació
+		PLANETES[i].setAngleRotacioPlaneta(axisRotacio);
 		PLANETES[i].setDireccioRotacio(DIRECCIONS_ROTACIO[i]);
-		PLANETES[i].setVelocitatRotacio(rotationSpeeds[i]);
+		PLANETES[i].setVelocitatRotacio(velocitatsRotacio[i]);
 	}
 }
+/*
 void processaPosicions()
 {
-	float radis[9] = { 100.0f, 5.0f, 10.0f, 9.0f, 7.0f, 25.0f, 20.0f, 9.0f, 9.0f };
 	float margin = 20.0f;
 	float currPos = 0.0f;
 	for (int i = 0; i < PLANETES.size(); i++)
 	{
-		PLANETES[i].setRadi(radis[i]);
+		PLANETES[i].setRadi(RADIS[i]);
 		if (i == 0)
 		{
 			currPos = PLANETES[i].getRadi();
@@ -807,37 +804,140 @@ void processaPosicions()
 		}
 	}
 }
-
+*/
 void processaFisica()
 {
-	float G = 6.67430e-11f * (ESCALA_MASSA) * (ESCALA_DISTANCIA * ESCALA_DISTANCIA);
+	// Constant gravitacional
+	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
+
+	for (int i = 0; i < PLANETES.size(); i++)
+	{
+		PLANETES[i].setRadi(RADIS[i] * ESCALA_DISTANCIA);
+
+		// Escala
+		double massa = MASSES[i] * ESCALA_MASSA;
+		PLANETES[i].setMassa(massa);
+
+		// Sol no es mou (valors per defecte del constructor, es pot eliminar)
+		if (i == 0)
+		{
+			
+			PLANETES[i].setPosition(glm::vec3(0.0f));
+			PLANETES[i].setVelocitat(glm::vec3(0.0f));
+		}
+		else
+		{
+			// Posició inicial del planeta
+			double distancia = RADI_ORBITAL[i] * ESCALA_DISTANCIA;
+			PLANETES[i].setPosition(glm::vec3(distancia, 0.0f, 0.0f));
+
+			// Calcular velocitat orbital
+			double M = PLANETES[0].getMassa(); // Masa del Sol
+			double v = sqrt(G * M / distancia);
+
+			// velocitat perpendicular a la posició
+			glm::dvec3 direccio = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), PLANETES[i].getPosition()));
+			glm::dvec3 velocitat = direccio * v;
+
+			PLANETES[i].setVelocitat(velocitat);
+		}
+	}
 }
 
 void processaPlanetes()
 {
 	processaFisica();
-	processaPosicions();
 	processaRotacions();
 }
 
+void updatePlanetes(float deltaTime)
+{
+	// Constant gravitacional
+	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
+	//std::cout << G << std::endl;
+	// Reiniciem les acceleracionss
+	for (auto& planeta : PLANETES)
+	{
+		planeta.setAcceleracio(glm::dvec3(0.0));
+		//std::cout << masaSol << std::endl;
+	}
+
+	// Calcular forces gravitacionals y actualitzar acceleracions
+	for (int i = 0; i < PLANETES.size(); ++i)
+	{
+		//::cout << "Posició1: " << PLANETES[i].getPosition().x << ", " << PLANETES[i].getPosition().y << ", " << PLANETES[i].getPosition().z << std::endl;
+		//std::cout << "Radi: " << PLANETES[i].getRadi() << std::endl;
+		//std::cout << "Velocitat1: " << PLANETES[i].getVelocitat().x << ", " << PLANETES[i].getVelocitat().y << ", " << PLANETES[i].getVelocitat().z << std::endl;
+		//std::cout << "Acceleracio1: " << PLANETES[i].getAcceleracio().x << ", " << PLANETES[i].getAcceleracio().y << ", " << PLANETES[i].getAcceleracio().z << std::endl;
+		Planeta& planeta = PLANETES[i];
+		
+		// El sol no s'ha de moure
+		if (i == 0) continue;
+
+		// Força gravitacional del sol
+		Planeta& sol = PLANETES[0];
+		glm::dvec3 direccio = sol.getPosition() - planeta.getPosition();
+		double distancia = glm::length(direccio);
+		//std::cout << "Distancia: " << distance << std::endl;
+		if (distancia > 0.0f)
+		{
+			glm::dvec3 direccioForça = glm::normalize(direccio);
+			double magnitudForça = G * (sol.getMassa() * planeta.getMassa()) / (distancia * distancia);
+			
+			glm::dvec3 força = direccioForça * magnitudForça;
+
+			// F=m*a => a=F/m
+			glm::dvec3 acceleracio = força / planeta.getMassa();
+			planeta.setAcceleracio(acceleracio);
+		}
+	}
+
+	// Actualitzar velocitats i posicions dels planetes
+	for (auto& planeta : PLANETES)
+	{
+		//std::cout << "Posició: " << planeta.getPosition().x << ", " << planeta.getPosition().y << ", " << planeta.getPosition().z << std::endl;
+		//std::cout << "Velocitat: " << planeta.getVelocitat().x << ", " << planeta.getVelocitat().y << ", " << planeta.getVelocitat().z << std::endl;
+		//std::cout << "Acceleració: " << planeta.getAcceleracio().x << ", " << planeta.getAcceleracio().y << ", " << planeta.getAcceleracio().z << std::endl;
+		// Actualitzar velocitat: v = v+a*dt
+		glm::dvec3 velocitat = planeta.getVelocitat() + planeta.getAcceleracio() * (double)deltaTime;
+		planeta.setVelocitat(velocitat);
+
+		// Actualitzar posició: x = x+v*dt
+		glm::vec3 position = planeta.getPosition() + (glm::vec3)planeta.getVelocitat() * deltaTime;
+		planeta.setPosition(position);
+	}
+}
+
+
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
 {
-	if (PLANETES[0].getRadi() == 1.0f)
+	// Inicialització de planetes
+	static bool inicialitzat = false;
+	static double lastTime = time;
+	if (!inicialitzat)
 	{
 		processaPlanetes();
+		inicialitzat = true;
 	}
+
+	double deltaTime = time - lastTime;
+	lastTime = time;
+	// Un dia per segon
+	double velocitatSimulacio = 60.0 * 60.0 * 24.0; 
+	deltaTime *= velocitatSimulacio;
+	// Física orbites
+	updatePlanetes(velocitatSimulacio);
 	for(auto planeta : PLANETES)
 	{
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
 
-		float rotationSpeed = planeta.getVelocitatRotacio();    // Degrees per second
-		int rotationDirection = planeta.getDireccioRotacio(); // 1 or -1
-		float angle = time * rotationSpeed * rotationDirection;
-
-		glm::vec3 rotationAxis = planeta.getAngleRotacioPlaneta();
-
-		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), rotationAxis);
+		float velocitatRotacio = planeta.getVelocitatRotacio();    // Graus per segon
+		int direccioRotacio = planeta.getDireccioRotacio(); 
+		float angle = time * velocitatRotacio * direccioRotacio;
+		glm::vec3 axisRotacio = planeta.getAngleRotacioPlaneta();
+		// Rotació sobre ell mateix
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), axisRotacio);
 
 		float radi = planeta.getRadi();
 		ModelMatrix = glm::scale(ModelMatrix, vec3(radi, radi, radi));

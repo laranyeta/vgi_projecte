@@ -121,55 +121,56 @@ const int NUM_MAX_LLUMS = 8;
 #define PROG_BINARY_SHADER 'p'
 #define PROG_BINARY_SHADERW 'W'
 
-const float ESCALA_DISTANCIA = 1e-9f;
-const float ESCALA_MASSA = 1e-24f;
+const double ESCALA_DISTANCIA = 1.0 / 1.496e10; //1.496e11
+const double ESCALA_MASSA = 1.0;
+const float RADIS[9] = { 6.96340e11, 2.4397e9, 6.0518e9 , 6.3710e9 , 3.3895e9 , 6.9911e10 , 5.8232e10 , 2.5362e10 , 2.4622e10 }; // e + 3
 
-const float MASSES[9] = {
+const double MASSES[9] = {
 		1.989e30f,  // Sol
-		3.301e23f,  // Mercurio
+		3.301e23f,  // Mercuri
 		4.867e24f,  // Venus
-		5.972e24f,  // Tierra
-		6.417e23f,  // Marte
+		5.972e24f,  // Terra
+		6.417e23f,  // Mart
 		1.898e27f,  // Júpiter
-		5.683e26f,  // Saturno
-		8.681e25f,  // Urano
-		1.024e26f   // Neptuno
+		5.683e26f,  // Saturn
+		8.681e25f,  // Urà
+		1.024e26f   // Neptú
 };
 
 const int DIRECCIONS_ROTACIO[9] = {
-		1,  // Sun
-		1,  // Mercury
-	   -1,  // Venus (retrograde)
-		1,  // Earth
-		1,  // Mars
-		1,  // Jupiter
+		1,  // Sol
+		1,  // Mercuri
+	   -1,  // Venus
+		1,  // Terra
+		1,  // Mart
+		1,  // Júpiter
 		1,  // Saturn
-	   -1,  // Uranus (retrograde)
-		1   // Neptune
+	   -1,  // Urà 
+		1   // Neptú
 };
 
 const float ANGLES_INCLINACIO_ROTACIO[9] = {
-		7.25f,    // Sun
-		0.03f,    // Mercury
-		2.64f,    // Venus (retrograde)
-		23.44f,   // Earth
-		25.19f,   // Mars
-		3.13f,    // Jupiter
+		7.25f,    // Sol
+		0.03f,    // Mercuri
+		2.64f,    // Venus 
+		23.44f,   // Terra
+		25.19f,   // Mart
+		3.13f,    // Júpiter
 		26.73f,   // Saturn
-		82.23f,   // Uranus (retrograde)
-		28.32f    // Neptune
+		82.23f,   // Urà 
+		28.32f    // Neptú
 };
 
-const float RADI_ORBITAL[9] = {
-		0.0f,        // Sol
-		57.9e9f,     // Mercurio
-		108.2e9f,    // Venus
-		149.6e9f,    // Tierra
-		227.9e9f,    // Marte
-		778.5e9f,    // Júpiter
-		1.4335e12f,  // Saturno
-		2.8725e12f,  // Urano
-		4.4951e12f   // Neptuno
+const double RADI_ORBITAL[9] = {
+		0.0f,        // Sol +++1
+		57.9e10f,     // Mercuri
+		108.2e10f,    // Venus
+		149.6e10f,    // Terra
+		227.9e10f,    // Mart
+		778.5e10f,    // Júpiter
+		1.4335e13f,  // Saturn
+		2.8725e13f,  // Urà
+		4.4951e13f   // Neptú
 };
 
 //--------------- VGI: Valor constant de pi
