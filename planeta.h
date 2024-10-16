@@ -1,4 +1,4 @@
-#ifndef PLANETA_H
+﻿#ifndef PLANETA_H
 #define PLANETA_H
 #include <vector>
 #include <glm/glm.hpp>	
@@ -19,6 +19,11 @@ public:
 		m_velocitat_rotacio = 5.0f;
 		m_angle_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
+		m_periapsis = 0.0;
+		m_semieix_major = 0.0;
+		m_inclinacio = 0.0;
+		m_long_node_asc = 0.0;
+		m_excentricitat = 0.0;
 	}
 
 	Planeta(float radi, int slices, int stacks, glm::vec3 position) {
@@ -65,22 +70,26 @@ public:
 		m_angle_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
 	}
-
-	double getRadi() { return m_radi; }
-	double getRadiOrbita() { return m_radi_orbita; }
-	double getMassa() { return m_massa; }
-	glm::dvec3 getVelocitat() { return m_velocitat; }
-	int getSlices() { return m_slices; }
-	int getStacks() { return m_stacks; }
-	float getAngleRotacio() { return m_angle_rotacio_orbita; }
-	float getVelocitatRotacio() { return m_velocitat_rotacio; }
-	int getDireccioRotacio() {
-		return m_direccio_rotacio;
-	}
-	glm::dvec3 getAcceleracio() { return m_acceleracio; }
-	glm::vec3 getAngleRotacioPlaneta() { return m_angle_rotacio_planeta; }
-	glm::vec4 getColor() { return m_color; }
-	glm::vec3 getPosition() { return m_position; }
+	// GETTERS
+	double getRadi() const { return m_radi; }
+	double getRadiOrbita() const  { return m_radi_orbita; }
+	double getMassa() const  { return m_massa; }
+	glm::dvec3 getVelocitat() const { return m_velocitat; }
+	int getSlices() const { return m_slices; }
+	int getStacks()  const { return m_stacks; }
+	float getAngleRotacio() const { return m_angle_rotacio_orbita; }
+	float getVelocitatRotacio() const { return m_velocitat_rotacio; }
+	int getDireccioRotacio() const {return m_direccio_rotacio;}
+	glm::dvec3 getAcceleracio() const { return m_acceleracio; }
+	glm::vec3 getAngleRotacioPlaneta() const { return m_angle_rotacio_planeta; }
+	glm::vec4 getColor() const { return m_color; }
+	glm::vec3 getPosition() const { return m_position; }
+	double getPeriapsis() { return m_periapsis; }
+	double getSemieixMajor() { return m_semieix_major; }
+	double getLongitudNodeAscendent(double lon) { return m_long_node_asc; }
+	double getInclinacio() { return m_inclinacio; }
+	double getExcentricitat() { return m_excentricitat; }
+	// SETTERS
 	void setRadi(float radi) { m_radi = radi; }
 	void setRadiOrbita(float radiOrbita) { m_radi_orbita = radiOrbita; }
 	void setMassa(float massa) { m_massa = massa; }
@@ -94,6 +103,12 @@ public:
 	void setDireccioRotacio(int direccio) { m_direccio_rotacio = direccio; }
 	void setAngleRotacioPlaneta(glm::vec3 angle_rotacio_planeta) { m_angle_rotacio_planeta = angle_rotacio_planeta; }
 	void setAcceleracio(glm::dvec3 acceleracio) { m_acceleracio = acceleracio;  }
+	// Orbites 3D
+	void setSemieixMajor(double semieix) { m_semieix_major = semieix; }
+	void setExcentricitat(double exc) { m_excentricitat = exc; }
+	void setInclinacio(double inclinacio) { m_inclinacio = inclinacio;  }
+	void setLongitudNodeAscendent(double lon) { m_long_node_asc = lon; }
+	void setPeriapsis(double periapsis) { m_periapsis = periapsis; }
 private:
 	glm::vec3 m_position;
 	glm::vec4 m_color;
@@ -108,6 +123,12 @@ private:
 	float m_velocitat_rotacio;
 	glm::vec3 m_angle_rotacio_planeta;
 	int m_direccio_rotacio;
+	// Elements orbitals 3D
+	double m_semieix_major;   // a
+	double m_excentricitat;    // e
+	double m_inclinacio;      // i (radians)
+	double m_long_node_asc;    // Ω (radians)
+	double m_periapsis;    // ω (radians)
 };	
 
 #endif

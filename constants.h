@@ -125,6 +125,26 @@ const double ESCALA_DISTANCIA = 1.0 / 1.496e10; //1.496e11
 const double ESCALA_MASSA = 1.0;
 const float RADIS[9] = { 6.96340e11, 2.4397e9, 6.0518e9 , 6.3710e9 , 3.3895e9 , 6.9911e10 , 5.8232e10 , 2.5362e10 , 2.4622e10 }; // e + 3
 
+const double SEMIEIXOS_MAJORS[8] = {
+	0.3871, 0.7233, 1.0000, 1.5237, 5.2026, 9.5549, 19.2184, 30.1104
+};
+
+const double EXCENTRICITATS[8] = {
+	0.2056, 0.0068, 0.0167, 0.0934, 0.0484, 0.0555, 0.0463, 0.0095
+};
+
+const double INCLINACIONS[8] = {
+	7.0049, 3.3947, 0.0000, 1.8506, 1.3030, 2.4845, 0.7699, 1.7692
+};
+
+const double LONG_NODES_ASC[8] = {
+	48.33167, 76.68069, 0.0, 49.57854, 100.55615, 113.71504, 74.22988, 131.72169
+};
+
+const double PERIAPSIS[8] = {
+	29.1241, 54.85229, 102.9373, 286.4623, 273.867, 339.392, 96.998857, 273.187
+};
+
 const double MASSES[9] = {
 		1.989e30f,  // Sol
 		3.301e23f,  // Mercuri
@@ -177,6 +197,7 @@ const double RADI_ORBITAL[9] = {
 const double PI=3.14159;
 const double TWOPI = 2 * PI;
 const double PID2 = PI / 2;
+const double DEG_A_RAD = PI / 180.0;
 //const double pi=3.14159265358979323846264338327950288419716939937510f;
 
 // --------------- GMS. GRID

@@ -809,7 +809,7 @@ void processaFisica()
 {
 	// Constant gravitacional
 	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
-
+	
 	for (int i = 0; i < PLANETES.size(); i++)
 	{
 		PLANETES[i].setRadi(RADIS[i] * ESCALA_DISTANCIA);
@@ -840,6 +840,13 @@ void processaFisica()
 			glm::dvec3 velocitat = direccio * v;
 
 			PLANETES[i].setVelocitat(velocitat);
+
+			// Orbites 3D
+			PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i-1]);
+			PLANETES[i].setExcentricitat(EXCENTRICITATS[i-1]);
+			PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i-1] * DEG_A_RAD);
+			PLANETES[i].setInclinacio(INCLINACIONS[i-1] * DEG_A_RAD);
+			PLANETES[i].setPeriapsis(PERIAPSIS[i-1] * DEG_A_RAD);
 		}
 	}
 }
