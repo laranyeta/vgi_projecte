@@ -121,10 +121,15 @@ const int NUM_MAX_LLUMS = 8;
 #define PROG_BINARY_SHADER 'p'
 #define PROG_BINARY_SHADERW 'W'
 
-const double ESCALA_DISTANCIA = 1.0 / 1.496e10; //1.496e11
-const double ESCALA_MASSA = 1.0;
-const float RADIS[9] = { 6.96340e11, 2.4397e9, 6.0518e9 , 6.3710e9 , 3.3895e9 , 6.9911e10 , 5.8232e10 , 2.5362e10 , 2.4622e10 }; // e + 3
 
+const std::string NAMES[9] = { "Sol", "Mercuri", "Venus", "Terra", "Mart", "Júpiter", "Saturn", "Urà", "Neptú" };
+const std::string RUTES_TEXTURA[9] = { "sun.jpg","mercury.jpg","venus.jpg","earth.jpg","mars.jpg","jupiter.jpg","saturn.jpg","uranus.jpg","neptune.jpg" };
+const double ESCALA_DISTANCIA = 1.0 / 10.496e9; //1.496e11
+const double ESCALA_MASSA = 1.0;
+const double RADIS[9] = { 6.96340e11, 2.4397e10, 6.0518e10 , 6.3710e10 , 3.3895e10 , 6.9911e11 , 5.8232e11 , 2.5362e11 , 2.4622e11 }; // e + 3
+
+
+/*const double RADIS[9] = { 6.96340e11, 2.4397e9, 6.0518e9 , 6.3710e9 , 3.3895e9 , 6.9911e10 , 5.8232e10 , 2.5362e10 , 2.4622e10 }; // e + 3*/
 const double SEMIEIXOS_MAJORS[8] = {
 	0.3871, 0.7233, 1.0000, 1.5237, 5.2026, 9.5549, 19.2184, 30.1104
 };

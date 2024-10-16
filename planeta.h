@@ -2,6 +2,7 @@
 #define PLANETA_H
 #include <vector>
 #include <glm/glm.hpp>	
+#include <string>
 class Planeta
 {
 public:
@@ -24,6 +25,7 @@ public:
 		m_inclinacio = 0.0;
 		m_long_node_asc = 0.0;
 		m_excentricitat = 0.0;
+		m_textureID = 0;
 	}
 
 	Planeta(float radi, int slices, int stacks, glm::vec3 position) {
@@ -70,7 +72,10 @@ public:
 		m_angle_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
 	}
-	// GETTERS
+	// 
+	std::string getName() const { return m_name; }
+	std::string getRutaTextura() const { return m_rutaTextura; }
+	unsigned int  getTextureID() const {return m_textureID;}
 	double getRadi() const { return m_radi; }
 	double getRadiOrbita() const  { return m_radi_orbita; }
 	double getMassa() const  { return m_massa; }
@@ -90,6 +95,9 @@ public:
 	double getInclinacio() { return m_inclinacio; }
 	double getExcentricitat() { return m_excentricitat; }
 	// SETTERS
+	void setName(std::string name) { m_name = name; }
+	void setTextureID(unsigned int texID) {m_textureID = texID;}
+	void setRutaTextura(std::string rutaTextura) { m_rutaTextura = rutaTextura; }
 	void setRadi(float radi) { m_radi = radi; }
 	void setRadiOrbita(float radiOrbita) { m_radi_orbita = radiOrbita; }
 	void setMassa(float massa) { m_massa = massa; }
@@ -110,6 +118,9 @@ public:
 	void setLongitudNodeAscendent(double lon) { m_long_node_asc = lon; }
 	void setPeriapsis(double periapsis) { m_periapsis = periapsis; }
 private:
+	std::string m_name;
+	unsigned int m_textureID;
+	std::string m_rutaTextura;
 	glm::vec3 m_position;
 	glm::vec4 m_color;
 	float m_radi;

@@ -16,6 +16,7 @@
 #include "visualitzacio.h"
 #include "escena.h"
 #include <iostream>
+#include <stb/stb_image.h> // ISMAEL
 
 // Dibuixa Eixos Coordenades Món i Reixes, activant un shader propi.
 void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, 
@@ -109,8 +110,8 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	if (textur) {	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
 					glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE); //glEnable(GL_MODULATE);
 				}
-		else {	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_FALSE); //glDisable(GL_TEXTURE_2D);
-				glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_FALSE); //glDisable(GL_MODULATE);
+		else {	//glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_FALSE); //glDisable(GL_TEXTURE_2D);
+				//glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_FALSE); //glDisable(GL_MODULATE);
 			}
 	glUniform1i(glGetUniformLocation(sh_programID, "flag_invert_y"), flagInvertY);
 
@@ -199,7 +200,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 	case PROVA_PLANETA:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
-		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
+		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur);
 		// Activar transparència
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -763,6 +764,8 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	draw_TriVAO_Object(GLUT_TEAPOT); //gluSphere(0.5, 20, 20);
 }
 
+
+
 void processaRotacions()
 {
 	float velocitatsRotacio[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
@@ -780,31 +783,11 @@ void processaRotacions()
 		PLANETES[i].setAngleRotacioPlaneta(axisRotacio);
 		PLANETES[i].setDireccioRotacio(DIRECCIONS_ROTACIO[i]);
 		PLANETES[i].setVelocitatRotacio(velocitatsRotacio[i]);
+		PLANETES[i].setName(NAMES[i]); // CANVIAR DE LLOC NO PINTA RES AQUI
+		PLANETES[i].setRutaTextura(RUTES_TEXTURA[i]);
 	}
 }
-/*
-void processaPosicions()
-{
-	float margin = 20.0f;
-	float currPos = 0.0f;
-	for (int i = 0; i < PLANETES.size(); i++)
-	{
-		PLANETES[i].setRadi(RADIS[i]);
-		if (i == 0)
-		{
-			currPos = PLANETES[i].getRadi();
-			PLANETES[i].setPosition(glm::vec3(currPos, 0.0f, 0.0f));
-			currPos += PLANETES[i].getRadi() + margin * 5;
-		}
-		else
-		{
-			currPos += PLANETES[i].getRadi();
-			PLANETES[i].setPosition(glm::vec3(currPos, 0.0f, 0.0f));
-			currPos += PLANETES[i].getRadi() + margin;
-		}
-	}
-}
-*/
+
 void processaFisica()
 {
 	// Constant gravitacional
@@ -851,10 +834,26 @@ void processaFisica()
 	}
 }
 
+void processaTextures()
+{
+
+	for (auto& planeta : PLANETES)
+	{
+		std::string rutaTextura = "textures/" + planeta.getRutaTextura();
+		char* cstr = new char[rutaTextura.length() + 1];
+		std::strcpy(cstr, rutaTextura.c_str());
+		GLint id = loadIMA_SOIL(cstr);
+		std::cout << id << std::endl;
+		planeta.setTextureID(id);
+		std::cout << planeta.getTextureID() << std::endl;
+	}
+}
+
 void processaPlanetes()
 {
 	processaFisica();
 	processaRotacions();
+	processaTextures();
 }
 
 void updatePlanetes(float deltaTime)
@@ -916,7 +915,8 @@ void updatePlanetes(float deltaTime)
 }
 
 
-void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
+void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur)
 {
 	// Inicialització de planetes
 	static bool inicialitzat = false;
@@ -926,7 +926,7 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		processaPlanetes();
 		inicialitzat = true;
 	}
-
+	// loadImaSOIL
 	double deltaTime = time - lastTime;
 	lastTime = time;
 	// Un dia per segon
@@ -934,7 +934,7 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	deltaTime *= velocitatSimulacio;
 	// Física orbites
 	updatePlanetes(velocitatSimulacio);
-	for(auto planeta : PLANETES)
+	for(auto& planeta : PLANETES)
 	{
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
@@ -952,6 +952,15 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+		//Textures planetes
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, (GLint)planeta.getTextureID());
+		glUniform1i(glGetUniformLocation(sh_programID, "texture0"), GLint(0));
+		SetTextureParameters((GLint)planeta.getTextureID(), true, true, false, false);
+		glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
+		glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
+		
 		draw_TriEBO_Object(3);
 	}
 	
