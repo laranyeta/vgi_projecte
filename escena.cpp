@@ -764,11 +764,11 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	draw_TriVAO_Object(GLUT_TEAPOT); //gluSphere(0.5, 20, 20);
 }
 
-void processaPlanetes()
+void processaRotacions()
 {
-	float radis[9] = { 100.0f, 5.0f, 10.0f, 9.0f, 7.0f, 25.0f, 20.0f, 9.0f, 9.0f };
+
 	float rotationSpeeds[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
-	
+
 	// Arrays to hold adjusted axial tilts and rotation directions
 	float adjustedTilts[9] = {
 		7.25f,    // Sun
@@ -809,20 +809,22 @@ void processaPlanetes()
 		// Assign rotation axis and direction to each planet
 		PLANETES[i].setAngleRotacioPlaneta(rotationAxis);
 		PLANETES[i].setDireccioRotacio(rotationDirections[i]);
+		PLANETES[i].setVelocitatRotacio(rotationSpeeds[i]);
 	}
-
+}
+void processaPosicions()
+{
+	float radis[9] = { 100.0f, 5.0f, 10.0f, 9.0f, 7.0f, 25.0f, 20.0f, 9.0f, 9.0f };
 	float margin = 20.0f;
 	float currPos = 0.0f;
-
 	for (int i = 0; i < PLANETES.size(); i++)
 	{
 		PLANETES[i].setRadi(radis[i]);
-
 		if (i == 0)
 		{
-			currPos = PLANETES[i].getRadi(); 
+			currPos = PLANETES[i].getRadi();
 			PLANETES[i].setPosition(glm::vec3(currPos, 0.0f, 0.0f));
-			currPos += PLANETES[i].getRadi() + margin*5;
+			currPos += PLANETES[i].getRadi() + margin * 5;
 		}
 		else
 		{
@@ -830,13 +832,21 @@ void processaPlanetes()
 			PLANETES[i].setPosition(glm::vec3(currPos, 0.0f, 0.0f));
 			currPos += PLANETES[i].getRadi() + margin;
 		}
-		PLANETES[i].setVelocitatRotacio(rotationSpeeds[i]);
 	}
+}
+
+void processaPlanetes()
+{
+	processaPosicions();
+	processaRotacions();
 }
 
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
 {
-	processaPlanetes();
+	if (PLANETES[0].getRadi() == 1.0f)
+	{
+		processaPlanetes();
+	}
 	for(auto planeta : PLANETES)
 	{
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);

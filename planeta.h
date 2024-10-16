@@ -6,9 +6,9 @@ class Planeta
 {
 public:
 	Planeta() {
-		m_radi = 0.0f;
-		m_slices = 0;
-		m_stacks = 0;
+		m_radi = 1.0f;
+		m_slices = 20;
+		m_stacks = 20;
 		m_massa = 0.0f;
 		m_gravetat = 0.0f;
 		m_angle_rotacio_orbita = 0.0f;

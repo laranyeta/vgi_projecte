@@ -2014,8 +2014,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				// ISMAEL CONTINUAR
 				for (int i = 0; i < 9; i++)
 				{
-					vec3 pos = { 0.0f, 0.0f, 0.0f };
-					Planeta planeta(1.0f, 20, 20, pos);
+					Planeta planeta;
 					PLANETES.push_back(planeta);
 				}
 				auto planeta = PLANETES[0];
