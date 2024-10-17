@@ -18,7 +18,7 @@ public:
 		m_color = { 0.0,0.0,0.0,1.0 };
 		m_position = glm::vec3(0.0f, 0.0f, 0.0f);
 		m_velocitat_rotacio = 5.0f;
-		m_angle_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
+		m_eixos_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
 		m_periapsis = 0.0;
 		m_semieix_major = 0.0;
@@ -39,7 +39,7 @@ public:
 		m_radi_orbita = 0.0;
 		m_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		m_velocitat_rotacio = 5.0f;
-		m_angle_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
+		m_eixos_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
 	}
 
@@ -54,7 +54,7 @@ public:
 		m_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		m_position = position;
 		m_velocitat_rotacio = 5.0f;
-		m_angle_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
+		m_eixos_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
 	}
 
@@ -69,7 +69,7 @@ public:
 		m_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		m_position = position;
 		m_velocitat_rotacio = 5.0f;
-		m_angle_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
+		m_eixos_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
 	}
 	// 
@@ -86,7 +86,7 @@ public:
 	float getVelocitatRotacio() const { return m_velocitat_rotacio; }
 	int getDireccioRotacio() const {return m_direccio_rotacio;}
 	glm::dvec3 getAcceleracio() const { return m_acceleracio; }
-	glm::vec3 getAngleRotacioPlaneta() const { return m_angle_rotacio_planeta; }
+	glm::vec3 getEixosRotacioPlaneta() const { return m_eixos_rotacio_planeta; }
 	glm::vec4 getColor() const { return m_color; }
 	glm::vec3 getPosition() const { return m_position; }
 	double getPeriapsis() { return m_periapsis; }
@@ -109,7 +109,7 @@ public:
 	void setPosition(glm::vec3 position) {m_position = position;}
 	void setVelocitatRotacio(float velocitat) { m_velocitat_rotacio = velocitat; }
 	void setDireccioRotacio(int direccio) { m_direccio_rotacio = direccio; }
-	void setAngleRotacioPlaneta(glm::vec3 angle_rotacio_planeta) { m_angle_rotacio_planeta = angle_rotacio_planeta; }
+	void setEixosRotacioPlaneta(glm::vec3 eixos_rotacio_planeta) { m_eixos_rotacio_planeta = eixos_rotacio_planeta; }
 	void setAcceleracio(glm::dvec3 acceleracio) { m_acceleracio = acceleracio;  }
 	// Orbites 3D
 	void setSemieixMajor(double semieix) { m_semieix_major = semieix; }
@@ -132,7 +132,7 @@ private:
 	int m_stacks;
 	float m_angle_rotacio_orbita;
 	float m_velocitat_rotacio;
-	glm::vec3 m_angle_rotacio_planeta;
+	glm::vec3 m_eixos_rotacio_planeta;
 	int m_direccio_rotacio;
 	// Elements orbitals 3D
 	double m_semieix_major;   // a

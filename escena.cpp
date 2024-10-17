@@ -16,7 +16,6 @@
 #include "visualitzacio.h"
 #include "escena.h"
 #include <iostream>
-#include <stb/stb_image.h> // ISMAEL
 
 // Dibuixa Eixos Coordenades Món i Reixes, activant un shader propi.
 void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, 
@@ -768,19 +767,19 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 
 void processaRotacions()
 {
+	// Calculem les coordenades dels eixos pels quals rotarà el planeta sobre ell mateix
 	float velocitatsRotacio[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
 
 	for (int i = 0; i < PLANETES.size(); ++i) {
 		float inclinacioRadians = glm::radians(ANGLES_INCLINACIO_ROTACIO[i]);
-		glm::vec3 axis = glm::vec3(
+		glm::vec3 eixosRotacio = glm::vec3(
 			0.0f,
 			cos(inclinacioRadians),
 			sin(inclinacioRadians)
 		);
-		glm::vec3 axisRotacio = glm::normalize(axis);
 
 		// Assignem eix de rotació i direcció de rotació
-		PLANETES[i].setAngleRotacioPlaneta(axisRotacio);
+		PLANETES[i].setEixosRotacioPlaneta(eixosRotacio);
 		PLANETES[i].setDireccioRotacio(DIRECCIONS_ROTACIO[i]);
 		PLANETES[i].setVelocitatRotacio(velocitatsRotacio[i]);
 		PLANETES[i].setName(NAMES[i]); // CANVIAR DE LLOC NO PINTA RES AQUI
@@ -795,16 +794,16 @@ void processaFisica()
 	
 	for (int i = 0; i < PLANETES.size(); i++)
 	{
+		// Mida planeta
 		PLANETES[i].setRadi(RADIS[i] * ESCALA_DISTANCIA);
 
-		// Escala
+		// Massa planeta
 		double massa = MASSES[i] * ESCALA_MASSA;
 		PLANETES[i].setMassa(massa);
 
 		// Sol no es mou (valors per defecte del constructor, es pot eliminar)
 		if (i == 0)
 		{
-			
 			PLANETES[i].setPosition(glm::vec3(0.0f));
 			PLANETES[i].setVelocitat(glm::vec3(0.0f));
 		}
@@ -812,10 +811,20 @@ void processaFisica()
 		{
 			// Posició inicial del planeta
 			double distancia = RADI_ORBITAL[i] * ESCALA_DISTANCIA;
-			PLANETES[i].setPosition(glm::vec3(distancia, 0.0f, 0.0f));
+			// ISMAEL: Planetes repartits al voltant del sol, canviar
+			double angleRad = 2.0 * PI * (i - 1) / (PLANETES.size() - 1); // Distribución uniforme
 
+			float x = distancia * cos(angleRad);
+			float y = distancia * sin(angleRad);
+			float z = 0.0f; // Puedes modificar esto para distribución en 3D
+
+			PLANETES[i].setPosition(glm::vec3(x, y, z));
+			/*
+			PLANETES[i].setPosition(glm::vec3(distancia, 0.0f, 0.0f));
+			std::cout << PLANETES[i].getPosition().x << " " << PLANETES[i].getPosition().y << std::endl;
+			*/
 			// Calcular velocitat orbital
-			double M = PLANETES[0].getMassa(); // Masa del Sol
+			double M = PLANETES[0].getMassa(); // Massa del Sol
 			double v = sqrt(G * M / distancia);
 
 			// velocitat perpendicular a la posició
@@ -824,7 +833,7 @@ void processaFisica()
 
 			PLANETES[i].setVelocitat(velocitat);
 
-			// Orbites 3D
+			// Orbites 3D, en procés
 			PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i-1]);
 			PLANETES[i].setExcentricitat(EXCENTRICITATS[i-1]);
 			PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i-1] * DEG_A_RAD);
@@ -836,7 +845,7 @@ void processaFisica()
 
 void processaTextures()
 {
-
+	// Per cada planeta carreguem la seva textura
 	for (auto& planeta : PLANETES)
 	{
 		std::string rutaTextura = "textures/" + planeta.getRutaTextura();
@@ -887,6 +896,7 @@ void updatePlanetes(float deltaTime)
 		//std::cout << "Distancia: " << distance << std::endl;
 		if (distancia > 0.0f)
 		{
+			// Fisica orbita
 			glm::dvec3 direccioForça = glm::normalize(direccio);
 			double magnitudForça = G * (sol.getMassa() * planeta.getMassa()) / (distancia * distancia);
 			
@@ -926,25 +936,25 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		processaPlanetes();
 		inicialitzat = true;
 	}
-	// loadImaSOIL
+	// Un dia per segon
 	double deltaTime = time - lastTime;
 	lastTime = time;
-	// Un dia per segon
 	double velocitatSimulacio = 60.0 * 60.0 * 24.0; 
 	deltaTime *= velocitatSimulacio;
-	// Física orbites
+	// Física orbites 2D de moment
 	updatePlanetes(velocitatSimulacio);
 	for(auto& planeta : PLANETES)
 	{
+		// Posició inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
-
+		
+		// Rotació sobre ell mateix
 		float velocitatRotacio = planeta.getVelocitatRotacio();    // Graus per segon
 		int direccioRotacio = planeta.getDireccioRotacio(); 
 		float angle = time * velocitatRotacio * direccioRotacio;
-		glm::vec3 axisRotacio = planeta.getAngleRotacioPlaneta();
-		// Rotació sobre ell mateix
-		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), axisRotacio);
+		glm::vec3 eixosRotacio = planeta.getEixosRotacioPlaneta();
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), eixosRotacio);
 
 		float radi = planeta.getRadi();
 		ModelMatrix = glm::scale(ModelMatrix, vec3(radi, radi, radi));
