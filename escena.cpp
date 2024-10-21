@@ -15,6 +15,7 @@
 #include "material.h"
 #include "visualitzacio.h"
 #include "escena.h"
+#include <iostream>
 
 // Dibuixa Eixos Coordenades Món i Reixes, activant un shader propi.
 void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, 
@@ -108,8 +109,8 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	if (textur) {	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
 					glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE); //glEnable(GL_MODULATE);
 				}
-		else {	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_FALSE); //glDisable(GL_TEXTURE_2D);
-				glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_FALSE); //glDisable(GL_MODULATE);
+		else {	//glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_FALSE); //glDisable(GL_TEXTURE_2D);
+				//glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_FALSE); //glDisable(GL_MODULATE);
 			}
 	glUniform1i(glGetUniformLocation(sh_programID, "flag_invert_y"), flagInvertY);
 
@@ -170,6 +171,28 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
 		nau_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
 		break;
+
+	case PROVA_PLANETA:
+		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur);
+		// Activar transparència
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		// Dibuix geometria Mar
+		color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
+		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		SeleccionaColorMaterial(sh_programID, color_Mar, sw_mat);
+		// Pas ModelView Matrix a shader
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		// Pas NormalMatrix a shader
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+		// Desactivar transparència
+		glDisable(GL_BLEND);
+		break;
+
+		
 
 // Dibuix de l'objecte TIE (Nau enemiga Star Wars)
 	case TIE:
@@ -625,6 +648,218 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	draw_TriVAO_Object(GLUT_TEAPOT); //gluSphere(0.5, 20, 20);
 }
 
+
+
+void processaRotacions()
+{
+	// Calculem les coordenades dels eixos pels quals rotarà el planeta sobre ell mateix
+	float velocitatsRotacio[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
+
+	for (int i = 0; i < PLANETES.size(); ++i) {
+		float inclinacioRadians = glm::radians(ANGLES_INCLINACIO_ROTACIO[i]);
+		glm::vec3 eixosRotacio = glm::vec3(
+			0.0f,
+			cos(inclinacioRadians),
+			sin(inclinacioRadians)
+		);
+
+		// Assignem eix de rotació i direcció de rotació
+		PLANETES[i].setEixosRotacioPlaneta(eixosRotacio);
+		PLANETES[i].setDireccioRotacio(DIRECCIONS_ROTACIO[i]);
+		PLANETES[i].setVelocitatRotacio(velocitatsRotacio[i]);
+		PLANETES[i].setName(NAMES[i]); // CANVIAR DE LLOC NO PINTA RES AQUI
+		PLANETES[i].setRutaTextura(RUTES_TEXTURA[i]);
+	}
+}
+
+void processaFisica()
+{
+	// Constant gravitacional
+	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
+	
+	for (int i = 0; i < PLANETES.size(); i++)
+	{
+		// Mida planeta
+		PLANETES[i].setRadi(RADIS[i] * ESCALA_DISTANCIA);
+
+		// Massa planeta
+		double massa = MASSES[i] * ESCALA_MASSA;
+		PLANETES[i].setMassa(massa);
+
+		// Sol no es mou (valors per defecte del constructor, es pot eliminar)
+		if (i == 0)
+		{
+			PLANETES[i].setPosition(glm::vec3(0.0f));
+			PLANETES[i].setVelocitat(glm::vec3(0.0f));
+		}
+		else
+		{
+			// Posició inicial del planeta
+			double distancia = RADI_ORBITAL[i] * ESCALA_DISTANCIA;
+			// ISMAEL: Planetes repartits al voltant del sol, canviar
+			double angleRad = 2.0 * PI * (i - 1) / (PLANETES.size() - 1); // Distribución uniforme
+
+			float x = distancia * cos(angleRad);
+			float y = distancia * sin(angleRad);
+			float z = 0.0f; // Puedes modificar esto para distribución en 3D
+
+			PLANETES[i].setPosition(glm::vec3(x, y, z));
+			/*
+			PLANETES[i].setPosition(glm::vec3(distancia, 0.0f, 0.0f));
+			std::cout << PLANETES[i].getPosition().x << " " << PLANETES[i].getPosition().y << std::endl;
+			*/
+			// Calcular velocitat orbital
+			double M = PLANETES[0].getMassa(); // Massa del Sol
+			double v = sqrt(G * M / distancia);
+
+			// velocitat perpendicular a la posició
+			glm::dvec3 direccio = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), PLANETES[i].getPosition()));
+			glm::dvec3 velocitat = direccio * v;
+
+			PLANETES[i].setVelocitat(velocitat);
+
+			// Orbites 3D, en procés
+			PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i-1]);
+			PLANETES[i].setExcentricitat(EXCENTRICITATS[i-1]);
+			PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i-1] * DEG_A_RAD);
+			PLANETES[i].setInclinacio(INCLINACIONS[i-1] * DEG_A_RAD);
+			PLANETES[i].setPeriapsis(PERIAPSIS[i-1] * DEG_A_RAD);
+		}
+	}
+}
+
+void processaTextures()
+{
+	// Per cada planeta carreguem la seva textura
+	for (auto& planeta : PLANETES)
+	{
+		std::string rutaTextura = "textures/" + planeta.getRutaTextura();
+		char* cstr = new char[rutaTextura.length() + 1];
+		std::strcpy(cstr, rutaTextura.c_str());
+		GLint id = loadIMA_SOIL(cstr);
+		std::cout << id << std::endl;
+		planeta.setTextureID(id);
+		std::cout << planeta.getTextureID() << std::endl;
+	}
+}
+
+void processaPlanetes()
+{
+	processaFisica();
+	processaRotacions();
+	processaTextures();
+}
+
+void updatePlanetes(float deltaTime)
+{
+	// Constant gravitacional
+	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
+	//std::cout << G << std::endl;
+	// Reiniciem les acceleracionss
+	for (auto& planeta : PLANETES)
+	{
+		planeta.setAcceleracio(glm::dvec3(0.0));
+		//std::cout << masaSol << std::endl;
+	}
+
+	// Calcular forces gravitacionals y actualitzar acceleracions
+	for (int i = 0; i < PLANETES.size(); ++i)
+	{
+		//::cout << "Posició1: " << PLANETES[i].getPosition().x << ", " << PLANETES[i].getPosition().y << ", " << PLANETES[i].getPosition().z << std::endl;
+		//std::cout << "Radi: " << PLANETES[i].getRadi() << std::endl;
+		//std::cout << "Velocitat1: " << PLANETES[i].getVelocitat().x << ", " << PLANETES[i].getVelocitat().y << ", " << PLANETES[i].getVelocitat().z << std::endl;
+		//std::cout << "Acceleracio1: " << PLANETES[i].getAcceleracio().x << ", " << PLANETES[i].getAcceleracio().y << ", " << PLANETES[i].getAcceleracio().z << std::endl;
+		Planeta& planeta = PLANETES[i];
+		
+		// El sol no s'ha de moure
+		if (i == 0) continue;
+
+		// Força gravitacional del sol
+		Planeta& sol = PLANETES[0];
+		glm::dvec3 direccio = sol.getPosition() - planeta.getPosition();
+		double distancia = glm::length(direccio);
+		//std::cout << "Distancia: " << distance << std::endl;
+		if (distancia > 0.0f)
+		{
+			// Fisica orbita
+			glm::dvec3 direccioForça = glm::normalize(direccio);
+			double magnitudForça = G * (sol.getMassa() * planeta.getMassa()) / (distancia * distancia);
+			
+			glm::dvec3 força = direccioForça * magnitudForça;
+
+			// F=m*a => a=F/m
+			glm::dvec3 acceleracio = força / planeta.getMassa();
+			planeta.setAcceleracio(acceleracio);
+		}
+	}
+
+	// Actualitzar velocitats i posicions dels planetes
+	for (auto& planeta : PLANETES)
+	{
+		//std::cout << "Posició: " << planeta.getPosition().x << ", " << planeta.getPosition().y << ", " << planeta.getPosition().z << std::endl;
+		//std::cout << "Velocitat: " << planeta.getVelocitat().x << ", " << planeta.getVelocitat().y << ", " << planeta.getVelocitat().z << std::endl;
+		//std::cout << "Acceleració: " << planeta.getAcceleracio().x << ", " << planeta.getAcceleracio().y << ", " << planeta.getAcceleracio().z << std::endl;
+		// Actualitzar velocitat: v = v+a*dt
+		glm::dvec3 velocitat = planeta.getVelocitat() + planeta.getAcceleracio() * (double)deltaTime;
+		planeta.setVelocitat(velocitat);
+
+		// Actualitzar posició: x = x+v*dt
+		glm::vec3 position = planeta.getPosition() + (glm::vec3)planeta.getVelocitat() * deltaTime;
+		planeta.setPosition(position);
+	}
+}
+
+
+void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur)
+{
+	// Inicialització de planetes
+	static bool inicialitzat = false;
+	static double lastTime = time;
+	if (!inicialitzat)
+	{
+		processaPlanetes();
+		inicialitzat = true;
+	}
+	// Un dia per segon
+	double deltaTime = time - lastTime;
+	lastTime = time;
+	double velocitatSimulacio = 60.0 * 60.0 * 24.0; 
+	deltaTime *= velocitatSimulacio;
+	// Física orbites 2D de moment
+	updatePlanetes(velocitatSimulacio);
+	for(auto& planeta : PLANETES)
+	{
+		// Posició inicial
+		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
+		
+		// Rotació sobre ell mateix
+		float velocitatRotacio = planeta.getVelocitatRotacio();    // Graus per segon
+		int direccioRotacio = planeta.getDireccioRotacio(); 
+		float angle = time * velocitatRotacio * direccioRotacio;
+		glm::vec3 eixosRotacio = planeta.getEixosRotacioPlaneta();
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), eixosRotacio);
+
+		float radi = planeta.getRadi();
+		ModelMatrix = glm::scale(ModelMatrix, vec3(radi, radi, radi));
+
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+		//Textures planetes
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, (GLint)planeta.getTextureID());
+		glUniform1i(glGetUniformLocation(sh_programID, "texture0"), GLint(0));
+		SetTextureParameters((GLint)planeta.getTextureID(), true, true, false, false);
+		glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
+		glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
+		
+		draw_TriEBO_Object(3);
+	}
+	
+}
 void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
 {
 	CColor col_object = { 0.0,0.0,0.0,1.0 };

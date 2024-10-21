@@ -18,7 +18,7 @@
 #include "escena.h"
 #include "main.h"
 
-
+std::vector<Planeta> PLANETES;
 void InitGL()
 {
 // TODO: agregar aquí el código de construcción
@@ -211,12 +211,12 @@ void InitGL()
 	{	// load Skybox textures
 		// -------------
 		std::vector<std::string> faces =
-		{ ".\\textures\\skybox\\right.jpg",
-			".\\textures\\skybox\\left.jpg",
-			".\\textures\\skybox\\top.jpg",
-			".\\textures\\skybox\\bottom.jpg",
-			".\\textures\\skybox\\front.jpg",
-			".\\textures\\skybox\\back.jpg"
+		{ ".\\textures\\skybox\\right.png",
+			".\\textures\\skybox\\left.png",
+			".\\textures\\skybox\\top.png",
+			".\\textures\\skybox\\bottom.png",
+			".\\textures\\skybox\\front.png",
+			".\\textures\\skybox\\back.png"
 		};
 		cubemapTexture = loadCubemap(faces);
 	}
@@ -914,6 +914,7 @@ void draw_Menu_ImGui()
 		ImGui::Spacing();
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		if (ImGui::Button("Reset time")) G_TIME = 0.0;
 		ImGui::End();
 	}
 
@@ -1185,6 +1186,8 @@ int shortCut_Objecte()
 	/*MAV MODIFIED*/case SPUTNIK: auxObjecte = 17; break; 
 	/*MAV MODIFIED*/case DONUT_FACE: auxObjecte = 19; break;
 	/*MAV MODIFIED*/case NAU_FACE: auxObjecte = 20; break;
+	case PROVA_PLANETA:
+		auxObjecte = 18; break;
 
 	default:			// Opció OBJECTE <Altres Objectes>
 		auxObjecte = 0;
@@ -1572,12 +1575,12 @@ void ShowEntornVGIWindow(bool* p_open)
 			{	// load Skybox textures
 				// -------------
 				std::vector<std::string> faces =
-				{ ".\\textures\\skybox\\right.jpg",
-					".\\textures\\skybox\\left.jpg",
-					".\\textures\\skybox\\top.jpg",
-					".\\textures\\skybox\\bottom.jpg",
-					".\\textures\\skybox\\front.jpg",
-					".\\textures\\skybox\\back.jpg"
+				{ ".\\textures\\skybox\\right.png",
+					".\\textures\\skybox\\left.png",
+					".\\textures\\skybox\\top.png",
+					".\\textures\\skybox\\bottom.png",
+					".\\textures\\skybox\\front.png",
+					".\\textures\\skybox\\back.png"
 				};
 				cubemapTexture = loadCubemap(faces);
 			}
@@ -1695,7 +1698,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)", "Cub (<Shift>+C)", "Cub RGB (<Shift>+D)", "Esfera (<Shift>+E)", "Tetera (<Shift>+T)",
 			"Arc (<Shift>+R)", "Matriu Primitives (<Shift>+M)", "Matriu Primitives VAO (<Shift>+V)", "Tie (<Shift>+I)", "Arxiu OBJ", 
 			"Bezier (<Shift>+F7)", "B-spline (<Shift>+F8)", "Lemniscata (<Shift>+F9)", "Hermitte (<Shift>+F10)", "Catmull-Rom (<Shift>+F11)",
-			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Donut face (n/a)", "Nau face (n/a)" };
+			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)", "Donut face (n/a)", "Nau face (n/a)" };
 		//static int item_current = 0;
 		ImGui::Combo(" ", &oObjecte, items, IM_ARRAYSIZE(items));
 		ImGui::Spacing();
@@ -2052,7 +2055,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.0f, 1.0f, 20, 1));
 			}
 			break;
-		case 18: // DONUT_FACE
+		case 19: // DONUT_FACE
 			if (objecte != DONUT_FACE) {
 				objecte = DONUT_FACE;
 				netejaVAOList();
@@ -2064,7 +2067,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
 			}
 			break;
-		case 19: // NAU_FACE
+		case 20: // NAU_FACE
 			if (objecte != NAU_FACE) {
 				objecte = NAU_FACE;
 				netejaVAOList();
@@ -2077,7 +2080,24 @@ void ShowEntornVGIWindow(bool* p_open)
 				Set_VAOList(GLUT_TETRAHEDRON, loadglutSolidTetrahedron_EBO());
 			}
 			break;
-		}
+		case 18:
+			if (objecte != PROVA_PLANETA) {
+				objecte = PROVA_PLANETA;
+				netejaVAOList();			
+				// ISMAEL CONTINUAR
+				for (int i = 0; i < 9; i++)
+				{
+					Planeta planeta;
+					PLANETES.push_back(planeta);
+				}
+				auto planeta = PLANETES[0];
+				vec4 color = planeta.getColor();
+				SetColor4d(color.r, color.g, color.b, color.a);
+				CVAO planetaC = loadgluSphere_EBO(planeta.getRadi(), planeta.getSlices(), planeta.getStacks());
+				Set_VAOList(3, planetaC);
+				
+			}
+}
 	}
 
 	// DESPLEGABLE VISTA
@@ -2840,13 +2860,12 @@ void Teclat_Shift(int key, GLFWwindow* window)
 					{	// load Skybox textures
 						// -------------
 						std::vector<std::string> faces =
-							{	".\\textures\\skybox\\right.jpg",
-								".\\textures\\skybox\\right.jpg",
-								".\\textures\\skybox\\left.jpg",
-								".\\textures\\skybox\\top.jpg",
-								".\\textures\\skybox\\bottom.jpg",
-								".\\textures\\skybox\\front.jpg",
-								".\\textures\\skybox\\back.jpg"
+							{	".\\textures\\skybox\\right.png",
+								".\\textures\\skybox\\left.png",
+								".\\textures\\skybox\\top.png",
+								".\\textures\\skybox\\bottom.png",
+								".\\textures\\skybox\\front.png",
+								".\\textures\\skybox\\back.png"
 							};
 						cubemapTexture = loadCubemap(faces);	
 					}
@@ -5309,6 +5328,7 @@ int main(void)
 // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
     {  
+		if (G_TIME == 0.0) time = 0;
 // Poll for and process events */
 //        glfwPollEvents();
 

@@ -8,12 +8,12 @@
 
 // Entorn VGI: Llibreries i constants Constants de l'aplicació EntornVGI
 #include "stdafx.h"
-
 // Entorn VGI: OBJECTE OBJ. Include per la definició de l'objecte Obj_OBJ
 #include "objLoader.h"	
 
-//-------------- Entorn VGI: Variables globals de main
 
+//-------------- Entorn VGI: Variables globals de main
+	
 // Retrieving main monitor
 	GLFWmonitor* primary;
 

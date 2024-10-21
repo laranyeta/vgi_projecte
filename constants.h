@@ -8,6 +8,11 @@
 #ifndef CONST_H
 #define CONST_H
 
+#include <vector>
+#include "planeta.h"
+
+extern std::vector<Planeta> PLANETES;
+
 //--------------- VGI: Tipus de Càmera
 #define CAP ' '
 #define CAM_ESFERICA 'E'
@@ -57,8 +62,12 @@
 #define OBJOBJ '4'		// Objecte format OBJ
 #define OBJECTE_T 'z'
 #define SPUTNIK 'Q'
+
 #define DONUT_FACE 'D'
 #define NAU_FACE 'X'
+
+#define PROVA_PLANETA '9'
+
 
 //-------------- VGI: Tipus d'Iluminacio
 #define PUNTS 'P'
@@ -98,6 +107,8 @@ const double p_far=50000.0;
 #define FITXERBMP 'f'
 #define FITXERIMA 'I'
 
+
+
 // --------------  VGI: NOMBRE DE LLUMS: Nombre de Llums de l'aplicació, les d'OpenGL
 const int NUM_MAX_LLUMS = 8;
 
@@ -116,10 +127,88 @@ const int NUM_MAX_LLUMS = 8;
 #define PROG_BINARY_SHADER 'p'
 #define PROG_BINARY_SHADERW 'W'
 
+
+const std::string NAMES[9] = { "Sol", "Mercuri", "Venus", "Terra", "Mart", "Júpiter", "Saturn", "Urà", "Neptú" };
+const std::string RUTES_TEXTURA[9] = { "sun.jpg","mercury.jpg","venus.jpg","earth.jpg","mars.jpg","jupiter.jpg","saturn.jpg","uranus.jpg","neptune.jpg" };
+const double ESCALA_DISTANCIA = 1.0 / 10.496e9; //1.496e11
+const double ESCALA_MASSA = 1.0;
+const double RADIS[9] = { 6.96340e11, 2.4397e10, 6.0518e10 , 6.3710e10 , 3.3895e10 , 6.9911e11 , 5.8232e11 , 2.5362e11 , 2.4622e11 }; // e + 3
+
+
+/*const double RADIS[9] = { 6.96340e11, 2.4397e9, 6.0518e9 , 6.3710e9 , 3.3895e9 , 6.9911e10 , 5.8232e10 , 2.5362e10 , 2.4622e10 }; // e + 3*/
+const double SEMIEIXOS_MAJORS[8] = {
+	0.3871, 0.7233, 1.0000, 1.5237, 5.2026, 9.5549, 19.2184, 30.1104
+};
+
+const double EXCENTRICITATS[8] = {
+	0.2056, 0.0068, 0.0167, 0.0934, 0.0484, 0.0555, 0.0463, 0.0095
+};
+
+const double INCLINACIONS[8] = {
+	7.0049, 3.3947, 0.0000, 1.8506, 1.3030, 2.4845, 0.7699, 1.7692
+};
+
+const double LONG_NODES_ASC[8] = {
+	48.33167, 76.68069, 0.0, 49.57854, 100.55615, 113.71504, 74.22988, 131.72169
+};
+
+const double PERIAPSIS[8] = {
+	29.1241, 54.85229, 102.9373, 286.4623, 273.867, 339.392, 96.998857, 273.187
+};
+
+const double MASSES[9] = {
+		1.989e30f,  // Sol
+		3.301e23f,  // Mercuri
+		4.867e24f,  // Venus
+		5.972e24f,  // Terra
+		6.417e23f,  // Mart
+		1.898e27f,  // Júpiter
+		5.683e26f,  // Saturn
+		8.681e25f,  // Urà
+		1.024e26f   // Neptú
+};
+
+const int DIRECCIONS_ROTACIO[9] = {
+		1,  // Sol
+		1,  // Mercuri
+	   -1,  // Venus
+		1,  // Terra
+		1,  // Mart
+		1,  // Júpiter
+		1,  // Saturn
+	   -1,  // Urà 
+		1   // Neptú
+};
+
+const float ANGLES_INCLINACIO_ROTACIO[9] = {
+		7.25f,    // Sol
+		0.03f,    // Mercuri
+		2.64f,    // Venus 
+		23.44f,   // Terra
+		25.19f,   // Mart
+		3.13f,    // Júpiter
+		26.73f,   // Saturn
+		82.23f,   // Urà 
+		28.32f    // Neptú
+};
+
+const double RADI_ORBITAL[9] = {
+		0.0f,        // Sol +++1
+		57.9e10f,     // Mercuri
+		108.2e10f,    // Venus
+		149.6e10f,    // Terra
+		227.9e10f,    // Mart
+		778.5e10f,    // Júpiter
+		1.4335e13f,  // Saturn
+		2.8725e13f,  // Urà
+		4.4951e13f   // Neptú
+};
+
 //--------------- VGI: Valor constant de pi
 const double PI=3.14159;
 const double TWOPI = 2 * PI;
 const double PID2 = PI / 2;
+const double DEG_A_RAD = PI / 180.0;
 //const double pi=3.14159265358979323846264338327950288419716939937510f;
 
 // --------------- GMS. GRID

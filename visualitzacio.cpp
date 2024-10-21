@@ -21,6 +21,8 @@
 #include "visualitzacio.h"
 #include "escena.h"
 
+#include <iostream>
+
 // Iluminació: Configurar iluminació de l'escena
 void Iluminacio(GLint sh_programID, char ilumin, bool ifix, bool ilu2sides, bool ll_amb, LLUM* lumin, char obj, bool frnt_fcs,
 	bool bc_lin, int step)
@@ -1059,6 +1061,8 @@ void FonsB()
    glFlush();
 }
 
+
+
 // TEXTURES------------------------------------------------------
 // loadIMA_SOIL: This function receives as input the image filename and an 
 // integer identifier (0 for the first texture) and creates an OpenGL 
@@ -1081,7 +1085,7 @@ GLint loadIMA_SOIL(const char * filename)
 // If the file is empty (or non existent) print an error and return false
 // if (file == NULL)
 	if (errno != 0)
-	{	//	printf("Could not open file '%s'.\n",filename) ;
+	{	printf("Could not open file '%s'.\n",filename) ;
 		return false;
 	}
 
