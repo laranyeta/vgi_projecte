@@ -189,6 +189,13 @@
 	GLdouble mida;		// Factor d'escala per calcular Volum de Visualització de l'objecte que encaixi.
 	std::string nom;	// Nom de fitxer.
 	std::string buffer; // Buffer que magatzema string caracters corresponent a variables double a printar en Status Bar (funció Barra_Estat).
+
+// MAV: variables per camera nau
+	double G_TIME, G_DELTA;
+	double angleA, angleB, angleC;
+	static const double vdir_ini[3] = { -1, 0, 0 }, vright_ini[3] = { 0, 1, 0 }, vup_ini[3] = { 0, 0, 1 };
+	double v[3]; //direccio vertical
+	bool pressW, pressS, pressA, pressD, pressUP, pressDOWN, pressLEFT, pressRIGHT;
 //-------------- Entorn VGI: Fi De Variables globals de main
 
 //-------------- Entorn VGI: Declaració funcions main
@@ -202,7 +209,7 @@
 // Entorn VGI: Control de l'EVENT ONSIZE
 	void OnSize(GLFWwindow* window, int width, int height);
 
-	void OnPaint(GLFWwindow* window, float time);
+	void OnPaint(/*GLFWwindow* window,*/ float time);
 	void configura_Escena();
 	void dibuixa_Escena(float time);
 	void Barra_Estat();
@@ -232,6 +239,8 @@
 	void Teclat_ColorObjecte(int key, int action);
 	void Teclat_ColorFons(int key, int action);
 	void Teclat_Navega(int key, int action);
+	void Teclat_Nau(int key, int action);
+	void Moviment_Nau();
 	void Teclat_Pan(int key, int action);
 	void Teclat_TransEscala(int key, int action);
 	void Teclat_TransRota(int key, int action);

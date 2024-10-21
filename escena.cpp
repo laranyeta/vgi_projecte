@@ -152,48 +152,23 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	/*MAV MODIFIED*/
 	case OBJECTE_T:
 		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
-		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		objecte_t(sh_programID, MatriuVista, MatriuTG, sw_mat);
 
-		// Activar transparència
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// Dibuix geometria Mar
-		color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
-		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
-		SeleccionaColorMaterial(sh_programID, color_Mar, sw_mat);
-		// Pas ModelView Matrix a shader
-		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-		// Pas NormalMatrix a shader
-		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-
-		// Desactivar transparència
-		glDisable(GL_BLEND);
 		break;
 		/*MAV MODIFIED*/
 	case SPUTNIK:
 		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
-		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		sputnik(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
-
-		// Activar transparència
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// Dibuix geometria Mar
-		color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
+		break;
+	/*MAV MODIFIED*/
+	case DONUT_FACE:
 		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
-		SeleccionaColorMaterial(sh_programID, color_Mar, sw_mat);
-		// Pas ModelView Matrix a shader
-		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-		// Pas NormalMatrix a shader
-		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-
-		// Desactivar transparència
-		glDisable(GL_BLEND);
+		donut_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
+		break;
+	/*MAV MODIFIED*/
+	case NAU_FACE:
+		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		nau_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
 		break;
 
 // Dibuix de l'objecte TIE (Nau enemiga Star Wars)
@@ -582,96 +557,6 @@ void dibuixa(GLuint sh_programID, char obj, glm::mat4 MatriuVista, glm::mat4 Mat
 	}
 }
 
-// OBJECTE ARC
-void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5])
-{	CColor col_object = { 0.0,0.0,0.0,1.0 };
-	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
-
-// Definir VAO del Cub
-	//glutSolidCube_VAO(1.0);
-
-// Pota Esquerra
-	//glPushMatrix();
-	  //glTranslated(0.0, 0.0, 2.5);
-	  //glScaled(1.0, 1.0, 5.0);
-	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 0.0f, 2.5f));
-	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 5.0f));
-	// Pas ModelView Matrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	// Pas NormalMatrix a shader
-	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	draw_TriEBO_Object(GLUT_CUBE); // drawSolidCube();	//  glutSolidCube(1.0);
-	//glPopMatrix();
-
-// Pota Dreta
-	//glPushMatrix();
-	//glTranslated(0.0, 5.0, 2.5);
-	//glScaled(1.0, 1.0, 5.0);
-	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 5.0f, 2.5f));
-	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 5.0f));
-	// Pas ModelView Matrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	// Pas NormalMatrix a shader
-	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	draw_TriEBO_Object(GLUT_CUBE); //drawSolidCube();	//  glutSolidCube(1.0);
-	//glPopMatrix();
-
-// Travesser
-	//glPushMatrix();
-	  //glTranslated(0.0, 2.5, 5.5);
-	  //glRotated(90.0, 1.0, 0.0, 0.0);
-	  //glScaled(1.0, 1.0, 6.0);
-	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 2.5f, 5.5f));
-	ModelMatrix = glm::rotate(ModelMatrix, radians(90.f),vec3(1.0f, 0.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 6.0f));
-	// Pas ModelView Matrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-	// Pas NormalMatrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	draw_TriEBO_Object(GLUT_CUBE);  //drawSolidCube();	//  glutSolidCube(1.0);
-	//glPopMatrix();
-
-// Eliminar VAO del Cub
-	//deleteVAO(GLUT_CUBE);
-
-// Esfera
-	col_object.r = 0.0;		col_object.g = 1.0;		col_object.b = 1.0;		col_object.a = 1.0;	// Color blau clar
-	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
-	//glPushMatrix();
-	  //glTranslated(0.0, 5.0, 6.5);
-    ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 5.0f, 6.5f));
-	// Pas ModelView Matrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	// Pas NormalMatrix a shader
-	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	draw_TriEBO_Object(GLU_SPHERE); //gluSphere(0.5, 20, 20);
-	//glPopMatrix();
-
-// Tetera
-	col_object.r = 1.0;		col_object.g = 1.0;		col_object.b = 0.0;		col_object.a = 1.0;	// Color groc
-	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
-	//glPushMatrix();
-	  //glTranslated(0.0, 0.0, 6.0);
-	  //glRotated(-90.0, 0.0, 0.0, 1.0);
-	  //glRotated(90.0, 1.0, 0.0, 0.0);
-	  //glScaled(0.25, 0.25, 0.25);
-	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 0.0f, 6.0f));
-	ModelMatrix = glm::rotate(ModelMatrix, radians(-90.f), vec3(0.0f, 0.0f, 1.0f));
-	ModelMatrix = glm::rotate(ModelMatrix, radians(90.f), vec3(1.0f, 0.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, vec3(0.25f, 0.25f, 0.25f));
-	// Pas ModelView Matrix a shader
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	// Pas NormalMatrix a shader
-	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	draw_TriVAO_Object(GLUT_TEAPOT); //glutSolidTeapot(1.0);
-	//glPopMatrix();
-}
-
 void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5])
 {
 	CColor col_object = { 0.0,0.0,0.0,1.0 };
@@ -770,6 +655,150 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	draw_TriEBO_Object(GLUT_CYLINDER);	//draw_TriVAO_Object(GLUT_CUBE);  //glutSolidCube(1.0);
 
 }
+
+void donut_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
+{
+	CColor col_object = { 1.0,1.0,1.0,1.0 };
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+
+	objecte_t(sh_programID, MatriuVista, MatriuTG, sw_mat);
+
+	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+
+	// donut
+	col_object = { 0.0,1.0,0.0,1.0 };
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+	// generar forma
+	ModelMatrix = glm::translate(inverse(MatriuVista), vec3(0.0f, 0.0f, -0.1f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(time*90.0f), vec3(0.0f, 0.0f, 1.0f));
+	ModelMatrix = glm::scale(ModelMatrix, vec3(0.001f, 0.001f, 0.001f));
+
+	// Pas a shaders Model
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+
+	// Pas a shader Normal
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+	draw_TriEBO_Object(GLUT_TORUS); //gluSphere(0.5, 20, 20);
+
+}
+void nau_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
+{
+	donut_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
+
+	// SPACESHIP
+	CColor col_object = { 0.0,1.0,1.0,1.0 };
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+
+	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+
+	// generar forma
+	ModelMatrix = glm::translate(MatriuTG, vec3(3.0f, 0.0f, 3.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(time*15.0f), vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 1.0f));
+
+	// Pas a shaders Model
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+
+	// Pas a shader Normal
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+	draw_TriEBO_Object(GLUT_TETRAHEDRON);
+}
+
+
+// OBJECTE ARC
+void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5])
+{	CColor col_object = { 0.0,0.0,0.0,1.0 };
+	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+
+// Definir VAO del Cub
+	//glutSolidCube_VAO(1.0);
+
+// Pota Esquerra
+	//glPushMatrix();
+	  //glTranslated(0.0, 0.0, 2.5);
+	  //glScaled(1.0, 1.0, 5.0);
+	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 0.0f, 2.5f));
+	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 5.0f));
+	// Pas ModelView Matrix a shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+	// Pas NormalMatrix a shader
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+	draw_TriEBO_Object(GLUT_CUBE); // drawSolidCube();	//  glutSolidCube(1.0);
+	//glPopMatrix();
+
+// Pota Dreta
+	//glPushMatrix();
+	//glTranslated(0.0, 5.0, 2.5);
+	//glScaled(1.0, 1.0, 5.0);
+	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 5.0f, 2.5f));
+	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 5.0f));
+	// Pas ModelView Matrix a shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+	// Pas NormalMatrix a shader
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+	draw_TriEBO_Object(GLUT_CUBE); //drawSolidCube();	//  glutSolidCube(1.0);
+	//glPopMatrix();
+
+// Travesser
+	//glPushMatrix();
+	  //glTranslated(0.0, 2.5, 5.5);
+	  //glRotated(90.0, 1.0, 0.0, 0.0);
+	  //glScaled(1.0, 1.0, 6.0);
+	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 2.5f, 5.5f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(90.f),vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 6.0f));
+	// Pas ModelView Matrix a shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	// Pas NormalMatrix a shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+	draw_TriEBO_Object(GLUT_CUBE);  //drawSolidCube();	//  glutSolidCube(1.0);
+	//glPopMatrix();
+
+// Eliminar VAO del Cub
+	//deleteVAO(GLUT_CUBE);
+
+// Esfera
+	col_object.r = 0.0;		col_object.g = 1.0;		col_object.b = 1.0;		col_object.a = 1.0;	// Color blau clar
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+	//glPushMatrix();
+	  //glTranslated(0.0, 5.0, 6.5);
+    ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 5.0f, 6.5f));
+	// Pas ModelView Matrix a shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+	// Pas NormalMatrix a shader
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+	draw_TriEBO_Object(GLU_SPHERE); //gluSphere(0.5, 20, 20);
+	//glPopMatrix();
+
+// Tetera
+	col_object.r = 1.0;		col_object.g = 1.0;		col_object.b = 0.0;		col_object.a = 1.0;	// Color groc
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+	//glPushMatrix();
+	  //glTranslated(0.0, 0.0, 6.0);
+	  //glRotated(-90.0, 0.0, 0.0, 1.0);
+	  //glRotated(90.0, 1.0, 0.0, 0.0);
+	  //glScaled(0.25, 0.25, 0.25);
+	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 0.0f, 6.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(-90.f), vec3(0.0f, 0.0f, 1.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(90.f), vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::scale(ModelMatrix, vec3(0.25f, 0.25f, 0.25f));
+	// Pas ModelView Matrix a shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+	// Pas NormalMatrix a shader
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+	draw_TriVAO_Object(GLUT_TEAPOT); //glutSolidTeapot(1.0);
+	//glPopMatrix();
+}
+
 
 // Mar amb ondulacions
 CVAO loadSea_VAO(CColor colorM)

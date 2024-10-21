@@ -35,6 +35,7 @@ void InitGL()
 
 // Entorn VGI: Variables de control de l'opció Càmera->Navega?
 	n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
+	v[0] = 0.0;		v[1] = 0.0;		v[2] = 1.0;
 	opvN.x = 10.0;	opvN.y = 0.0;		opvN.z = 0.0;
 	angleZ = 0.0;
 	ViewMatrix = glm::mat4(1.0);		// Inicialitzar a identitat
@@ -397,7 +398,7 @@ void OnSize(GLFWwindow* window, int width, int height)
 
 
 // OnPaint: Funció de dibuix i visualització en frame buffer del frame
-void OnPaint(GLFWwindow* window, float time)
+void OnPaint(/*GLFWwindow* window,*/ float time)
 {
 // TODO: Agregue aquí su código de controlador de mensajes
 	GLdouble vpv[3] = { 0.0, 0.0, 1.0 };
@@ -527,6 +528,23 @@ void OnPaint(GLFWwindow* window, float time)
 					ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
 					eixos, grid, hgrid);
 				}
+		else if (camera == CAM_NAU) {
+			Moviment_Nau();
+			if (Vis_Polar == POLARZ) {
+				vpv[0] = 0.0;	vpv[1] = 0.0;	vpv[2] = 1.0;
+			}
+			else if (Vis_Polar == POLARY) {
+				vpv[0] = 0.0;	vpv[1] = 1.0;	vpv[2] = 0.0;
+			}
+			else if (Vis_Polar == POLARX) {
+				vpv[0] = 1.0;	vpv[1] = 0.0;	vpv[2] = 0.0;
+			}
+			ViewMatrix = Vista_Navega(shader_programID, opvN, //false, 
+				n, v, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, true, pas,
+				front_faces, oculta, test_vis, back_line,
+				ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
+				eixos, grid, hgrid);
+		}
 		else if (camera == CAM_GEODE) {
 				ViewMatrix = Vista_Geode(shader_programID, OPV_G, Vis_Polar, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, mida, pas,
 					front_faces, oculta, test_vis, back_line,
@@ -1071,6 +1089,9 @@ int shortCut_Camera()
 	case CAM_GEODE:		// Càmera GEODE
 		auxCamera = 2;
 		break;
+	case CAM_NAU:		// Càmera NAU
+		auxCamera = 3;
+		break;
 	default:			// Opció CÀMERA <Altres Càmeres>
 		auxCamera = 0;
 		break;
@@ -1161,7 +1182,9 @@ int shortCut_Objecte()
 		break;
 	/*MAV MODIFIED*/case CILINDRE: auxObjecte = 15; break;
 	/*MAV MODIFIED*/case OBJECTE_T: auxObjecte = 16; break;
-	/*MAV MODIFIED*/case SPUTNIK: auxObjecte = 17; break;
+	/*MAV MODIFIED*/case SPUTNIK: auxObjecte = 17; break; 
+	/*MAV MODIFIED*/case DONUT_FACE: auxObjecte = 19; break;
+	/*MAV MODIFIED*/case NAU_FACE: auxObjecte = 20; break;
 
 	default:			// Opció OBJECTE <Altres Objectes>
 		auxObjecte = 0;
@@ -1393,6 +1416,8 @@ void ShowEntornVGIWindow(bool* p_open)
 		static int clickCG = 0;
 		ImGui::RadioButton("Geode (<Shift>+J)", &oCamera, 2); ImGui::SameLine();
 		if (ImGui::Button("Origen Geode")) clickCG++;
+		ImGui::Separator();
+		ImGui::Spacing();
 
 		// EntornVGI: Si s'ha apretat el botó "Origen Geode"
 		if (clickCG)
@@ -1402,6 +1427,23 @@ void ShowEntornVGIWindow(bool* p_open)
 				mobil = true;		zzoom = true;	zzoomO = false;	 satelit = false;	pan = false;
 				Vis_Polar = POLARZ;	llumGL[5].encesa = true;
 				glFrontFace(GL_CW);
+			}
+		}
+
+		static int clickCNa = 0;
+		ImGui::RadioButton("Nau (n/a)", &oCamera, 3); ImGui::SameLine();
+		if (ImGui::Button("Origen Nau")) clickCNa++;
+
+		// EntornVGI: Si s'ha apretat el botó "Origen Geode"
+		if (clickCNa)
+		{
+			clickCNa = 0;
+			if (camera == CAM_NAU) {
+				n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
+				v[0] = 0.0;		v[1] = 0.0;		v[2] = 1.0;
+				angleA = 0.0;		angleB = 0.0;		angleC = 0.0;
+				opvN.x = 10.0;	opvN.y = 0.0;		opvN.z = 0.0;
+				angleZ = 0.0;
 			}
 		}
 
@@ -1451,6 +1493,11 @@ void ShowEntornVGIWindow(bool* p_open)
 					Vis_Polar = POLARZ;
 					llumGL[5].encesa = true;
 				}
+			break;
+		case 3: // Opció CAMERA Nau
+			if ((projeccio != ORTO) && (projeccio != CAP)) camera = CAM_NAU;
+			// Activació de zoom, mobil
+			mobil = true;	zzoom = true;
 			break;
 		default: // Opció PROJECCIÓ <Altres Projeccions>
 			break;
@@ -1648,7 +1695,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)", "Cub (<Shift>+C)", "Cub RGB (<Shift>+D)", "Esfera (<Shift>+E)", "Tetera (<Shift>+T)",
 			"Arc (<Shift>+R)", "Matriu Primitives (<Shift>+M)", "Matriu Primitives VAO (<Shift>+V)", "Tie (<Shift>+I)", "Arxiu OBJ", 
 			"Bezier (<Shift>+F7)", "B-spline (<Shift>+F8)", "Lemniscata (<Shift>+F9)", "Hermitte (<Shift>+F10)", "Catmull-Rom (<Shift>+F11)",
-			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)" };
+			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Donut face (n/a)", "Nau face (n/a)" };
 		//static int item_current = 0;
 		ImGui::Combo(" ", &oObjecte, items, IM_ARRAYSIZE(items));
 		ImGui::Spacing();
@@ -1993,7 +2040,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posició GLUT_TEAPOT.
 			}
 			break;
-		case 17: // OBJECTE T
+		case 17: // SPUTNIK
 			if (objecte != SPUTNIK) {
 				objecte = SPUTNIK;
 				netejaVAOList();
@@ -2003,6 +2050,31 @@ void ShowEntornVGIWindow(bool* p_open)
 				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// Càrrega Esfera a la posició GLU_SPHERE.
 
 				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.0f, 1.0f, 20, 1));
+			}
+			break;
+		case 18: // DONUT_FACE
+			if (objecte != DONUT_FACE) {
+				objecte = DONUT_FACE;
+				netejaVAOList();
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(0.5, 5.0, 8, 8));
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
+			}
+			break;
+		case 19: // NAU_FACE
+			if (objecte != NAU_FACE) {
+				objecte = NAU_FACE;
+				netejaVAOList();
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(0.5, 5.0, 8, 8));
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
+				Set_VAOList(GLUT_TETRAHEDRON, loadglutSolidTetrahedron_EBO());
 			}
 			break;
 		}
@@ -2522,6 +2594,7 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 							else if (escal) Teclat_TransEscala(key, action);
 				}
 		else if (camera == CAM_NAVEGA) Teclat_Navega(key, action);
+		else if (camera == CAM_NAU) Teclat_Nau(key, action);
 		else if (!sw_color) Teclat_ColorFons(key, action);
 		else Teclat_ColorObjecte(key, action);
 	}
@@ -2538,10 +2611,39 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 void OnKeyUp(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	if (action == GLFW_RELEASE)
+	{
+		switch (key)
+		{
+			// Tecla cursor amunt
+		case GLFW_KEY_W:
+			pressW = false;
+			break;
+
+			// Tecla cursor avall
+		case GLFW_KEY_S:
+			pressS = false;
+			break;
+
+			// Tecla cursor esquerra
+		case GLFW_KEY_LEFT:
+			pressUP = false;
+			break;
+
+			// Tecla cursor dret
+		case GLFW_KEY_RIGHT:
+			pressDOWN = false;
+			break;
+
+		default:
+			break;
+		}
+	}
 }
 
 void OnTextDown(GLFWwindow* window, unsigned int codepoint)
 {
+
 }
 
 // Teclat_Shift: Shortcuts per Pop Ups Fitxer, Finestra, Vista, Projecció i Objecte
@@ -3427,7 +3529,7 @@ void Teclat_ColorObjecte(int key, int action)
 
 
 // Teclat_ColorFons: Teclat pels canvis del color de fons.
-	void Teclat_ColorFons(int key, int action)
+void Teclat_ColorFons(int key, int action)
 {		const double incr = 0.025f;
 
 		if (action == GLFW_PRESS)
@@ -3681,6 +3783,230 @@ void Teclat_Navega(int key, int action)
 	}
 }
 
+// MAV ----------------
+void Teclat_Nau(int key, int action)
+{
+	if (action == GLFW_PRESS)
+	{
+		switch (key)
+		{
+			// Tecla cursor amunt
+		case GLFW_KEY_W:
+			pressW = true;
+			break;
+
+			// Tecla cursor avall
+		case GLFW_KEY_S:
+			pressS = true;
+			break;
+			// Tecla cursor amunt
+
+		case GLFW_KEY_A:
+			pressA = true;
+			break;
+
+			// Tecla cursor avall
+		case GLFW_KEY_D:
+			pressD = true;
+			break;
+
+			// Tecla cursor esquerra
+		case GLFW_KEY_LEFT:
+			pressLEFT = true;
+			break;
+
+			// Tecla cursor dret
+		case GLFW_KEY_RIGHT:
+			pressRIGHT = true;
+			break;
+
+		case GLFW_KEY_UP:
+			pressUP = true;
+			break;
+
+			// Tecla cursor dret
+		case GLFW_KEY_DOWN:
+			pressDOWN = true;
+			break;
+
+		default:
+			break;
+		}
+	}
+
+}
+
+void rotate_vector(double vec1[3], double vec2[3], double axis[3], double angle) {
+	double cos_theta = cos(angle);
+	double sin_theta = sin(angle);
+
+	//Producto escalar del vector con el eje
+	double dot_product1 = axis[0] * vec1[0] + axis[1] * vec1[1] + axis[2] * vec1[2];
+	double dot_product2 = axis[0] * vec1[0] + axis[1] * vec1[1] + axis[2] * vec1[2];
+
+	// Copiem vec1
+	double cvec1[3] = {vec1[0], vec1[1], vec1[2]};
+
+	// Aplicar la fórmula de Rodríguez
+	vec1[0] = vec1[0] * cos_theta + vec2[0] * sin_theta + axis[0] * dot_product1 * (1 - cos_theta);
+	vec1[1] = vec1[1] * cos_theta + vec2[1] * sin_theta + axis[1] * dot_product1 * (1 - cos_theta);
+	vec1[2] = vec1[2] * cos_theta + vec2[2] * sin_theta + axis[2] * dot_product1 * (1 - cos_theta);
+
+	vec2[0] = vec2[0] * cos_theta + cvec1[0] * sin_theta + axis[0] * dot_product2 * (1 - cos_theta);
+	vec2[1] = vec2[1] * cos_theta + cvec1[1] * sin_theta + axis[1] * dot_product2 * (1 - cos_theta);
+	vec2[2] = vec2[2] * cos_theta + cvec1[2] * sin_theta + axis[2] * dot_product2 * (1 - cos_theta);
+}
+
+void Moviment_Nau()
+{
+	double vdir[3] = { 0, 0, 0 };
+	double vup[3] = { 0, 0, 0 };
+	double vright[3] = { 0, 0, 0 };
+	double modulN = 0;
+	double modulV = 0;
+	double modulU = 0;
+
+	// Entorn VGI: Controls de moviment de navegació
+
+	//vector normalitzat n: vdir
+	vdir[0] = n[0] - opvN.x;
+	vdir[1] = n[1] - opvN.y;
+	vdir[2] = n[2] - opvN.z;
+	modulN = sqrt(vdir[0] * vdir[0] + vdir[1] * vdir[1] + vdir[2] * vdir[2]);
+	vdir[0] /= modulN;
+	vdir[1] /= modulN;
+	vdir[2] /= modulN;
+
+	// vector normalitzat v: vup (v ha d'estar noormalitzat)
+	vup[0] = v[0];
+	vup[1] = v[1];
+	vup[2] = v[2];
+	modulV = sqrt(vup[0] * vup[0] + vup[1] * vup[1] + vup[2] * vup[2]);
+	vup[0] /= modulV;
+	vup[1] /= modulV;
+	vup[2] /= modulV;
+	
+	// vector normalitzat u: vright
+	vright[0] = vdir[1] * vup[2] - vdir[2] * vup[1];
+	vright[1] = vdir[2] * vup[0] - vdir[0] * vup[2];
+	vright[2] = vdir[0] * vup[1] - vdir[1] * vup[0];
+	modulU = sqrt(vright[0] * vright[0] + vright[1] * vright[1] + vright[2] * vright[2]);
+	vright[0] /= modulU;
+	vright[1] /= modulU;
+	vright[2] /= modulU;
+
+	double fact_nau = 10.0 * G_DELTA;
+	double fact_ang_nau = 45.0  * G_DELTA;
+
+	if (Vis_Polar == POLARZ) { }
+	if (Vis_Polar == POLARY) { return; }
+	if (Vis_Polar == POLARX) { return; }
+	
+	glfwGetKey(window, GLFW_KEY_W);
+	if (pressW && glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		opvN.x += fact_nau * vdir[0];
+		opvN.y += fact_nau * vdir[1];
+		opvN.z += fact_nau * vdir[2];
+		n[0] += fact_nau * vdir[0];
+		n[1] += fact_nau * vdir[1];
+		n[2] += fact_nau * vdir[2];
+	}
+	else
+		pressW = false;
+
+	glfwGetKey(window, GLFW_KEY_S);
+	if (pressS && glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		opvN.x -= fact_nau * vdir[0];
+		opvN.y -= fact_nau * vdir[1];
+		opvN.z -= fact_nau * vdir[2];
+		n[0] -= fact_nau * vdir[0];
+		n[1] -= fact_nau * vdir[1];
+		n[2] -= fact_nau * vdir[2];
+	}
+	else
+		pressS = false;
+	
+	glfwGetKey(window, GLFW_KEY_A);
+	if (pressA && glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		opvN.x -= fact_nau * vright[0];
+		opvN.y -= fact_nau * vright[1];
+		opvN.z -= fact_nau * vright[2];
+		n[0] -= fact_nau * vright[0];
+		n[1] -= fact_nau * vright[1];
+		n[2] -= fact_nau * vright[2];
+	}
+	else
+		pressA = false;
+
+	glfwGetKey(window, GLFW_KEY_D);
+	if (pressD && glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		opvN.x += fact_nau * vright[0];
+		opvN.y += fact_nau * vright[1];
+		opvN.z += fact_nau * vright[2];
+		n[0] += fact_nau * vright[0];
+		n[1] += fact_nau * vright[1];
+		n[2] += fact_nau * vright[2];
+	}
+	else
+		pressD = false;
+	
+	glfwGetKey(window, GLFW_KEY_LEFT);
+	if (pressLEFT && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		angleA -= fact_ang_nau;
+		if (angleA < 0) angleA += 360;
+	}
+	else
+		pressLEFT = false;
+
+	glfwGetKey(window, GLFW_KEY_RIGHT);
+	if (pressRIGHT && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		angleA += fact_ang_nau;
+		if (angleA >= 360) angleA -= 360;
+	}
+	else
+		pressRIGHT = false;
+	
+	
+	if (pressUP && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		angleB -= fact_ang_nau;
+		if (angleB < 0) angleB += 360;
+	}
+	else
+		pressUP = false;
+
+	glfwGetKey(window, GLFW_KEY_DOWN);
+	if (pressDOWN && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		angleB += fact_ang_nau;
+		if (angleB >= 360) angleB -= 360;
+	}
+	else
+		pressDOWN = false;
+
+	vdir[0] = vdir_ini[0]; vdir[1] = vdir_ini[1]; vdir[2] = vdir_ini[2];
+	vup[0] = vup_ini[0]; vup[1] = vup_ini[1]; vup[2] = vup_ini[2];
+	vright[0] = vright_ini[0]; vright[1] = vright_ini[1]; vright[2] = vright_ini[2];
+
+	rotate_vector(vdir, vright, vup, angleA * PI /180);
+	rotate_vector(vdir, vup, vright, angleB * PI / 180);
+	rotate_vector(vup, vright, vdir, angleC * PI / 180);
+
+	n[0] = vdir[0] + opvN.x;
+	n[1] = vdir[1] + opvN.y;
+	n[2] = vdir[2] + opvN.z;
+
+	v[0] = vup[0];
+	v[1] = vup[1];
+	v[2] = vup[2];
+}
+// END MAV ----------------
 
 // Teclat_Pan: Teclat pels moviments de Pan.
 void Teclat_Pan(int key, int action)
@@ -4988,11 +5314,11 @@ int main(void)
 
 // Entorn VGI. Timer: common part, do this only once
 		now = glfwGetTime();
-		delta = now - previous;
+		G_DELTA = delta = now - previous;
 		previous = now;
 
 // Entorn VGI. Timer: for each timer do this
-		time -= delta;
+		G_TIME = time -= delta;
 		if ((time <= 0.0) && (satelit || anima)) OnTimer();
 
 // Poll for and process events
@@ -5002,7 +5328,7 @@ int main(void)
 		draw_Menu_ImGui();
 
 // Crida a OnPaint() per redibuixar l'escena
-		OnPaint(window, time);
+		OnPaint(/*window,*/ time);
 
 // Entorn VGI.ImGui: Capta dades del menú InGui
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

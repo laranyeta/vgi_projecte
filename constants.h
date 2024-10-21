@@ -13,6 +13,7 @@
 #define CAM_ESFERICA 'E'
 #define CAM_GEODE 'G'
 #define CAM_NAVEGA 'N'
+#define CAM_NAU 'S'
 
 //--------------- VGI: Tipus de Projecció
 #define AXONOM 'A'
@@ -56,6 +57,8 @@
 #define OBJOBJ '4'		// Objecte format OBJ
 #define OBJECTE_T 'z'
 #define SPUTNIK 'Q'
+#define DONUT_FACE 'D'
+#define NAU_FACE 'X'
 
 //-------------- VGI: Tipus d'Iluminacio
 #define PUNTS 'P'
