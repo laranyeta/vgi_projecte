@@ -81,7 +81,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 			bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 			int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 			COBJModel* objecteOBJ,
-			glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time)
+			glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time,bool propulsat)
 {
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
@@ -159,7 +159,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		/*MAV MODIFIED*/
 	case SPUTNIK:
 		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
-		sputnik(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
+		sputnik(sh_programID, MatriuVista, MatriuTG, sw_mat, time,propulsat);
 		break;
 	/*MAV MODIFIED*/
 	case DONUT_FACE:
@@ -860,36 +860,140 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	}
 	
 }
-void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
+
+
+// Variables globals
+float velocitat_satelit = 1.0f;  // Velocitat vertical del satèl·lit
+float temps_propulsio_rest = 2.0f; // Temps restant de la propulsió
+float semi_eix_major = 25.0f;
+
+void dibuixar_orbita(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, float semi_eix_major, float excentricitat)
 {
-	CColor col_object = { 0.0,0.0,0.0,1.0 };
+	// Nombre de segments per a l'òrbita (com més gran sigui, més suau serà)
+	int num_segments = 100;
+	std::vector<glm::vec3> punts_orbita;
+
+	// Calcular els punts de l'òrbita utilitzant coordenades polars
+	for (int i = 0; i < num_segments; ++i) {
+		float angle = 2.0f * glm::pi<float>() * float(i) / float(num_segments); // Angle entre punts en radians
+
+		// Calcular la distància radial r en funció de l'excentricitat i l'angle
+		float radi_orbita = (semi_eix_major * (1.0f - excentricitat * excentricitat)) / (1.0f + excentricitat * cos(angle));
+
+		// Coordenades x i y per a l'òrbita el·líptica
+		float x = radi_orbita * cos(angle); // Coordenada x
+		float y = radi_orbita * sin(angle); // Coordenada y
+
+		// Afegir el punt al vector, considerant que orbita en el pla X-Y (amb Z constant)
+		punts_orbita.push_back(glm::vec3(x, y, 0.0f));
+	}
+
+	// Dibuixar l'òrbita amb línies
+	glUseProgram(sh_programID); // Assegurar-se que s'està usant el programa shader correcte
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &MatriuTG[0][0]);
+
+	glBegin(GL_LINE_LOOP); // Utilitzar línia tancada per a l'òrbita
+	for (const auto& punt : punts_orbita) {
+		glVertex3f(punt.x, punt.y, punt.z); // Dibuixar cada punt
+	}
+	glEnd();
+}
+
+void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, bool propulsat)
+{
+	CColor col_object = { 0.0, 0.0, 0.0, 1.0 };
 	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
-	// Esfera
-	// generar forma
+	// Esfera (planeta)
 	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, vec3(5.0f, 5.0f, 5.0f));
-	// Pas a shaders Model
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	// Pas a shader Normal
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	draw_TriEBO_Object(GLU_SPHERE); //gluSphere(0.5, 20, 20);
+	draw_TriEBO_Object(GLU_SPHERE);
 
-	//Satelit
-	// generar forma
-	ModelMatrix = glm::rotate(MatriuTG, radians(time*15.0f), vec3(1.0f, 0.0f, 0.0f));
-	ModelMatrix = glm::translate(ModelMatrix, vec3(0.0f, 6.0f, 0.5f));
-	ModelMatrix = glm::rotate(ModelMatrix, radians(180.0f), vec3(1.0f, 0.0f, 0.0f));
-	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 1.0f));
-	// Pas a shaders Model
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-	// Pas a shader Normal
-	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	draw_TriEBO_Object(GLUT_CYLINDER);	//draw_TriVAO_Object(GLUT_CUBE);  //glutSolidCube(1.0);
+	// Paràmetres de l'òrbita
+	float forca_propulsio = 0.01f;
+	float gravetat = 0.0098f;
+	float radi_planeta = 5.0f;
+	float excentricitat = 0.2f;
+
+	// Manejar la propulsió
+	/*if (propulsat) {
+		std::cout << "Propulsat => " << temps_propulsio_rest << std::endl;
+		velocitat_satelit += forca_propulsio;
+		temps_propulsio_rest -= 0.1f;
+
+		if (temps_propulsio_rest <= 0.0f) {
+			propulsat = false;
+		}
+	}
+	else {
+		velocitat_satelit -= gravetat;
+	}*/
+	if (propulsat) {
+		std::cout << "Propulsat => " << temps_propulsio_rest << std::endl;
+		velocitat_satelit += forca_propulsio;  // Augmentem la velocitat amb propulsió
+		temps_propulsio_rest -= 0.01f;
+
+		if (temps_propulsio_rest <= 0.0f) {
+			propulsat = false;  // Desactivar propulsió
+			//temps_propulsio_rest = 2.0f;
+		}
+		semi_eix_major += 0.001f;  // Decrementar semi-eix major per simular una òrbita més petita
+		if (semi_eix_major < 1.0f) { // Assegurar que no baixi massa
+			semi_eix_major = 1.0f;
+		}
+	}
+	else {
+		velocitat_satelit -= gravetat;  // Aplicar gravetat
+		semi_eix_major -= 0.001f;  // Decrementar semi-eix major per simular una òrbita més petita
+		if (semi_eix_major < 1.0f) { // Assegurar que no baixi massa
+			semi_eix_major = 1.0f;
+		}
+	}
+
+	float dist_focal = semi_eix_major * excentricitat;
+
+	// Càlcul de la posició el·líptica del satèl·lit
+	float anomalia = fmod((time /10)* velocitat_satelit, 360.0f);
+	float radians_anomalia = glm::radians(anomalia);
+
+	// Calcular la distància radial en funció de l'excentricitat
+	float radi_orbital = (semi_eix_major * (1.0f - excentricitat * excentricitat)) /
+		(1.0f + excentricitat * cos(radians_anomalia));
+
+	// Posicions x i y basades en el radi i l'anomalia veritable
+	float posicio_x = radi_orbital * cos(radians_anomalia) - dist_focal;
+	float posicio_y = radi_orbital * sin(radians_anomalia);
+
+	// Dibuixar l'òrbita en el pla X-Y
+	dibuixar_orbita(sh_programID, MatriuVista, MatriuTG, semi_eix_major, excentricitat);
+
+	// Calcular l'angle d'orientació per a la nau
+	//float angle_direccio = glm::degrees(radians_anomalia) + 90.0f;  // Afegim 90 graus per ajustar la orientació
+	std::cout << "Time =>" << time << std::endl;
+	std::cout << "velocitat_satelit =>" << velocitat_satelit << std::endl;
+	std::cout << "Posicio_x =>" << posicio_x << std::endl;
+	std::cout << "Posicio_y =>" << posicio_y << std::endl;
+	if (!(posicio_x * posicio_x + posicio_y * posicio_y < radi_planeta * radi_planeta)) {
+		// Dibuixar el satèl·lit amb rotació per apuntar cap a la direcció del moviment
+		//ModelMatrix = glm::rotate(MatriuTG, radians(time * 15.0f), vec3(1.0f, 0.0f, 0.0f));
+		ModelMatrix = glm::translate(MatriuTG, vec3(posicio_x, posicio_y, 0.0f));  // Manté Z = 0
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(180.0f), vec3(1.0f, 0.0f, 0.0f));  // Rotar al voltant de l'eix Z
+		ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 1.0f));  // Escalament
+
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+		draw_TriEBO_Object(GLUT_CYLINDER);  // Dibuixar el satèl·lit
+		std::cout << "FORA PLANETA" << std::endl;
+	}else{
+		std::cout << "DINS PLANETA" << std::endl;
+	}
 
 }
+
 
 void donut_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time)
 {

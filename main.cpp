@@ -228,7 +228,7 @@ void InitGL()
 	m_EsfeIncEAvall.R = 0.0;	m_EsfeIncEAvall.alfa = 0.0;	m_EsfeIncEAvall.beta = 0.0;
 
 // Entorn VGI: Variables que controlen paràmetres visualització: Mides finestra Windows i PV
-	w = 640;			h = 480;			// Mides de la finestra Windows (w-amplada,h-alçada)
+	w = 1920;			h = 1080;			// Mides de la finestra Windows (w-amplada,h-alçada)
 	width_old = 640;	height_old = 480;	// Mides de la resolució actual de la pantalla (finestra Windows)
 	w_old = 640;		h_old = 480;		// Mides de la finestra Windows (w-amplada,h-alçada) per restaurar Finestra des de fullscreen
 	OPV.R = cam_Esferica[0];	OPV.alfa = cam_Esferica[1];		OPV.beta = cam_Esferica[2];		// Origen PV en esfèriques
@@ -610,7 +610,7 @@ void dibuixa_Escena(float time) {
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet,
 		ObOBJ,				// Classe de l'objecte OBJ que conté els VAO's
-		ViewMatrix, GTMatrix, time);
+		ViewMatrix, GTMatrix, time, PROPULSIO_NAU);
 }
 
 // Barra_Estat: Actualitza la barra d'estat (Status Bar) de l'aplicació amb els
@@ -837,8 +837,34 @@ void draw_Menu_ImGui()
 	if (show_EntornVGI_window)
 		ShowEntornVGIWindow(&show_EntornVGI_window); //ShowEntornVGIWindow(&show_EntornVGI_window);
 
+	if (show_user_windows) {
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar + ImGuiWindowFlags_NoMove +
+			ImGuiWindowFlags_NoScrollbar + ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoBackground;
+		/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+		if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+		if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+		if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+		if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+		if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+		if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+		if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+		if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+		if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+		if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+		ImVec2 screenSize = ImGui::GetIO().DisplaySize;
+		ImGui::SetNextWindowSize(screenSize);
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::Begin("Finestra Usuari", &show_user_windows, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+		if (ImGui::Button("Debug")) {
+			show_debug_windows = true;
+			show_user_windows = false;
+		}
+	}
+
 	// 3. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-	{
+	if(show_debug_windows){
 		static float f = 0.0f;
 		static int counter = 0;
 		static float PV[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -915,6 +941,7 @@ void draw_Menu_ImGui()
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		if (ImGui::Button("Reset time")) G_TIME = 0.0;
+		if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
 		ImGui::End();
 	}
 
@@ -2050,7 +2077,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				//if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
-				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// Càrrega Esfera a la posició GLU_SPHERE.
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1, 20, 20));	// Càrrega Esfera a la posició GLU_SPHERE.
 
 				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.0f, 1.0f, 20, 1));
 			}
@@ -5232,8 +5259,14 @@ int main(void)
 #endif
 
 // Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
-    if (!window)
+	
+	//Finestra de maxim de tamany
+	//window = glfwCreateWindow(mode->width, mode->height, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
+	
+	//Pantalla Completa
+	window = glfwCreateWindow(1920,1080, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", primary, NULL);
+	
+	if (!window)
     {	fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 4.3 compatible. Try the 2.1 version of the tutorials.\n");
 		getchar();
 		glfwTerminate();
@@ -5245,6 +5278,7 @@ int main(void)
 
 // Llegir resolució actual de pantalla
 	glfwGetWindowSize(window, &width_old, &height_old);
+;
 
 // Initialize GLEW
 	if (GLEW_VERSION_3_3) glewExperimental = GL_TRUE; // Needed for core profile
@@ -5331,7 +5365,6 @@ int main(void)
 		if (G_TIME == 0.0) time = 0;
 // Poll for and process events */
 //        glfwPollEvents();
-
 // Entorn VGI. Timer: common part, do this only once
 		now = glfwGetTime();
 		G_DELTA = delta = now - previous;

@@ -32,6 +32,9 @@
 	bool show_EntornVGI_window = false;
 	bool show_window_about = false;
 
+	bool show_debug_windows = false;
+	bool show_user_windows = true;
+
 // Entorn V3D: Variables de control per Menú Càmera: Esfèrica, Navega, Mòbil, Zoom, Satelit, Polars... 
 	char camera;	// Variable que controla el tipus de càmera segons valors definits en constants.h
 	static int oCamera = 0;	// Variable que controla desplegable CAMERA d'ImGui
@@ -192,6 +195,7 @@
 
 // MAV: variables per camera nau
 	double G_TIME, G_DELTA;
+	bool PROPULSIO_NAU = false;
 	double angleA, angleB, angleC;
 	static const double vdir_ini[3] = { -1, 0, 0 }, vright_ini[3] = { 0, 1, 0 }, vup_ini[3] = { 0, 0, 1 };
 	double v[3]; //direccio vertical
