@@ -195,7 +195,8 @@
 	double angleA, angleB, angleC;
 	static const double vdir_ini[3] = { -1, 0, 0 }, vright_ini[3] = { 0, 1, 0 }, vup_ini[3] = { 0, 0, 1 };
 	double v[3]; //direccio vertical
-	bool pressW, pressS, pressA, pressD, pressUP, pressDOWN, pressLEFT, pressRIGHT;
+	double u[3]; //direccio derecha
+	bool pressW, pressS, pressA, pressD, pressUP, pressDOWN, pressLEFT, pressRIGHT, pressQ, pressE;
 //-------------- Entorn VGI: Fi De Variables globals de main
 
 //-------------- Entorn VGI: Declaració funcions main
