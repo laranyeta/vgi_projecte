@@ -1,20 +1,25 @@
-//******** PRACTICA VISUALITZACI” GR¿FICA INTERACTIVA (Escola Enginyeria - UAB)
-//******** Entorn b‡sic VS2022 MONOFINESTRA amb OpenGL 4.3, interfÌcie GLFW, ImGui i llibreries GLM
-//******** Ferran Poveda, Marc Vivet, Carme Juli‡, DÈbora Gil, Enric MartÌ (Setembre 2024)
-// constants.h : DefiniciÛ de constants compartides
+//******** PRACTICA VISUALITZACI√ì GR√ÄFICA INTERACTIVA (Escola Enginyeria - UAB)
+//******** Entorn b√†sic VS2022 MONOFINESTRA amb OpenGL 4.3, interf√≠cie GLFW, ImGui i llibreries GLM
+//******** Ferran Poveda, Marc Vivet, Carme Juli√†, D√©bora Gil, Enric Mart√≠ (Setembre 2024)
+// constants.h : Definici√≥ de constants compartides
 //				 CENtornVGIView.cpp, visualitzacio.cpp i escena.cpp
 
 
 #ifndef CONST_H
 #define CONST_H
 
-//--------------- VGI: Tipus de C‡mera
+#include <vector>
+#include "planeta.h"
+
+extern std::vector<Planeta> PLANETES;
+
+//--------------- VGI: Tipus de C√†mera
 #define CAP ' '
 #define CAM_ESFERICA 'E'
 #define CAM_GEODE 'G'
 #define CAM_NAVEGA 'N'
 
-//--------------- VGI: Tipus de ProjecciÛ
+//--------------- VGI: Tipus de Projecci√≥
 #define AXONOM 'A'
 #define ORTO 'O'
 #define PERSPECT 'P'
@@ -22,7 +27,7 @@
 #define PASSEIG_V 4
 
 
-//--------------- VGI: Tipus de Polars (per la VisualitzaciÛ Interactiva)
+//--------------- VGI: Tipus de Polars (per la Visualitzaci√≥ Interactiva)
 #define POLARZ 'Z'
 #define POLARY 'Y'
 #define POLARX 'X'
@@ -56,6 +61,7 @@
 #define OBJOBJ '4'		// Objecte format OBJ
 #define OBJECTE_T 'z'
 #define SPUTNIK 'Q'
+#define PROVA_PLANETA '9'
 
 //-------------- VGI: Tipus d'Iluminacio
 #define PUNTS 'P'
@@ -72,7 +78,7 @@
 #define OBJECTEOBJT 6   // Objecte OBJ amb textures
 #define SEA 7			// Objecte SEA
 
-// -------------- VGI: DefiniciÛ dels valors del pla near i far del Volum de VisualitzaciÛ en Perspectiva
+// -------------- VGI: Definici√≥ dels valors del pla near i far del Volum de Visualitzaci√≥ en Perspectiva
 const double p_near=0.01;
 const double p_far=50000.0;
 
@@ -83,7 +89,7 @@ const double p_far=50000.0;
 #define PICKHIDRO 3 
 
 // -------------- VGI: CONSTANTS TEXTURES
-// Nombre m‡xim de textures
+// Nombre m√†xim de textures
 #define NUM_MAX_TEXTURES 10
 
 // Tipus de textures
@@ -95,7 +101,9 @@ const double p_far=50000.0;
 #define FITXERBMP 'f'
 #define FITXERIMA 'I'
 
-// --------------  VGI: NOMBRE DE LLUMS: Nombre de Llums de l'aplicaciÛ, les d'OpenGL
+
+
+// --------------  VGI: NOMBRE DE LLUMS: Nombre de Llums de l'aplicaci√≥, les d'OpenGL
 const int NUM_MAX_LLUMS = 8;
 
 // Permet prendre les funcions _s enlloc de les deprecated (strcpy -> strcpy_s). Ja definit
@@ -113,17 +121,98 @@ const int NUM_MAX_LLUMS = 8;
 #define PROG_BINARY_SHADER 'p'
 #define PROG_BINARY_SHADERW 'W'
 
+//LCR: s'afegeixen parametres lluna //
+const std::string NAMES[10] = { "Sol", "Mercuri", "Venus", "Terra", "Mart", "J√∫piter", "Saturn", "Ur√†", "Nept√∫", "Lluna"};
+const std::string RUTES_TEXTURA[10] = { "sun.jpg","mercury.jpg","venus.jpg","earth.jpg","mars.jpg","jupiter.jpg","saturn.jpg","uranus.jpg","neptune.jpg", "moon.jpg"};
+const double ESCALA_DISTANCIA = 1.0 / 10.496e9; //1.496e11
+const double ESCALA_MASSA = 1.0;
+
+const double RADIS[10] = { 6.96340e11, 2.4397e10, 6.0518e10 , 6.3710e10 , 3.3895e10 , 6.9911e11 , 5.8232e11 , 2.5362e11 , 2.4622e11, 1.737e10}; // e + 3
+
+const double SEMIEIXOS_MAJORS[9] = {
+	0.3871, 0.7233, 1.0000, 1.5237, 5.2026, 9.5549, 19.2184, 30.1104, 0.00257
+};
+
+const double EXCENTRICITATS[10] = {
+	0.2056, 0.0068, 0.0167, 0.0934, 0.0484, 0.0555, 0.0463, 0.0095, 0.0549
+};
+
+const double INCLINACIONS[9] = {
+	7.0049, 3.3947, 0.0000, 1.8506, 1.3030, 2.4845, 0.7699, 1.7692, 5.145
+};
+
+const double LONG_NODES_ASC[9] = {
+	48.33167, 76.68069, 0.0, 49.57854, 100.55615, 113.71504, 74.22988, 131.72169, 125.08
+};
+
+const double PERIAPSIS[9] = {
+	29.1241, 54.85229, 102.9373, 286.4623, 273.867, 339.392, 96.998857, 273.187, 318.15
+};
+
+const double MASSES[10] = {
+		1.989e30f,  // Sol
+		3.301e23f,  // Mercuri
+		4.867e24f,  // Venus
+		5.972e24f,  // Terra
+		6.417e23f,  // Mart
+		1.898e27f,  // J√∫piter
+		5.683e26f,  // Saturn
+		8.681e25f,  // Ur√†
+		1.024e26f,   // Nept√∫
+		7.342e22f   // Lluna
+};
+
+const int DIRECCIONS_ROTACIO[10] = {
+		1,  // Sol
+		1,  // Mercuri
+	   -1,  // Venus
+		1,  // Terra
+		1,  // Mart
+		1,  // J√∫piter
+		1,  // Saturn
+	   -1,  // Ur√† 
+		1,   // Nept√∫
+		1	// Lluna
+};
+
+const float ANGLES_INCLINACIO_ROTACIO[10] = {
+		7.25f,    // Sol
+		0.03f,    // Mercuri
+		2.64f,    // Venus 
+		23.44f,   // Terra
+		25.19f,   // Mart
+		3.13f,    // J√∫piter
+		26.73f,   // Saturn
+		82.23f,   // Ur√† 
+		28.32f,   // Nept√∫
+		6.68f	  // Lluna
+};
+
+const double RADI_ORBITAL[10] = {
+		0.0f,        // Sol +++1
+		57.9e10f,     // Mercuri
+		108.2e10f,    // Venus
+		149.6e10f,    // Terra
+		227.9e10f,    // Mart
+		778.5e10f,    // J√∫piter
+		1.4335e13f,  // Saturn
+		2.8725e13f,  // Ur√†
+		4.4951e13f,   // Nept√∫
+		3.844e10f	  // Lluna
+};
+
 //--------------- VGI: Valor constant de pi
 const double PI=3.14159;
 const double TWOPI = 2 * PI;
 const double PID2 = PI / 2;
+const double DEG_A_RAD = PI / 180.0;
 //const double pi=3.14159265358979323846264338327950288419716939937510f;
 
 // --------------- GMS. GRID
 #define GRID_SIZE 50	// Maximum size of the grid in OpenGL World Coordenates unities.
 #define PAS_GRID 1		// Step to shift the grid planes.
 
-// --------------- VGI. TRUCK: ResoluciÛ de les rodes (Nombre de divisions del cilindre i discos)
+// --------------- VGI. TRUCK: Resoluci√≥ de les rodes (Nombre de divisions del cilindre i discos)
 #define RESOLUCIO_RODA 16
 
 // --------------- VGI. MInterval temps Timer
@@ -150,7 +239,7 @@ struct CPunt3D
 	GLdouble w;
 };
 
-// --------------- GMS: 3M‡scara booleana sobre coordenades 3D
+// --------------- GMS: 3M√†scara booleana sobre coordenades 3D
 struct CMask3D
 {	bool x;
 	bool y;
@@ -166,7 +255,7 @@ struct CColor
 	GLdouble a;
 };
 
-// --------------- VGI: Estructura coordenada EsfËrica 3D
+// --------------- VGI: Estructura coordenada Esf√®rica 3D
 struct CEsfe3D
 {   GLdouble R;
     GLdouble alfa;
@@ -182,14 +271,14 @@ struct CVAO
 	GLint nIndices;
 };
 
-// --------------- VGI: INSTANCIA (TG d'instanciaciÛ d'un objecte)
+// --------------- VGI: INSTANCIA (TG d'instanciaci√≥ d'un objecte)
 struct INSTANCIA
-{	CPunt3D VTras;	// Vector de TraslaciÛ
+{	CPunt3D VTras;	// Vector de Traslaci√≥
 	CPunt3D VScal;	// Vector d'Escalatge
-	CPunt3D VRota;	// Vector de RotaciÛ
+	CPunt3D VRota;	// Vector de Rotaci√≥
 };
 
-// --------------- VGI: Coeficients equaciÛ d'atenuaciÛ de la llum fatt=1/(ad2+bd+c)
+// --------------- VGI: Coeficients equaci√≥ d'atenuaci√≥ de la llum fatt=1/(ad2+bd+c)
 struct CAtenua
 {   GLdouble a;
     GLdouble b;
@@ -208,15 +297,15 @@ struct MATERIAL
 
 // --------------- VGI: Estructura font de llum
 struct LLUM
-{	bool encesa;				// Booleana que controla si la llum Ès encesa [TRUE] o no [FALSE]
-	CEsfe3D posicio;			// PosiciÛ d ela foont de llum en coordenades esfËriques.
+{	bool encesa;				// Booleana que controla si la llum √©s encesa [TRUE] o no [FALSE]
+	CEsfe3D posicio;			// Posici√≥ d ela foont de llum en coordenades esf√®riques.
 	GLfloat difusa[4];			// Intensitat difusa de la font de llum (r,g,b,a)
 	GLfloat especular[4];		// Intensitat especular de la font de llum (r,g,b,a)
-	CAtenua atenuacio;			// Coeficients de l'equaciÛ d'atenuaciÛ de la llum fatt=1/(ad2+bd+c)
-	bool restringida;			// Booleana que indica si la font de llum Ès restringida [TRUE] i per tant sÛn v‡lids els coeficients posteriors o no [FALSE].
-	GLfloat spotdirection[3];	// Vector de direciÛ de la font de llum restringida (x,y,z).
+	CAtenua atenuacio;			// Coeficients de l'equaci√≥ d'atenuaci√≥ de la llum fatt=1/(ad2+bd+c)
+	bool restringida;			// Booleana que indica si la font de llum √©s restringida [TRUE] i per tant s√≥n v√†lids els coeficients posteriors o no [FALSE].
+	GLfloat spotdirection[3];	// Vector de direci√≥ de la font de llum restringida (x,y,z).
 	GLfloat spotcoscutoff;		// Coseno de l'angle d'obertura de la font de llum restringida.
-	GLfloat spotexponent;		// Exponent que indica l'atenuaciÛ de la font del centre de l'eix a l'exterior, segons model de Warn.
+	GLfloat spotexponent;		// Exponent que indica l'atenuaci√≥ de la font del centre de l'eix a l'exterior, segons model de Warn.
 };
 
 #endif
