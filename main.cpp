@@ -78,7 +78,7 @@ void InitGL()
 	front_faces = true;	test_vis = false;	oculta = false;		back_line = false;
 
 // Entorn VGI: Variables de control del menú Iluminació		
-	ilumina = FILFERROS;			ifixe = false;					ilum2sides = false;
+	ilumina = SUAU;			ifixe = false;					ilum2sides = false;
 // Reflexions actives: Ambient [1], Difusa [2] i Especular [3]. No actives: Emission [0]. 
 	sw_material[0] = false;			sw_material[1] = true;			sw_material[2] = true;			sw_material[3] = true;	sw_material[4] = true;
 	sw_material_old[0] = false;		sw_material_old[1] = true;		sw_material_old[2] = true;		sw_material_old[3] = true;	sw_material_old[4] = true;
@@ -1650,7 +1650,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)", "Cub (<Shift>+C)", "Cub RGB (<Shift>+D)", "Esfera (<Shift>+E)", "Tetera (<Shift>+T)",
 			"Arc (<Shift>+R)", "Matriu Primitives (<Shift>+M)", "Matriu Primitives VAO (<Shift>+V)", "Tie (<Shift>+I)", "Arxiu OBJ", 
 			"Bezier (<Shift>+F7)", "B-spline (<Shift>+F8)", "Lemniscata (<Shift>+F9)", "Hermitte (<Shift>+F10)", "Catmull-Rom (<Shift>+F11)",
-			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)"};
+			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Sistema Solar (n/a)"};
 		//static int item_current = 0;
 		ImGui::Combo(" ", &oObjecte, items, IM_ARRAYSIZE(items));
 		ImGui::Spacing();
@@ -2357,7 +2357,9 @@ void ShowEntornVGIWindow(bool* p_open)
 		// Using the generic BeginCombo() API, you have full control over how to display the combo contents.
 		// (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
 		// stored in the object itself, etc.)
-		const char* itemsS[] = { "Flat (<Ctrl>+F)", "Gouraud (<Ctrl>+G)", "Phong (<Ctrl>+P)",
+
+		//LCR - s'ha afegit desplegable nou del shader
+		const char* itemsS[] = { "Flat (<Ctrl>+F)", "Gouraud (<Ctrl>+G)", "Phong (<Ctrl>+P)", "Sistema Solar (n/a)",
 			"Carregar fitxers Shader (.vert, .frag)" };
 		const char* combo_preview_value = itemsS[oShader];  // Pass in the preview value visible before opening the combo (it could be anything)
 		if (ImGui::BeginCombo("Tipus de Shader", combo_preview_value, flagsS))
@@ -2420,14 +2422,45 @@ void ShowEntornVGIWindow(bool* p_open)
 			}
 			break;
 
-		case 3:	// Opció SHADER Carregar fitxers shader (.vert, .frag)
+		// LCR -- afegir opcio shader sistema solar
+		case 3:	// Opció SHADER Sistema Solar
+			if (shader != SOLARSYSTEM_SHADER) {
+				shader = SOLARSYSTEM_SHADER;
+				test_vis = false;
+				oculta = true;
+				fprintf(stderr, "solarSystem_shdrML: \n");
+
+				shaderLighting.DeleteProgram();
+				shader_programID = shaderLighting.loadFileShaders(".\\shaders\\solarSystem_shdrML.vert", ".\\shaders\\solarSystem_shdrML.frag");
+				glUseProgram(shader_programID);
+
+				//carreguem parametres sol (PLANETES[0])
+				glm::vec3 posSol = PLANETES[0].getPosition();
+				float radiSol = PLANETES[0].getRadi();
+
+				glUniform3fv(glGetUniformLocation(shader_programID, "posSol"), 1, glm::value_ptr(posSol));
+				glUniform1f(glGetUniformLocation(shader_programID, "radiSol"), radiSol);
+
+				//afegim glow (cal canviar!)
+				float radiGlow = 1.5f * radiSol; 
+				glUniform1f(glGetUniformLocation(shader_programID, "radiGlow"), radiSol);
+
+				glm::vec3 direccioLlumSol = glm::normalize(posSol);
+				//r,g,b,a
+				glUniform3fv(glGetUniformLocation(shader_programID, "LightSource[0].position"), 1, glm::value_ptr(direccioLlumSol));
+				glUniform4f(glGetUniformLocation(shader_programID, "LightSource[0].diffuse"), 1.0f, 1.0f, 1.0f, 1.0f);
+				glUniform4f(glGetUniformLocation(shader_programID, "LightSource[0].ambient"), 0.2f, 0.2f, 0.2f, 1.0f);
+				glUniform4f(glGetUniformLocation(shader_programID, "LightSource[0].specular"), 0.5f, 0.5f, 0.5f, 0.5f);
+			}
+			break;
+
+		case 4:  //Opció SHADER Carregar fitxers shader (.vert, .frag)
 			if (shader != FILE_SHADER) {
 				shader = FILE_SHADER;	ilumina = SUAU;
 				test_vis = false;		oculta = true;
 				Menu_Shaders_Opcio_CarregarVSFS();
 			}
 			break;
-
 		}
 	}
 
