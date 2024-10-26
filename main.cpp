@@ -18,6 +18,7 @@
 #include "escena.h"
 #include "main.h"
 
+const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
 std::vector<Planeta> PLANETES;
 void InitGL()
 {
@@ -47,7 +48,7 @@ void InitGL()
 // Entorn VGI: Variables de control per Menú Vista: Pantalla Completa, Pan, dibuixar eixos i grids 
 	fullscreen = false;
 	pan = false;
-	eixos = true;	eixos_programID = 0;  eixos_Id = 0;
+	eixos = false;	eixos_programID = 0;  eixos_Id = 0;
 	sw_grid = false;
 	grid.x = false;	grid.y = false;		grid.z = false;		grid.w = false;
 	hgrid.x = 0.0;	hgrid.y = 0.0;		hgrid.z = 0.0;		hgrid.w = 0.0;
@@ -57,7 +58,7 @@ void InitGL()
 	tr_cpv.x = 0;	tr_cpv.y = 0;	tr_cpv.z = 0;		tr_cpvF.x = 0;	tr_cpvF.y = 0;	tr_cpvF.z = 0;
 
 // Entorn VGI: Variables de control per les opcions de menú Projecció, Objecte
-	projeccio = CAP;	// projeccio = PERSPECT;
+	projeccio = PERSPECT;	// projeccio = PERSPECT;
 	ProjectionMatrix = glm::mat4(1.0);	// Inicialitzar a identitat
 	objecte = CAP;		// objecte = TETERA;
 
@@ -80,7 +81,7 @@ void InitGL()
 	front_faces = true;	test_vis = false;	oculta = false;		back_line = false;
 
 // Entorn VGI: Variables de control del menú Iluminació		
-	ilumina = FILFERROS;			ifixe = false;					ilum2sides = false;
+	ilumina = SUAU;			ifixe = false;					ilum2sides = false;
 // Reflexions actives: Ambient [1], Difusa [2] i Especular [3]. No actives: Emission [0]. 
 	sw_material[0] = false;			sw_material[1] = true;			sw_material[2] = true;			sw_material[3] = true;	sw_material[4] = true;
 	sw_material_old[0] = false;		sw_material_old[1] = true;		sw_material_old[2] = true;		sw_material_old[3] = true;	sw_material_old[4] = true;
@@ -1190,6 +1191,9 @@ int shortCut_Objecte()
 	case PROVA_PLANETA:
 		auxObjecte = 18; break;
 
+	case SHIP:
+		auxObjecte = 21; break;
+
 	default:			// Opció OBJECTE <Altres Objectes>
 		auxObjecte = 0;
 		break;
@@ -1700,7 +1704,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)", "Cub (<Shift>+C)", "Cub RGB (<Shift>+D)", "Esfera (<Shift>+E)", "Tetera (<Shift>+T)",
 			"Arc (<Shift>+R)", "Matriu Primitives (<Shift>+M)", "Matriu Primitives VAO (<Shift>+V)", "Tie (<Shift>+I)", "Arxiu OBJ", 
 			"Bezier (<Shift>+F7)", "B-spline (<Shift>+F8)", "Lemniscata (<Shift>+F9)", "Hermitte (<Shift>+F10)", "Catmull-Rom (<Shift>+F11)",
-			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)", "Donut face (n/a)", "Nau face (n/a)" };
+			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)", "Donut face (n/a)", "Nau face (n/a)","SHIP (n/a)" };
 		//static int item_current = 0;
 		ImGui::Combo(" ", &oObjecte, items, IM_ARRAYSIZE(items));
 		ImGui::Spacing();
@@ -2085,7 +2089,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		case 18:
 			if (objecte != PROVA_PLANETA) {
 				objecte = PROVA_PLANETA;
-				netejaVAOList();			
+				netejaVAOList();
 				// ISMAEL CONTINUAR
 				for (int i = 0; i < 9; i++)
 				{
@@ -2097,9 +2101,58 @@ void ShowEntornVGIWindow(bool* p_open)
 				SetColor4d(color.r, color.g, color.b, color.a);
 				CVAO planetaC = loadgluSphere_EBO(planeta.getRadi(), planeta.getSlices(), planeta.getStacks());
 				Set_VAOList(3, planetaC);
-				
+
+				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(0.5, 5.0, 8, 8));
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
+
+
+				// reservar espai per a la ruta
+				nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
+
+				strcpy(nomOBJ, rutaArchivo);
+
+				textura = true;		tFlag_invert_Y = false;
+
+				if (ObOBJ == NULL)
+					ObOBJ = ::new COBJModel;
+				else {
+					ObOBJ->netejaVAOList_OBJ();
+					ObOBJ->netejaTextures_OBJ();
+				}
+
+				int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+				if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+				if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+				free(nomOBJ);
+
 			}
-}
+			break;
+		case 21:
+			const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
+			// reservar espai per a la ruta
+			nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
+
+			strcpy(nomOBJ, rutaArchivo);
+
+			objecte = OBJOBJ;		textura = true;		tFlag_invert_Y = false;
+
+			if (ObOBJ == NULL)
+				ObOBJ = ::new COBJModel;
+			else {
+				ObOBJ->netejaVAOList_OBJ();
+				ObOBJ->netejaTextures_OBJ();
+			}
+
+			int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+			free(nomOBJ);
+			break;
+		}
 	}
 
 	// DESPLEGABLE VISTA
