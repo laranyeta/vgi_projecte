@@ -52,7 +52,7 @@
 // Entorn VGI: Variables de control per Menú Vista: fullsecreen, pan, dibuixar eixos i grid. 
 	bool fullscreen;	// Opció booleana per Pantalla Completal [0:NO,1:SI]
 	bool pan;			// Opcio Pan. Desplaçament del centre de l'esfera de Vista [0:NO,1:SI]
-	bool eixos;			// Opció per dibuixar els eixos X,Y,Z (Eixos?) [0:NO,1:SI]
+	bool eixos=0;			// Opció per dibuixar els eixos X,Y,Z (Eixos?) [0:NO,1:SI]
 	Shader shaderEixos;	// Ientificador pel shader d'eixos.
 	GLuint eixos_programID;
 	GLuint eixos_Id;	// Identificador del VBO per a dibuixar els eixos.
@@ -67,7 +67,7 @@
 						//       i actiu fora l'opció pan.
 
 // Entorn VGI: Variables de control per les opcions de menú Projecció, Objecte
-	char projeccio;					// Menú Projecció: Tipus de projeccio
+	char projeccio='P';					// Menú Projecció: Tipus de projeccio
 	static int oProjeccio = 3;		// ImGui: Variable que controla desplegable TIPUS PROJECCIO d'ImGui
 	glm::mat4 ProjectionMatrix(1.0);// Matriu de Projecció a passar al shader
 	char objecte;					// Menú Objecte: Tipus d'Objecte
@@ -107,7 +107,7 @@
 						// o depenent (mobil) respecte el PV (casc miner) (ifixe=0)
 	bool ilum2sides;	// Iluminació de les cares FRONT i BACK [TRUE] o només les FRONT [FALSE]
 	char ilumina;		// Tipus d'il.luminació [FILFERROS 'f',PLANA 'c',SUAU 'c']
-	static int oIlumina = 1;	// Variable que controla desplegable TIPUS ILUMINACIO d'ImGui
+	static int oIlumina = 3;	// Variable que controla desplegable TIPUS ILUMINACIO d'ImGui
 	bool sw_material[5];// Variable que controla els coeficients de reflectivitat del material [TRUE] o no [FALSE]:
 						// [0]: emission, [1]: ambient, [2]: difusa, [3] especular.
 	bool sw_material_old[5]; // Variable que guarda els valors de sw_material mentre no hi ha reflectivitat de material (refl_material=false).
