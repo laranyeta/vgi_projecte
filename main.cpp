@@ -821,6 +821,10 @@ void draw_Menu_ImGui()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	//ImGuiIO& io = ImGui::GetIO();
+	//ImFont* font = io.Fonts->AddFontFromFileTTF("textures/Silkscreen-Regular.ttf", 28.0f); // Canvia 18.0f a la mida que desitgis
+	//io.FontDefault = font;
+
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
@@ -842,7 +846,7 @@ void draw_Menu_ImGui()
 	if (show_user_windows) {
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar + ImGuiWindowFlags_NoMove +
-			ImGuiWindowFlags_NoScrollbar + ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoBackground;
+			ImGuiWindowFlags_NoScrollbar + ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse;
 		/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
 		if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
 		if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
@@ -854,15 +858,73 @@ void draw_Menu_ImGui()
 		if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 		if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
 		if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
-	*/
+		*/
+
+
+		//GLuint backgroundTextureID = loadIMA_SOIL("textures/fons.png");
+		/*ImGui::Text("pointer = %x", my_image_texture);
+		ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+		ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));*/
+		//ImGui::Image((void*)(intptr_t)backgroundTextureID, screenSize);
+		// Estableix el color de fons d'ImGui a negre
+		ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons de la finestra
+		ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del frame
+		ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del child
+		ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons dels popups
+
 		ImVec2 screenSize = ImGui::GetIO().DisplaySize;
-		ImGui::SetNextWindowSize(screenSize);
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::Begin("Finestra Usuari", &show_user_windows, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		if (ImGui::Button("Debug")) {
+		ImGui::SetNextWindowSize(screenSize);
+		ImGui::Begin("Opcions", &show_user_windows, window_flags+ ImGuiWindowFlags_NoBringToFrontOnFocus);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+		
+		// Configura els colors i l'estil
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+
+		// Arrodoniment
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
+
+
+		if (ImGui::Button("Debug", ImVec2(50, 20))) {
 			show_debug_windows = true;
 			show_user_windows = false;
 		}
+		//ImGui::End;
+
+		// Calcula les dimensions de la finestra principal
+		ImVec2 windowSize(200, 100); // Canvia aquestes dimensions segons el tamany de la finestra desitjada
+
+		//ImGui::SetNextWindowPos(ImVec2(0, 0));
+		
+		// Calcula la posició per centrar la finestra a la pantalla
+		ImVec2 windowPos = ImVec2(
+			(screenSize.x - windowSize.x) * 0.5f,
+			(screenSize.y - windowSize.y)-50 
+		);
+		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+
+		ImGui::Begin("Finestra Usuari", &show_user_windows, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Blanc
+
+		// Afegeix el text amb mida augmentada
+		//ImGui::PushFont(font); 
+		//ImGui::Text("Text amb mida augmentada"); // El text utilitzarà la font carregada
+		//ImGui::PopFont();
+		// Restaura l'estil de color del text
+		ImGui::PopStyleColor();
+		// Mida del botó
+		if (ImGui::Button("Iniciar Simulador", ImVec2(200, 55))) {
+			// Acció del botó
+		}
+
+		// Restaura l'estil
+		ImGui::PopStyleVar(); // Restaura l'arrodoniment
+		ImGui::PopStyleColor(3); // Restaura els colors
+
+
 	}
 
 	// 3. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
