@@ -18,6 +18,7 @@
 #include "escena.h"
 #include "main.h"
 
+const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
 std::vector<Planeta> PLANETES;
 void InitGL()
 {
@@ -36,6 +37,7 @@ void InitGL()
 // Entorn VGI: Variables de control de l'opció Càmera->Navega?
 	n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
 	v[0] = 0.0;		v[1] = 0.0;		v[2] = 1.0;
+	u[0] = 0.0;		u[1] = -1.0;	u[2] = 0.0;
 	opvN.x = 10.0;	opvN.y = 0.0;		opvN.z = 0.0;
 	angleZ = 0.0;
 	ViewMatrix = glm::mat4(1.0);		// Inicialitzar a identitat
@@ -46,7 +48,7 @@ void InitGL()
 // Entorn VGI: Variables de control per Menú Vista: Pantalla Completa, Pan, dibuixar eixos i grids 
 	fullscreen = false;
 	pan = false;
-	eixos = true;	eixos_programID = 0;  eixos_Id = 0;
+	eixos = false;	eixos_programID = 0;  eixos_Id = 0;
 	sw_grid = false;
 	grid.x = false;	grid.y = false;		grid.z = false;		grid.w = false;
 	hgrid.x = 0.0;	hgrid.y = 0.0;		hgrid.z = 0.0;		hgrid.w = 0.0;
@@ -56,7 +58,7 @@ void InitGL()
 	tr_cpv.x = 0;	tr_cpv.y = 0;	tr_cpv.z = 0;		tr_cpvF.x = 0;	tr_cpvF.y = 0;	tr_cpvF.z = 0;
 
 // Entorn VGI: Variables de control per les opcions de menú Projecció, Objecte
-	projeccio = CAP;	// projeccio = PERSPECT;
+	projeccio = PERSPECT;	// projeccio = PERSPECT;
 	ProjectionMatrix = glm::mat4(1.0);	// Inicialitzar a identitat
 	objecte = CAP;		// objecte = TETERA;
 
@@ -79,7 +81,7 @@ void InitGL()
 	front_faces = true;	test_vis = false;	oculta = false;		back_line = false;
 
 // Entorn VGI: Variables de control del menú Iluminació		
-	ilumina = FILFERROS;			ifixe = false;					ilum2sides = false;
+	ilumina = SUAU;			ifixe = false;					ilum2sides = false;
 // Reflexions actives: Ambient [1], Difusa [2] i Especular [3]. No actives: Emission [0]. 
 	sw_material[0] = false;			sw_material[1] = true;			sw_material[2] = true;			sw_material[3] = true;	sw_material[4] = true;
 	sw_material_old[0] = false;		sw_material_old[1] = true;		sw_material_old[2] = true;		sw_material_old[3] = true;	sw_material_old[4] = true;
@@ -1216,6 +1218,9 @@ int shortCut_Objecte()
 	case PROVA_PLANETA:
 		auxObjecte = 18; break;
 
+	case SHIP:
+		auxObjecte = 21; break;
+
 	default:			// Opció OBJECTE <Altres Objectes>
 		auxObjecte = 0;
 		break;
@@ -1471,6 +1476,7 @@ void ShowEntornVGIWindow(bool* p_open)
 			if (camera == CAM_NAU) {
 				n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
 				v[0] = 0.0;		v[1] = 0.0;		v[2] = 1.0;
+				u[0] = 0.0;		u[1] = -1.0;	u[2] = 0.0;
 				angleA = 0.0;		angleB = 0.0;		angleC = 0.0;
 				opvN.x = 10.0;	opvN.y = 0.0;		opvN.z = 0.0;
 				angleZ = 0.0;
@@ -1725,7 +1731,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)", "Cub (<Shift>+C)", "Cub RGB (<Shift>+D)", "Esfera (<Shift>+E)", "Tetera (<Shift>+T)",
 			"Arc (<Shift>+R)", "Matriu Primitives (<Shift>+M)", "Matriu Primitives VAO (<Shift>+V)", "Tie (<Shift>+I)", "Arxiu OBJ", 
 			"Bezier (<Shift>+F7)", "B-spline (<Shift>+F8)", "Lemniscata (<Shift>+F9)", "Hermitte (<Shift>+F10)", "Catmull-Rom (<Shift>+F11)",
-			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)", "Donut face (n/a)", "Nau face (n/a)" };
+			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)", "Donut face (n/a)", "Nau face (n/a)","SHIP (n/a)" };
 		//static int item_current = 0;
 		ImGui::Combo(" ", &oObjecte, items, IM_ARRAYSIZE(items));
 		ImGui::Spacing();
@@ -2110,7 +2116,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		case 18:
 			if (objecte != PROVA_PLANETA) {
 				objecte = PROVA_PLANETA;
-				netejaVAOList();			
+				netejaVAOList();
 				// ISMAEL CONTINUAR
 				for (int i = 0; i < 9; i++)
 				{
@@ -2122,9 +2128,58 @@ void ShowEntornVGIWindow(bool* p_open)
 				SetColor4d(color.r, color.g, color.b, color.a);
 				CVAO planetaC = loadgluSphere_EBO(planeta.getRadi(), planeta.getSlices(), planeta.getStacks());
 				Set_VAOList(3, planetaC);
-				
+
+				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(0.5, 5.0, 8, 8));
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
+
+
+				// reservar espai per a la ruta
+				nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
+
+				strcpy(nomOBJ, rutaArchivo);
+
+				textura = true;		tFlag_invert_Y = false;
+
+				if (ObOBJ == NULL)
+					ObOBJ = ::new COBJModel;
+				else {
+					ObOBJ->netejaVAOList_OBJ();
+					ObOBJ->netejaTextures_OBJ();
+				}
+
+				int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+				if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+				if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+				free(nomOBJ);
+
 			}
-}
+			break;
+		case 21:
+			const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
+			// reservar espai per a la ruta
+			nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
+
+			strcpy(nomOBJ, rutaArchivo);
+
+			objecte = OBJOBJ;		textura = true;		tFlag_invert_Y = false;
+
+			if (ObOBJ == NULL)
+				ObOBJ = ::new COBJModel;
+			else {
+				ObOBJ->netejaVAOList_OBJ();
+				ObOBJ->netejaTextures_OBJ();
+			}
+
+			int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+			free(nomOBJ);
+			break;
+		}
 	}
 
 	// DESPLEGABLE VISTA
@@ -3875,6 +3930,15 @@ void Teclat_Nau(int key, int action)
 			pressDOWN = true;
 			break;
 
+		case GLFW_KEY_Q:
+			pressQ = true;
+			break;
+
+			// Tecla cursor dret
+		case GLFW_KEY_E:
+			pressE = true;
+			break;
+
 		default:
 			break;
 		}
@@ -3882,25 +3946,37 @@ void Teclat_Nau(int key, int action)
 
 }
 
-void rotate_vector(double vec1[3], double vec2[3], double axis[3], double angle) {
+void rotate_vector(double vec1[3], double axis[3], double angle) {
 	double cos_theta = cos(angle);
 	double sin_theta = sin(angle);
 
+	double vec2[3] = { 0,0,0 };
+	vec2[0] = axis[1] * vec1[2] - axis[2] * vec1[1];
+	vec2[1] = axis[2] * vec1[0] - axis[0] * vec1[2];
+	vec2[2] = axis[0] * vec1[1] - axis[1] * vec1[0];
+	double modul2 = sqrt(vec2[0] * vec2[0] + vec2[1] * vec2[1] + vec2[2] * vec2[2]);
+	vec2[0] /= modul2;
+	vec2[1] /= modul2;
+	vec2[2] /= modul2;
+
 	//Producto escalar del vector con el eje
 	double dot_product1 = axis[0] * vec1[0] + axis[1] * vec1[1] + axis[2] * vec1[2];
-	double dot_product2 = axis[0] * vec1[0] + axis[1] * vec1[1] + axis[2] * vec1[2];
 
 	// Copiem vec1
-	double cvec1[3] = {vec1[0], vec1[1], vec1[2]};
+	//double cvec1[3] = {vec1[0], vec1[1], vec1[2]};
 
 	// Aplicar la fórmula de Rodríguez
 	vec1[0] = vec1[0] * cos_theta + vec2[0] * sin_theta + axis[0] * dot_product1 * (1 - cos_theta);
 	vec1[1] = vec1[1] * cos_theta + vec2[1] * sin_theta + axis[1] * dot_product1 * (1 - cos_theta);
 	vec1[2] = vec1[2] * cos_theta + vec2[2] * sin_theta + axis[2] * dot_product1 * (1 - cos_theta);
+}
 
-	vec2[0] = vec2[0] * cos_theta + cvec1[0] * sin_theta + axis[0] * dot_product2 * (1 - cos_theta);
-	vec2[1] = vec2[1] * cos_theta + cvec1[1] * sin_theta + axis[1] * dot_product2 * (1 - cos_theta);
-	vec2[2] = vec2[2] * cos_theta + cvec1[2] * sin_theta + axis[2] * dot_product2 * (1 - cos_theta);
+void normal_vector(double* vector)
+{
+	double module = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+	vector[0] /= module;
+	vector[1] /= module;
+	vector[2] /= module;
 }
 
 void Moviment_Nau()
@@ -3931,23 +4007,24 @@ void Moviment_Nau()
 	vup[0] /= modulV;
 	vup[1] /= modulV;
 	vup[2] /= modulV;
-	
+
 	// vector normalitzat u: vright
-	vright[0] = vdir[1] * vup[2] - vdir[2] * vup[1];
-	vright[1] = vdir[2] * vup[0] - vdir[0] * vup[2];
-	vright[2] = vdir[0] * vup[1] - vdir[1] * vup[0];
+	vright[0] = u[0];
+	vright[1] = u[1];
+	vright[2] = u[2];
 	modulU = sqrt(vright[0] * vright[0] + vright[1] * vright[1] + vright[2] * vright[2]);
 	vright[0] /= modulU;
 	vright[1] /= modulU;
 	vright[2] /= modulU;
 
 	double fact_nau = 10.0 * G_DELTA;
-	double fact_ang_nau = 45.0  * G_DELTA;
+	double fact_ang_nau = 45.0 * G_DELTA;
 
-	if (Vis_Polar == POLARZ) { }
+
+	if (Vis_Polar == POLARZ) {}
 	if (Vis_Polar == POLARY) { return; }
 	if (Vis_Polar == POLARX) { return; }
-	
+
 	glfwGetKey(window, GLFW_KEY_W);
 	if (pressW && glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
@@ -3973,22 +4050,9 @@ void Moviment_Nau()
 	}
 	else
 		pressS = false;
-	
+
 	glfwGetKey(window, GLFW_KEY_A);
 	if (pressA && glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		opvN.x -= fact_nau * vright[0];
-		opvN.y -= fact_nau * vright[1];
-		opvN.z -= fact_nau * vright[2];
-		n[0] -= fact_nau * vright[0];
-		n[1] -= fact_nau * vright[1];
-		n[2] -= fact_nau * vright[2];
-	}
-	else
-		pressA = false;
-
-	glfwGetKey(window, GLFW_KEY_D);
-	if (pressD && glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		opvN.x += fact_nau * vright[0];
 		opvN.y += fact_nau * vright[1];
@@ -3998,13 +4062,28 @@ void Moviment_Nau()
 		n[2] += fact_nau * vright[2];
 	}
 	else
+		pressA = false;
+
+	glfwGetKey(window, GLFW_KEY_D);
+	if (pressD && glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		opvN.x -= fact_nau * vright[0];
+		opvN.y -= fact_nau * vright[1];
+		opvN.z -= fact_nau * vright[2];
+		n[0] -= fact_nau * vright[0];
+		n[1] -= fact_nau * vright[1];
+		n[2] -= fact_nau * vright[2];
+	}
+	else
 		pressD = false;
-	
+
 	glfwGetKey(window, GLFW_KEY_LEFT);
 	if (pressLEFT && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 	{
 		angleA -= fact_ang_nau;
 		if (angleA < 0) angleA += 360;
+		rotate_vector(vdir, vup, fact_ang_nau * PI / 180);
+		rotate_vector(vright, vup, fact_ang_nau * PI / 180);
 	}
 	else
 		pressLEFT = false;
@@ -4014,15 +4093,21 @@ void Moviment_Nau()
 	{
 		angleA += fact_ang_nau;
 		if (angleA >= 360) angleA -= 360;
+		rotate_vector(vdir, vup, -fact_ang_nau * PI / 180);
+		rotate_vector(vright, vup, -fact_ang_nau * PI / 180);
 	}
 	else
 		pressRIGHT = false;
-	
-	
+
+	glfwGetKey(window, GLFW_KEY_UP);
 	if (pressUP && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		angleB -= fact_ang_nau;
-		if (angleB < 0) angleB += 360;
+
+		angleB += fact_ang_nau;
+		if (angleB >= 360) angleB -= 360;
+
+		rotate_vector(vdir, vright, -fact_ang_nau * PI / 180);
+		rotate_vector(vup, vright, -fact_ang_nau * PI / 180);
 	}
 	else
 		pressUP = false;
@@ -4030,19 +4115,32 @@ void Moviment_Nau()
 	glfwGetKey(window, GLFW_KEY_DOWN);
 	if (pressDOWN && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		angleB += fact_ang_nau;
-		if (angleB >= 360) angleB -= 360;
+		angleB -= fact_ang_nau;
+		if (angleB < 0) angleB += 360;
+
+		rotate_vector(vdir, vright, +fact_ang_nau * PI / 180);
+		rotate_vector(vup, vright, +fact_ang_nau * PI / 180);
 	}
 	else
 		pressDOWN = false;
 
-	vdir[0] = vdir_ini[0]; vdir[1] = vdir_ini[1]; vdir[2] = vdir_ini[2];
-	vup[0] = vup_ini[0]; vup[1] = vup_ini[1]; vup[2] = vup_ini[2];
-	vright[0] = vright_ini[0]; vright[1] = vright_ini[1]; vright[2] = vright_ini[2];
+	glfwGetKey(window, GLFW_KEY_Q);
+	if (pressQ && glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		rotate_vector(vright, vdir, -fact_ang_nau * PI / 180);
+		rotate_vector(vup, vdir, -fact_ang_nau * PI / 180);
+	}
+	else
+		pressQ = false;
 
-	rotate_vector(vdir, vright, vup, angleA * PI /180);
-	rotate_vector(vdir, vup, vright, angleB * PI / 180);
-	rotate_vector(vup, vright, vdir, angleC * PI / 180);
+	glfwGetKey(window, GLFW_KEY_E);
+	if (pressE && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		rotate_vector(vright, vdir, fact_ang_nau * PI / 180);
+		rotate_vector(vup, vdir, fact_ang_nau * PI / 180);
+	}
+	else
+		pressE = false;
 
 	n[0] = vdir[0] + opvN.x;
 	n[1] = vdir[1] + opvN.y;
@@ -4051,6 +4149,10 @@ void Moviment_Nau()
 	v[0] = vup[0];
 	v[1] = vup[1];
 	v[2] = vup[2];
+
+	u[0] = vright[0];
+	u[1] = vright[1];
+	u[2] = vright[2];
 }
 // END MAV ----------------
 

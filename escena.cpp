@@ -190,6 +190,25 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 		// Desactivar transparència
 		glDisable(GL_BLEND);
+
+		////////////////////////////////////////////nau///////////////////////////////////////////////////////
+
+		// Aplica la traslación
+		//Julia: falta moure la nau a fora del sol
+		ModelMatrix = glm::translate(inverse(MatriuVista), vec3(0.0f, -0.02f, -0.1f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.005f, 0.005f, 0.005)); // Ejemplo de escala
+		ModelMatrix = glm::rotate(ModelMatrix, radians(7.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		// Pasar la ModelMatrix actualizada al shader
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+
+		// Calcular y pasar la NormalMatrix al shader
+		NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+		// Configuración del material y dibujo del objeto
+		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+		objecteOBJ->draw_TriVAO_OBJ(sh_programID);
 		break;
 
 		
@@ -653,7 +672,9 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 void processaRotacions()
 {
 	// Calculem les coordenades dels eixos pels quals rotarà el planeta sobre ell mateix
-	float velocitatsRotacio[9] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f };
+	// 
+	// LCR - s'ha afegit velocitat de rotació de la lluna (posicio 9)
+	float velocitatsRotacio[10] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f, 0.27f };
 
 	for (int i = 0; i < PLANETES.size(); ++i) {
 		float inclinacioRadians = glm::radians(ANGLES_INCLINACIO_ROTACIO[i]);
@@ -676,7 +697,7 @@ void processaFisica()
 {
 	// Constant gravitacional
 	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
-	
+
 	for (int i = 0; i < PLANETES.size(); i++)
 	{
 		// Mida planeta
@@ -719,11 +740,11 @@ void processaFisica()
 			PLANETES[i].setVelocitat(velocitat);
 
 			// Orbites 3D, en procés
-			PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i-1]);
-			PLANETES[i].setExcentricitat(EXCENTRICITATS[i-1]);
-			PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i-1] * DEG_A_RAD);
-			PLANETES[i].setInclinacio(INCLINACIONS[i-1] * DEG_A_RAD);
-			PLANETES[i].setPeriapsis(PERIAPSIS[i-1] * DEG_A_RAD);
+			PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i - 1]);
+			PLANETES[i].setExcentricitat(EXCENTRICITATS[i - 1]);
+			PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i - 1] * DEG_A_RAD);
+			PLANETES[i].setInclinacio(INCLINACIONS[i - 1] * DEG_A_RAD);
+			PLANETES[i].setPeriapsis(PERIAPSIS[i - 1] * DEG_A_RAD);
 		}
 	}
 }
@@ -754,51 +775,60 @@ void updatePlanetes(float deltaTime)
 {
 	// Constant gravitacional
 	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
-	//std::cout << G << std::endl;
+
 	// Reiniciem les acceleracionss
 	for (auto& planeta : PLANETES)
-	{
 		planeta.setAcceleracio(glm::dvec3(0.0));
-		//std::cout << masaSol << std::endl;
-	}
 
 	// Calcular forces gravitacionals y actualitzar acceleracions
 	for (int i = 0; i < PLANETES.size(); ++i)
 	{
-		//::cout << "Posició1: " << PLANETES[i].getPosition().x << ", " << PLANETES[i].getPosition().y << ", " << PLANETES[i].getPosition().z << std::endl;
-		//std::cout << "Radi: " << PLANETES[i].getRadi() << std::endl;
-		//std::cout << "Velocitat1: " << PLANETES[i].getVelocitat().x << ", " << PLANETES[i].getVelocitat().y << ", " << PLANETES[i].getVelocitat().z << std::endl;
-		//std::cout << "Acceleracio1: " << PLANETES[i].getAcceleracio().x << ", " << PLANETES[i].getAcceleracio().y << ", " << PLANETES[i].getAcceleracio().z << std::endl;
 		Planeta& planeta = PLANETES[i];
-		
+
 		// El sol no s'ha de moure
-		if (i == 0) continue;
+		if (i == 0)
+			continue;
 
-		// Força gravitacional del sol
-		Planeta& sol = PLANETES[0];
-		glm::dvec3 direccio = sol.getPosition() - planeta.getPosition();
-		double distancia = glm::length(direccio);
-		//std::cout << "Distancia: " << distance << std::endl;
-		if (distancia > 0.0f)
+		// LCR - ORBITA LLUNA AL VOLTANT DE LA TERRA //
+		else if (i == 9) //si es lluna
 		{
-			// Fisica orbita
-			glm::dvec3 direccioForça = glm::normalize(direccio);
-			double magnitudForça = G * (sol.getMassa() * planeta.getMassa()) / (distancia * distancia);
-			
-			glm::dvec3 força = direccioForça * magnitudForça;
+			Planeta& terra = PLANETES[3];
+			double distanciaTerraLluna = 3.844e11 * ESCALA_DISTANCIA; //distancia aproximada terra-lluna
+			static double angleRadLluna = 0.0;
+			double velocitatOrbitaLluna = sqrt(G * MASSES[3] / distanciaTerraLluna);
+			angleRadLluna += 2.0 * PI * deltaTime * velocitatOrbitaLluna; //orbita lluna al voltant de la terra
 
-			// F=m*a => a=F/m
-			glm::dvec3 acceleracio = força / planeta.getMassa();
-			planeta.setAcceleracio(acceleracio);
+			float lluna_X = distanciaTerraLluna * cos(angleRadLluna);
+			float lluna_Y = distanciaTerraLluna * sin(angleRadLluna);
+
+			glm::vec3 posLluna = glm::vec3(lluna_X, lluna_Y, 0.0f);
+
+			planeta.setPosition(terra.getPosition() + posLluna);
+		}
+		else
+		{
+			Planeta& sol = PLANETES[0];
+			glm::dvec3 direccio = sol.getPosition() - planeta.getPosition();
+			double distancia = glm::length(direccio);
+			//std::cout << "Distancia: " << distance << std::endl;
+			if (distancia > 0.0f)
+			{
+				// Fisica orbita
+				glm::dvec3 direccioForça = glm::normalize(direccio);
+				double magnitudForça = G * (sol.getMassa() * planeta.getMassa()) / (distancia * distancia);
+
+				glm::dvec3 força = direccioForça * magnitudForça;
+
+				// F=m*a => a=F/m
+				glm::dvec3 acceleracio = força / planeta.getMassa();
+				planeta.setAcceleracio(acceleracio);
+			}
 		}
 	}
 
 	// Actualitzar velocitats i posicions dels planetes
 	for (auto& planeta : PLANETES)
 	{
-		//std::cout << "Posició: " << planeta.getPosition().x << ", " << planeta.getPosition().y << ", " << planeta.getPosition().z << std::endl;
-		//std::cout << "Velocitat: " << planeta.getVelocitat().x << ", " << planeta.getVelocitat().y << ", " << planeta.getVelocitat().z << std::endl;
-		//std::cout << "Acceleració: " << planeta.getAcceleracio().x << ", " << planeta.getAcceleracio().y << ", " << planeta.getAcceleracio().z << std::endl;
 		// Actualitzar velocitat: v = v+a*dt
 		glm::dvec3 velocitat = planeta.getVelocitat() + planeta.getAcceleracio() * (double)deltaTime;
 		planeta.setVelocitat(velocitat);
@@ -824,19 +854,27 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	// Un dia per segon
 	double deltaTime = time - lastTime;
 	lastTime = time;
-	double velocitatSimulacio = 60.0 * 60.0 * 24.0; 
+	double velocitatSimulacio = 60.0 * 60.0 * 24.0;
 	deltaTime *= velocitatSimulacio;
 	// Física orbites 2D de moment
 	updatePlanetes(velocitatSimulacio);
-	for(auto& planeta : PLANETES)
+	for (auto& planeta : PLANETES)
 	{
 		// Posició inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
-		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
-		
+
+		// LCR: cas lluna //
+		if (planeta.getName() == "Lluna")
+		{
+			glm::vec3 posLluna = planeta.getPosition();
+			ModelMatrix = glm::translate(MatriuTG, posLluna);
+		}
+		else
+			ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
+
 		// Rotació sobre ell mateix
 		float velocitatRotacio = planeta.getVelocitatRotacio();    // Graus per segon
-		int direccioRotacio = planeta.getDireccioRotacio(); 
+		int direccioRotacio = planeta.getDireccioRotacio();
 		float angle = time * velocitatRotacio * direccioRotacio;
 		glm::vec3 eixosRotacio = planeta.getEixosRotacioPlaneta();
 		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), eixosRotacio);
@@ -855,10 +893,10 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		SetTextureParameters((GLint)planeta.getTextureID(), true, true, false, false);
 		glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
 		glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
-		
+
 		draw_TriEBO_Object(3);
 	}
-	
+
 }
 
 
