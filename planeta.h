@@ -91,7 +91,7 @@ public:
 	glm::vec3 getPosition() const { return m_position; }
 	double getPeriapsis() { return m_periapsis; }
 	double getSemieixMajor() { return m_semieix_major; }
-	double getLongitudNodeAscendent(double lon) { return m_long_node_asc; }
+	double getLongitudNodeAscendent() { return m_long_node_asc; }
 	double getInclinacio() { return m_inclinacio; }
 	double getExcentricitat() { return m_excentricitat; }
 	// SETTERS
