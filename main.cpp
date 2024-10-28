@@ -845,8 +845,8 @@ void draw_Menu_ImGui()
 
 	if (show_user_windows) {
 
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar + ImGuiWindowFlags_NoMove +
-			ImGuiWindowFlags_NoScrollbar + ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 		/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
 		if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
 		if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
@@ -875,6 +875,7 @@ void draw_Menu_ImGui()
 		ImVec2 screenSize = ImGui::GetIO().DisplaySize;
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::SetNextWindowSize(screenSize);
+
 		ImGui::Begin("Opcions", &show_user_windows, window_flags+ ImGuiWindowFlags_NoBringToFrontOnFocus);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 		
 		// Configura els colors i l'estil
@@ -890,22 +891,33 @@ void draw_Menu_ImGui()
 		if (ImGui::Button("Debug", ImVec2(50, 20))) {
 			show_debug_windows = true;
 			show_user_windows = false;
+			show_user_windows_button_inici = false;
 		}
-		//ImGui::End;
+
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(3);
+		ImGui::End();
 
 		// Calcula les dimensions de la finestra principal
 		ImVec2 windowSize(200, 100); // Canvia aquestes dimensions segons el tamany de la finestra desitjada
-
-		//ImGui::SetNextWindowPos(ImVec2(0, 0));
-		
 		// Calcula la posició per centrar la finestra a la pantalla
 		ImVec2 windowPos = ImVec2(
 			(screenSize.x - windowSize.x) * 0.5f,
-			(screenSize.y - windowSize.y)-50 
+			(screenSize.y - windowSize.y) - 50 
 		);
 		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
 
-		ImGui::Begin("Finestra Usuari", &show_user_windows, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+		ImGui::Begin("Finestra Usuari", &show_user_windows_button_inici, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+
+
+		// Configura els colors i l'estil
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+
+		// Arrodoniment
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
 
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Blanc
 
@@ -918,13 +930,61 @@ void draw_Menu_ImGui()
 		// Mida del botó
 		if (ImGui::Button("Iniciar Simulador", ImVec2(200, 55))) {
 			// Acció del botó
+			oCamera = 3;
+			SkyBoxCube = true;
+			oObjecte = 18;
+			test_vis = false;
+			oculta = true;
+			show_user_windows = false;
+			show_user_windows_button_inici = false;
+			/*
+			netejaVAOList();
+			// ISMAEL CONTINUAR
+			for (int i = 0; i < 10; i++)
+			{
+				Planeta planeta;
+				PLANETES.push_back(planeta);
+			}
+			auto planeta = PLANETES[0];
+			vec4 color = planeta.getColor();
+			SetColor4d(color.r, color.g, color.b, color.a);
+			CVAO planetaC = loadgluSphere_EBO(planeta.getRadi(), planeta.getSlices(), planeta.getStacks());
+			Set_VAOList(3, planetaC);
+
+			Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(0.5, 5.0, 8, 8));
+			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
+			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
+			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
+
+
+			// reservar espai per a la ruta
+			nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
+
+			strcpy(nomOBJ, rutaArchivo);
+
+			textura = true;		tFlag_invert_Y = false;
+
+			if (ObOBJ == NULL)
+				ObOBJ = ::new COBJModel;
+			else {
+				ObOBJ->netejaVAOList_OBJ();
+				ObOBJ->netejaTextures_OBJ();
+			}
+
+			int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+			free(nomOBJ);
+			*/
+
+			show_debug_windows = true;
+
 		}
 
-		// Restaura l'estil
-		ImGui::PopStyleVar(); // Restaura l'arrodoniment
-		ImGui::PopStyleColor(3); // Restaura els colors
-
-
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(3);
+		ImGui::End();
 	}
 
 	// 3. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.

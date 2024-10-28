@@ -34,6 +34,7 @@
 
 	bool show_debug_windows = false;
 	bool show_user_windows = true;
+	bool show_user_windows_button_inici = true;
 
 // Entorn V3D: Variables de control per Menú Càmera: Esfèrica, Navega, Mòbil, Zoom, Satelit, Polars... 
 	char camera;	// Variable que controla el tipus de càmera segons valors definits en constants.h
