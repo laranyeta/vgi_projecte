@@ -38,7 +38,7 @@ void InitGL()
 	n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
 	v[0] = 0.0;		v[1] = 0.0;		v[2] = 1.0;
 	u[0] = 0.0;		u[1] = -1.0;	u[2] = 0.0;
-	opvN.x = 10.0;	opvN.y = 0.0;		opvN.z = 0.0;
+	opvN.x = 200.0;	opvN.y = 0.0;		opvN.z = 0.0;
 	angleZ = 0.0;
 	ViewMatrix = glm::mat4(1.0);		// Inicialitzar a identitat
 
@@ -1054,12 +1054,12 @@ void Iniciar_simulador() {
 	{	// load Skybox textures
 		// -------------
 		std::vector<std::string> faces =
-		{ ".\\textures\\skybox\\right.png",
-			".\\textures\\skybox\\left.png",
-			".\\textures\\skybox\\top.png",
-			".\\textures\\skybox\\bottom.png",
-			".\\textures\\skybox\\front.png",
-			".\\textures\\skybox\\back.png"
+		{ ".\\textures\\skybox\\right.jpg",
+			".\\textures\\skybox\\left.jpg",
+			".\\textures\\skybox\\top.jpg",
+			".\\textures\\skybox\\bottom.jpg",
+			".\\textures\\skybox\\front.jpg",
+			".\\textures\\skybox\\back.jpg"
 		};
 		cubemapTexture = loadCubemap(faces);
 	}
@@ -1638,7 +1638,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				v[0] = 0.0;		v[1] = 0.0;		v[2] = 1.0;
 				u[0] = 0.0;		u[1] = -1.0;	u[2] = 0.0;
 				angleA = 0.0;		angleB = 0.0;		angleC = 0.0;
-				opvN.x = 10.0;	opvN.y = 0.0;		opvN.z = 0.0;
+				opvN.x = 200.0;	opvN.y = 0.0;		opvN.z = 0.0;
 				angleZ = 0.0;
 			}
 		}
@@ -1768,12 +1768,12 @@ void ShowEntornVGIWindow(bool* p_open)
 			{	// load Skybox textures
 				// -------------
 				std::vector<std::string> faces =
-				{ ".\\textures\\skybox\\right.png",
-					".\\textures\\skybox\\left.png",
-					".\\textures\\skybox\\top.png",
-					".\\textures\\skybox\\bottom.png",
-					".\\textures\\skybox\\front.png",
-					".\\textures\\skybox\\back.png"
+				{ ".\\textures\\skybox\\right.jpg",
+					".\\textures\\skybox\\left.jpg",
+					".\\textures\\skybox\\top.jpg",
+					".\\textures\\skybox\\bottom.jpg",
+					".\\textures\\skybox\\front.jpg",
+					".\\textures\\skybox\\back.jpg"
 				};
 				cubemapTexture = loadCubemap(faces);
 			}
