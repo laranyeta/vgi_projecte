@@ -929,57 +929,9 @@ void draw_Menu_ImGui()
 		ImGui::PopStyleColor();
 		// Mida del botó
 		if (ImGui::Button("Iniciar Simulador", ImVec2(200, 55))) {
-			// Acció del botó
-			oCamera = 3;
-			SkyBoxCube = true;
-			oObjecte = 18;
-			test_vis = false;
-			oculta = true;
 			show_user_windows = false;
 			show_user_windows_button_inici = false;
-			/*
-			netejaVAOList();
-			// ISMAEL CONTINUAR
-			for (int i = 0; i < 10; i++)
-			{
-				Planeta planeta;
-				PLANETES.push_back(planeta);
-			}
-			auto planeta = PLANETES[0];
-			vec4 color = planeta.getColor();
-			SetColor4d(color.r, color.g, color.b, color.a);
-			CVAO planetaC = loadgluSphere_EBO(planeta.getRadi(), planeta.getSlices(), planeta.getStacks());
-			Set_VAOList(3, planetaC);
-
-			Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(0.5, 5.0, 8, 8));
-			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
-			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
-			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
-
-
-			// reservar espai per a la ruta
-			nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
-
-			strcpy(nomOBJ, rutaArchivo);
-
-			textura = true;		tFlag_invert_Y = false;
-
-			if (ObOBJ == NULL)
-				ObOBJ = ::new COBJModel;
-			else {
-				ObOBJ->netejaVAOList_OBJ();
-				ObOBJ->netejaTextures_OBJ();
-			}
-
-			int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
-
-			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
-			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
-			free(nomOBJ);
-			*/
-
-			show_debug_windows = true;
-
+			Iniciar_simulador();
 		}
 
 		ImGui::PopStyleVar();
@@ -1073,6 +1025,92 @@ void draw_Menu_ImGui()
 	ImGui::Render();
 	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+
+void Iniciar_simulador() {
+	//Varibales Importants
+	// Acció del botó
+	oCamera = 3;
+	SkyBoxCube = true;
+	oObjecte = 18;
+	test_vis = false;
+	oculta = true;
+	eixos = true;
+	objecte = PROVA_PLANETA;
+
+	//Camara Nau
+	if ((projeccio != ORTO) && (projeccio != CAP)) camera = CAM_NAU;
+	// Activació de zoom, mobil
+	mobil = true;	zzoom = true;
+
+
+	// Càrrega Shader Skybox
+	if (!skC_programID) skC_programID = shader_SkyBoxC.loadFileShaders(".\\shaders\\skybox.VERT", ".\\shaders\\skybox.FRAG");
+
+	// Càrrega VAO Skybox Cube
+	if (skC_VAOID.vaoId == 0) skC_VAOID = loadCubeSkybox_VAO();
+	Set_VAOList(CUBE_SKYBOX, skC_VAOID);
+
+	if (!cubemapTexture)
+	{	// load Skybox textures
+		// -------------
+		std::vector<std::string> faces =
+		{ ".\\textures\\skybox\\right.png",
+			".\\textures\\skybox\\left.png",
+			".\\textures\\skybox\\top.png",
+			".\\textures\\skybox\\bottom.png",
+			".\\textures\\skybox\\front.png",
+			".\\textures\\skybox\\back.png"
+		};
+		cubemapTexture = loadCubemap(faces);
+	}
+	if (pan) {
+		fact_pan = 1;
+		tr_cpv.x = 0;	tr_cpv.y = 0;	tr_cpv.z = 0;
+	}
+
+
+	//Planetes i nau
+	netejaVAOList();
+	// ISMAEL CONTINUAR
+	for (int i = 0; i < 10; i++)
+	{
+		Planeta planeta;
+		PLANETES.push_back(planeta);
+	}
+	auto planeta = PLANETES[0];
+	vec4 color = planeta.getColor();
+	SetColor4d(color.r, color.g, color.b, color.a);
+	CVAO planetaC = loadgluSphere_EBO(planeta.getRadi(), planeta.getSlices(), planeta.getStacks());
+	Set_VAOList(3, planetaC);
+
+	Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(0.5, 5.0, 8, 8));
+	Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
+	Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
+	Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
+
+
+	// reservar espai per a la ruta
+	nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
+
+	strcpy(nomOBJ, rutaArchivo);
+
+	textura = true;		tFlag_invert_Y = false;
+
+	if (ObOBJ == NULL)
+		ObOBJ = ::new COBJModel;
+	else {
+		ObOBJ->netejaVAOList_OBJ();
+		ObOBJ->netejaTextures_OBJ();
+	}
+
+	int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+	free(nomOBJ);
+
+}
+
 
 
 void MostraEntornVGIWindow(bool* p_open)
