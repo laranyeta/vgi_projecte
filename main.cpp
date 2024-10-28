@@ -1,8 +1,8 @@
-//******** PRACTICA VISUALITZACI” GR¿FICA INTERACTIVA (Escola Enginyeria - UAB)
-//******** Entorn b‡sic VS2022 MONOFINESTRA amb OpenGL 3.3+, interfÌcie GLFW, ImGui i llibreries GLM
-//******** Ferran Poveda, Marc Vivet, Carme Juli‡, DÈbora Gil, Enric MartÌ (Setembre 2024)
-// main.cpp : DefiniciÛ de main
-//    VersiÛ 0.5:	- Interficie ImGui
+//******** PRACTICA VISUALITZACI√ì GR√ÄFICA INTERACTIVA (Escola Enginyeria - UAB)
+//******** Entorn b√†sic VS2022 MONOFINESTRA amb OpenGL 3.3+, interf√≠cie GLFW, ImGui i llibreries GLM
+//******** Ferran Poveda, Marc Vivet, Carme Juli√†, D√©bora Gil, Enric Mart√≠ (Setembre 2024)
+// main.cpp : Definici√≥ de main
+//    Versi√≥ 0.5:	- Interficie ImGui
 //					- Per a dialeg de cerca de fitxers, s'utilitza la llibreria NativeFileDialog
 
 
@@ -22,19 +22,19 @@ const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
 std::vector<Planeta> PLANETES;
 void InitGL()
 {
-// TODO: agregar aquÌ el cÛdigo de construcciÛn
+// TODO: agregar aqu√≠ el c√≥digo de construcci√≥n
 
-//------ Entorn VGI: InicialitzaciÛ de les variables globals de CEntornVGIView
+//------ Entorn VGI: Inicialitzaci√≥ de les variables globals de CEntornVGIView
 	int i;
 
 // Entorn VGI: Variable de control per a Status Bar (consola) 
 	statusB = false;
 
-// Entorn VGI: Variables de control per Men˙ C‡mera: EsfËrica, Navega, MÚbil, Zoom, Satelit, Polars... 
+// Entorn VGI: Variables de control per Men√∫ C√†mera: Esf√®rica, Navega, M√≤bil, Zoom, Satelit, Polars... 
 	camera = CAM_ESFERICA;
 	mobil = true;	zzoom = true;		zzoomO = false;		satelit = false;
 
-// Entorn VGI: Variables de control de l'opciÛ C‡mera->Navega?
+// Entorn VGI: Variables de control de l'opci√≥ C√†mera->Navega?
 	n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
 	v[0] = 0.0;		v[1] = 0.0;		v[2] = 1.0;
 	u[0] = 0.0;		u[1] = -1.0;	u[2] = 0.0;
@@ -42,10 +42,10 @@ void InitGL()
 	angleZ = 0.0;
 	ViewMatrix = glm::mat4(1.0);		// Inicialitzar a identitat
 
-// Entorn VGI: Variables de control de l'opciÛ C‡mera->Geode?
-	OPV_G.R = 15.0;		OPV_G.alfa = 0.0;	OPV_G.beta = 0.0;	// Origen PV en esfËriques per a Vista_Geode
+// Entorn VGI: Variables de control de l'opci√≥ C√†mera->Geode?
+	OPV_G.R = 15.0;		OPV_G.alfa = 0.0;	OPV_G.beta = 0.0;	// Origen PV en esf√®riques per a Vista_Geode
 
-// Entorn VGI: Variables de control per Men˙ Vista: Pantalla Completa, Pan, dibuixar eixos i grids 
+// Entorn VGI: Variables de control per Men√∫ Vista: Pantalla Completa, Pan, dibuixar eixos i grids 
 	fullscreen = false;
 	pan = false;
 	eixos = false;	eixos_programID = 0;  eixos_Id = 0;
@@ -53,11 +53,11 @@ void InitGL()
 	grid.x = false;	grid.y = false;		grid.z = false;		grid.w = false;
 	hgrid.x = 0.0;	hgrid.y = 0.0;		hgrid.z = 0.0;		hgrid.w = 0.0;
 
-// Entorn VGI: Variables opciÛ Vista->Pan
+// Entorn VGI: Variables opci√≥ Vista->Pan
 	fact_pan = 1;
 	tr_cpv.x = 0;	tr_cpv.y = 0;	tr_cpv.z = 0;		tr_cpvF.x = 0;	tr_cpvF.y = 0;	tr_cpvF.z = 0;
 
-// Entorn VGI: Variables de control per les opcions de men˙ ProjecciÛ, Objecte
+// Entorn VGI: Variables de control per les opcions de men√∫ Projecci√≥, Objecte
 	projeccio = PERSPECT;	// projeccio = PERSPECT;
 	ProjectionMatrix = glm::mat4(1.0);	// Inicialitzar a identitat
 	objecte = CAP;		// objecte = TETERA;
@@ -67,7 +67,7 @@ void InitGL()
 	skC_VAOID.vaoId = 0;	skC_VAOID.vboId = 0;	skC_VAOID.nVertexs = 0;
 	cubemapTexture = 0;
 
-// Entorn VGI: Variables de control del men˙ Transforma
+// Entorn VGI: Variables de control del men√∫ Transforma
 	transf = false;		trasl = false;		rota = false;		escal = false;
 	fact_Tras = 1;		fact_Rota = 90;
 	TG.VTras.x = 0.0;	TG.VTras.y = 0.0;	TG.VTras.z = 0;	TGF.VTras.x = 0.0;	TGF.VTras.y = 0.0;	TGF.VTras.z = 0;
@@ -77,10 +77,10 @@ void InitGL()
 	transX = false;		transY = false;		transZ = false;
 	GTMatrix= glm::mat4(1.0);		// Inicialitzar a identitat
 
-// Entorn VGI: Variables de control per les opcions de men˙ Ocultacions
+// Entorn VGI: Variables de control per les opcions de men√∫ Ocultacions
 	front_faces = true;	test_vis = false;	oculta = false;		back_line = false;
 
-// Entorn VGI: Variables de control del men˙ IluminaciÛ		
+// Entorn VGI: Variables de control del men√∫ Iluminaci√≥		
 	ilumina = SUAU;			ifixe = false;					ilum2sides = false;
 // Reflexions actives: Ambient [1], Difusa [2] i Especular [3]. No actives: Emission [0]. 
 	sw_material[0] = false;			sw_material[1] = true;			sw_material[2] = true;			sw_material[3] = true;	sw_material[4] = true;
@@ -89,8 +89,8 @@ void InitGL()
 	for (i = 0; i < NUM_MAX_TEXTURES; i++) texturesID[i] = -1;
 	tFlag_invert_Y = false;
 
-// Entorn VGI: Variables de control del men˙ Llums
-// Entorn VGI: InicialitzaciÛ variables Llums
+// Entorn VGI: Variables de control del men√∫ Llums
+// Entorn VGI: Inicialitzaci√≥ variables Llums
 	llum_ambient = true;
 	for (i = 1; i < NUM_MAX_LLUMS; i++) llumGL[i].encesa = false;
 	for (i = 0; i < NUM_MAX_LLUMS; i++) {
@@ -99,18 +99,18 @@ void InitGL()
 		llumGL[i].especular[0] = 1.0f; llumGL[i].especular[1] = 1.0f; llumGL[i].especular[2] = 1.0f; llumGL[i].especular[3] = 1.0f;
 		}
 
-// LLum 0: AtenuaciÛ constant (c=1), sobre l'eix Z, no restringida.
+// LLum 0: Atenuaci√≥ constant (c=1), sobre l'eix Z, no restringida.
 	llumGL[0].encesa = true;
 	llumGL[0].difusa[0] = 1.0f;			llumGL[0].difusa[1] = 1.0f;			llumGL[0].difusa[2] = 1.0f;		llumGL[0].difusa[3] = 1.0f;
 	llumGL[0].especular[0] = 1.0f;		llumGL[0].especular[1] = 1.0f;		llumGL[0].especular[2] = 1.0f;	llumGL[0].especular[3] = 1.0f;
 
-	llumGL[0].posicio.R = 200.0;		llumGL[0].posicio.alfa = 90.0;		llumGL[0].posicio.beta = 0.0;		// PosiciÛ llum (x,y,z)=(0,0,200)
-	llumGL[0].atenuacio.a = 0.0;		llumGL[0].atenuacio.b = 0.0;		llumGL[0].atenuacio.c = 1.0;		// Llum sense atenuaciÛ per dist‡ncia (a,b,c)=(0,0,1)
+	llumGL[0].posicio.R = 200.0;		llumGL[0].posicio.alfa = 90.0;		llumGL[0].posicio.beta = 0.0;		// Posici√≥ llum (x,y,z)=(0,0,200)
+	llumGL[0].atenuacio.a = 0.0;		llumGL[0].atenuacio.b = 0.0;		llumGL[0].atenuacio.c = 1.0;		// Llum sense atenuaci√≥ per dist√†ncia (a,b,c)=(0,0,1)
 	llumGL[0].restringida = false;
 	llumGL[0].spotdirection[0] = 0.0;	llumGL[0].spotdirection[1] = 0.0;	llumGL[0].spotdirection[2] = 0.0;
 	llumGL[0].spotcoscutoff = 0.0;		llumGL[0].spotexponent = 0.0;
 
-// LLum 1: AtenuaciÛ constant (c=1), sobre l'eix X, no restringida.
+// LLum 1: Atenuaci√≥ constant (c=1), sobre l'eix X, no restringida.
 	llumGL[1].encesa = false;
 	llumGL[1].difusa[0] = 1.0f;			llumGL[1].difusa[1] = 1.0f;			llumGL[1].difusa[2] = 1.0f;		llumGL[1].difusa[3] = 1.0f;
 	llumGL[1].especular[0] = 1.0f;		llumGL[1].especular[1] = 1.0f;		llumGL[1].especular[2] = 1.0f;	llumGL[1].especular[3] = 1;
@@ -121,7 +121,7 @@ void InitGL()
 	llumGL[1].spotdirection[0] = 0.0;	llumGL[1].spotdirection[1] = 0.0;	llumGL[1].spotdirection[2] = 0.0;
 	llumGL[1].spotcoscutoff = 0.0;		llumGL[1].spotexponent = 0.0;
 
-// LLum 2: AtenuaciÛ constant (c=1), sobre l'eix Y, no restringida.
+// LLum 2: Atenuaci√≥ constant (c=1), sobre l'eix Y, no restringida.
 	llumGL[2].encesa = false;
 	llumGL[2].difusa[1] = 1.0f;			llumGL[2].difusa[1] = 1.0f;			llumGL[2].difusa[2] = 1.0f;		llumGL[2].difusa[3] = 1.0f;
 	llumGL[2].especular[1] = 1.0f;		llumGL[2].especular[1] = 1.0f;		llumGL[2].especular[2] = 1.0f;	llumGL[2].especular[3] = 1;
@@ -132,7 +132,7 @@ void InitGL()
 	llumGL[2].spotdirection[0] = 0.0;	llumGL[2].spotdirection[1] = 0.0;	llumGL[2].spotdirection[2] = 0.0;
 	llumGL[2].spotcoscutoff = 0.0;		llumGL[2].spotexponent = 0.0;
 
-// LLum 3: AtenuaciÛ constant (c=1), sobre l'eix Y=X, no restringida.
+// LLum 3: Atenuaci√≥ constant (c=1), sobre l'eix Y=X, no restringida.
 	llumGL[3].encesa = false;
 	llumGL[3].difusa[0] = 1.0f;			llumGL[2].difusa[1] = 1.0f;			llumGL[3].difusa[2] = 1.0f;		llumGL[3].difusa[3] = 1.0f;
 	llumGL[3].especular[0] = 1.0f;		llumGL[2].especular[1] = 1.0f;		llumGL[3].especular[2] = 1.0f;	llumGL[3].especular[3] = 1;
@@ -143,7 +143,7 @@ void InitGL()
 	llumGL[3].spotdirection[0] = 0.0;	llumGL[3].spotdirection[1] = 0.0;	llumGL[3].spotdirection[2] = 0.0;
 	llumGL[3].spotcoscutoff = 0.0;		llumGL[3].spotexponent = 0.0;
 
-// LLum 4: AtenuaciÛ constant (c=1), sobre l'eix -Z, no restringida.
+// LLum 4: Atenuaci√≥ constant (c=1), sobre l'eix -Z, no restringida.
 	llumGL[4].encesa = false;
 	llumGL[4].difusa[0] = 1.0f;			llumGL[4].difusa[1] = 1.0f;			llumGL[4].difusa[2] = 1.0f;		llumGL[4].difusa[3] = 1.0f;
 	llumGL[4].especular[0] = 1.0f;		llumGL[4].especular[1] = 1.0f;		llumGL[4].especular[2] = 1.0f;	llumGL[4].especular[3] = 1;
@@ -159,53 +159,53 @@ void InitGL()
 	llumGL[5].difusa[0] = 1.0f;			llumGL[5].difusa[1] = 1.0f;			llumGL[5].difusa[2] = 1.0f;		llumGL[5].difusa[3] = 1.0f;
 	llumGL[5].especular[0] = 1.0f;		llumGL[5].especular[1] = 1.0f;		llumGL[5].especular[2] = 1.0f;	llumGL[5].especular[3] = 1;
 
-	llumGL[5].posicio.R = 0.0;			llumGL[5].posicio.alfa = 0.0;		llumGL[5].posicio.beta = 0.0; // Cap posiciÛ definida
+	llumGL[5].posicio.R = 0.0;			llumGL[5].posicio.alfa = 0.0;		llumGL[5].posicio.beta = 0.0; // Cap posici√≥ definida
 	llumGL[5].atenuacio.a = 0.0;		llumGL[5].atenuacio.b = 0.0;		llumGL[5].atenuacio.c = 1.0;
 	llumGL[5].restringida = false;
 	llumGL[5].spotdirection[0] = 0.0;	llumGL[5].spotdirection[1] = 0.0;	llumGL[5].spotdirection[2] = 0.0;
 	llumGL[5].spotcoscutoff = 0.0;		llumGL[5].spotexponent = 0.0;
 
-// LLum #6: Llum Vaixell, configurada a la funciÛ vaixell() en escena.cpp.
+// LLum #6: Llum Vaixell, configurada a la funci√≥ vaixell() en escena.cpp.
 	llumGL[6].encesa = false;
 	llumGL[6].difusa[0] = 1.0f;			llumGL[6].difusa[1] = 1.0f;			llumGL[6].difusa[2] = 1.0f;		llumGL[6].difusa[3] = 1.0f;
 	llumGL[6].especular[0] = 1.0f;		llumGL[6].especular[1] = 1.0f;		llumGL[6].especular[2] = 1.0f;	llumGL[6].especular[3] = 1;
 
-	llumGL[6].posicio.R = 0.0;			llumGL[6].posicio.alfa = 0.0;		llumGL[6].posicio.beta = 0.0; // Cap posiciÛ definida, definida en funciÛ vaixell() en escena.cpp
+	llumGL[6].posicio.R = 0.0;			llumGL[6].posicio.alfa = 0.0;		llumGL[6].posicio.beta = 0.0; // Cap posici√≥ definida, definida en funci√≥ vaixell() en escena.cpp
 	llumGL[6].atenuacio.a = 0.0;		llumGL[6].atenuacio.b = 0.0;		llumGL[6].atenuacio.c = 1.0;
 	llumGL[6].restringida = false;
 	llumGL[6].spotdirection[0] = 0.0;	llumGL[6].spotdirection[1] = 0.0;	llumGL[6].spotdirection[2] = 0.0;
 	llumGL[6].spotcoscutoff = 0.0;		llumGL[6].spotexponent = 0.0;
 
-// LLum #7: Llum Far, configurada a la funciÛ faro() en escena.cpp.
+// LLum #7: Llum Far, configurada a la funci√≥ faro() en escena.cpp.
 	llumGL[7].encesa = false;
 	llumGL[7].difusa[0] = 1.0f;			llumGL[7].difusa[1] = 1.0f;			llumGL[7].difusa[2] = 1.0f;		llumGL[7].difusa[3] = 1.0f;
 	llumGL[7].especular[0] = 1.0f;		llumGL[7].especular[1] = 1.0f;		llumGL[7].especular[2] = 1.0f;	llumGL[7].especular[3] = 1;
 
-	llumGL[7].posicio.R = 0.0;			llumGL[7].posicio.alfa = 0.0;		llumGL[7].posicio.beta = 0.0; // Cap posiciÛ definida, definida en funciÛ faro() en escena.cpp
+	llumGL[7].posicio.R = 0.0;			llumGL[7].posicio.alfa = 0.0;		llumGL[7].posicio.beta = 0.0; // Cap posici√≥ definida, definida en funci√≥ faro() en escena.cpp
 	llumGL[7].atenuacio.a = 0.0;		llumGL[7].atenuacio.b = 0.0;		llumGL[7].atenuacio.c = 1.0;
 	llumGL[7].restringida = false;
 	llumGL[7].spotdirection[0] = 0.0;	llumGL[7].spotdirection[1] = 0.0;	llumGL[7].spotdirection[2] = 0.0;
 	llumGL[7].spotcoscutoff = 0.0;		llumGL[7].spotexponent = 0.0;
 
-// Entorn VGI: Variables de control del men˙ Shaders
+// Entorn VGI: Variables de control del men√∫ Shaders
 	shader = CAP_SHADER;	shader_programID = 0;	
 	shaderLighting.releaseAllShaders();
-	// C‡rrega Shader de Gouraud
+	// C√†rrega Shader de Gouraud
 	shader_programID = 0;
 	fprintf(stderr, "Gouraud_shdrML: \n");
 	if (!shader_programID) shader_programID = shaderLighting.loadFileShaders(".\\shaders\\gouraud_shdrML.vert", ".\\shaders\\gouraud_shdrML.frag");
 	shader = GOURAUD_SHADER;
 
-// C‡rrega SHADERS
-// C‡rrega Shader Eixos
+// C√†rrega SHADERS
+// C√†rrega Shader Eixos
 	fprintf(stderr, "Eixos: \n");
 	if (!eixos_programID) eixos_programID = shaderEixos.loadFileShaders(".\\shaders\\eixos.VERT", ".\\shaders\\eixos.FRAG");
 
-// C‡rrega Shader Skybox
+// C√†rrega Shader Skybox
 	fprintf(stderr, "SkyBox: \n");
 	if (!skC_programID) skC_programID = shader_SkyBoxC.loadFileShaders(".\\shaders\\skybox.VERT", ".\\shaders\\skybox.FRAG");
 
-// C‡rrega VAO Skybox Cube
+// C√†rrega VAO Skybox Cube
 	if (skC_VAOID.vaoId == 0) skC_VAOID = loadCubeSkybox_VAO();
 	Set_VAOList(CUBE_SKYBOX, skC_VAOID);
 
@@ -229,12 +229,12 @@ void InitGL()
 	m_EsfeEAvall.R = 0.0;		m_EsfeEAvall.alfa = 0.0;	m_EsfeEAvall.beta = 0.0;
 	m_EsfeIncEAvall.R = 0.0;	m_EsfeIncEAvall.alfa = 0.0;	m_EsfeIncEAvall.beta = 0.0;
 
-// Entorn VGI: Variables que controlen par‡metres visualitzaciÛ: Mides finestra Windows i PV
-	w = 1920;			h = 1080;			// Mides de la finestra Windows (w-amplada,h-alÁada)
-	width_old = 640;	height_old = 480;	// Mides de la resoluciÛ actual de la pantalla (finestra Windows)
-	w_old = 640;		h_old = 480;		// Mides de la finestra Windows (w-amplada,h-alÁada) per restaurar Finestra des de fullscreen
-	OPV.R = cam_Esferica[0];	OPV.alfa = cam_Esferica[1];		OPV.beta = cam_Esferica[2];		// Origen PV en esfËriques
-	//OPV.R = 15.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;										// Origen PV en esfËriques
+// Entorn VGI: Variables que controlen par√†metres visualitzaci√≥: Mides finestra Windows i PV
+	w = 1920;			h = 1080;			// Mides de la finestra Windows (w-amplada,h-al√ßada)
+	width_old = 640;	height_old = 480;	// Mides de la resoluci√≥ actual de la pantalla (finestra Windows)
+	w_old = 640;		h_old = 480;		// Mides de la finestra Windows (w-amplada,h-al√ßada) per restaurar Finestra des de fullscreen
+	OPV.R = cam_Esferica[0];	OPV.alfa = cam_Esferica[1];		OPV.beta = cam_Esferica[2];		// Origen PV en esf√®riques
+	//OPV.R = 15.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;										// Origen PV en esf√®riques
 	Vis_Polar = POLARZ;
 
 // Entorn VGI: Color de fons i de l'objecte
@@ -279,11 +279,11 @@ void InitGL()
 
 void InitAPI()
 {
-// Vendor, Renderer, Version, Shading Laguage Version i Extensions suportades per la placa gr‡fica gravades en fitxer extensions.txt
+// Vendor, Renderer, Version, Shading Laguage Version i Extensions suportades per la placa gr√†fica gravades en fitxer extensions.txt
 	std::string nomf = "extensions.txt";
 	char const* nomExt = "";
 	const char* nomfitxer;
-	nomfitxer = nomf.c_str();	// ConversiÛ tipus string --> char *
+	nomfitxer = nomf.c_str();	// Conversi√≥ tipus string --> char *
 	int num_Ext;
 
 	char* str = (char*)glGetString(GL_VENDOR);
@@ -307,7 +307,7 @@ void InitAPI()
 					fprintf(f, "%s \n", nomExt);
 					//fprintf(stderr, "%s", nomExt);	// Displaiar extensions per pantalla
 				}
-				//fprintf(stderr, "\n");				// Displaiar <cr> per pantalla desprÈs extensions
+				//fprintf(stderr, "\n");				// Displaiar <cr> per pantalla despr√©s extensions
 //				str = (char*)glGetString(GL_EXTENSIONS);
 //				fprintf(f, "EXTENSIONS: %s\n", str);
 				//fprintf(stderr, "EXTENSIONS: %s\n", str);
@@ -386,12 +386,12 @@ void GetGLVersion(int* major, int* minor)
 
 void OnSize(GLFWwindow* window, int width, int height)
 {
-// TODO: Agregue aquÌ su cÛdigo de controlador de mensajes
+// TODO: Agregue aqu√≠ su c√≥digo de controlador de mensajes
 
 // A resize event occured; cx and cy are the window's new width and height.
 // Find the OpenGL change size function given in the Lab 1 notes and call it here
 
-// Entorn VGI: MODIFICACI” ->Establim les mides de la finestra actual
+// Entorn VGI: MODIFICACI√ì ->Establim les mides de la finestra actual
 	w = width;	h = height;
 
 // Crida a OnPaint per a redibuixar la pantalla
@@ -399,44 +399,44 @@ void OnSize(GLFWwindow* window, int width, int height)
 }
 
 
-// OnPaint: FunciÛ de dibuix i visualitzaciÛ en frame buffer del frame
+// OnPaint: Funci√≥ de dibuix i visualitzaci√≥ en frame buffer del frame
 void OnPaint(/*GLFWwindow* window,*/ float time)
 {
-// TODO: Agregue aquÌ su cÛdigo de controlador de mensajes
+// TODO: Agregue aqu√≠ su c√≥digo de controlador de mensajes
 	GLdouble vpv[3] = { 0.0, 0.0, 1.0 };
 
-// Entorn VGI.ImGui: Men˙ ImGui condicionat al color de fons
+// Entorn VGI.ImGui: Men√∫ ImGui condicionat al color de fons
 	if ((c_fons.r < 0.5) || (c_fons.g < 0.5) || (c_fons.b < 0.5))
 		ImGui::StyleColorsLight();
 	else ImGui::StyleColorsDark();
 
-// Entorn VGI: Cridem a les funcions de l'escena i la projecciÛ segons s'hagi 
-// seleccionat una projecciÛ o un altra
+// Entorn VGI: Cridem a les funcions de l'escena i la projecci√≥ segons s'hagi 
+// seleccionat una projecci√≥ o un altra
 	switch (projeccio)
 	{
 	case AXONOM:
-// Entorn VGI: PROJECCI” AXONOM»TRICA
-// Entorn VGI: ActivaciÛ del retall de pantalla
+// Entorn VGI: PROJECCI√ì AXONOM√àTRICA
+// Entorn VGI: Activaci√≥ del retall de pantalla
 		glEnable(GL_SCISSOR_TEST);
 
 // Entorn VGI: Retall
 		glScissor(0, 0, w, h);
 		glViewport(0, 0, w, h);
 
-// AquÌ farem les crides per a definir Viewport, ProjecciÛ i C‡mara: INICI -------------------------
+// Aqu√≠ farem les crides per a definir Viewport, Projecci√≥ i C√†mara: INICI -------------------------
 
-// AquÌ farem les cridesper a definir Viewport, ProjecciÛ i C‡mara:: FI -------------------------
+// Aqu√≠ farem les cridesper a definir Viewport, Projecci√≥ i C√†mara:: FI -------------------------
 // Entorn VGI: Dibuixar Model (escena)
 		configura_Escena();     // Aplicar Transformacions Geometriques segons persiana Transformacio i configurar objectes
 		dibuixa_Escena(time);		// Dibuix geometria de l'escena amb comandes GL.
 
-// Entorn VGI: TransferËncia del buffer OpenGL a buffer de pantalla
+// Entorn VGI: Transfer√®ncia del buffer OpenGL a buffer de pantalla
 		//glfwSwapBuffers(window);
 		break;
 
 	case ORTO:
-// Entorn VGI: PROJECCI” ORTOGR¿FICA
-// Entorn VGI: ActivaciÛ del retall de pantalla
+// Entorn VGI: PROJECCI√ì ORTOGR√ÄFICA
+// Entorn VGI: Activaci√≥ del retall de pantalla
 		glEnable(GL_SCISSOR_TEST);
 
 // Entorn VGI: Retall
@@ -449,11 +449,11 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 		else
 			FonsN();
 
-// Entorn VGI: TO DO -> AquÌ farem les quatre crides a ProjeccioOrto i Ortografica per obtenir 
-//						les quatre vistes ortogr‡fiques. De moment n'activem nomÈs una de prova
+// Entorn VGI: TO DO -> Aqu√≠ farem les quatre crides a ProjeccioOrto i Ortografica per obtenir 
+//						les quatre vistes ortogr√†fiques. De moment n'activem nom√©s una de prova
 //						IMPORTANT: DESCOMENTAR LA RESTA QUAN FUNCIONI LA PRIMERA
 // PLANTA (Inferior Esquerra)
-		// DefiniciÛ de Viewport, ProjecciÛ i C‡mara
+		// Definici√≥ de Viewport, Projecci√≥ i C√†mara
 		ProjectionMatrix = Projeccio_Orto();
 		ViewMatrix = Vista_Ortografica(shader_programID, 0, OPV.R, c_fons, col_obj, objecte, mida, pas, front_faces, oculta,
 			test_vis, back_line, ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
@@ -462,8 +462,8 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 		configura_Escena();     // Aplicar Transformacions Geometriques segons persiana Transformacio i configurar objectes
 		dibuixa_Escena(time);		// Dibuix geometria de l'escena amb comandes GL.
 /*
-// ISOM»TRICA (Inferior Dreta)
-		// DefiniciÛ de Viewport, ProjecciÛ i C‡mara
+// ISOM√àTRICA (Inferior Dreta)
+		// Definici√≥ de Viewport, Projecci√≥ i C√†mara
 		ProjectionMatrix = Projeccio_Orto();
 		ViewMatrix = Vista_Ortografica(shader_programID, 3, OPV.R, c_fons, col_obj, objecte, mida, pas, front_faces, oculta,
 			test_vis, back_line, ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
@@ -472,8 +472,8 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 		configura_Escena();     // Aplicar Transformacions Geometriques segons persiana Transformacio i configurar objectes
 		dibuixa_Escena();		// Dibuix geometria de l'escena amb comandes GL.
 
-// AL«AT (Superior Esquerra)
-		// DefiniciÛ de Viewport, ProjecciÛ i C‡mara
+// AL√áAT (Superior Esquerra)
+		// Definici√≥ de Viewport, Projecci√≥ i C√†mara
 		ProjectionMatrix = Projeccio_Orto();
 		ViewMatrix = Vista_Ortografica(shader_programID, 1, OPV.R, c_fons, col_obj, objecte, mida, pas, front_faces, oculta,
 			test_vis, back_line, ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
@@ -483,33 +483,33 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 	 	  dibuixa_Escena();		// Dibuix geometria de l'escena amb comandes GL.
 
 // PERFIL (Superior Dreta)
-		// DefiniciÛ de Viewport, ProjecciÛ i C‡mara
+		// Definici√≥ de Viewport, Projecci√≥ i C√†mara
 		ProjectionMatrix = Projeccio_Orto();
 		ViewMatrix = Vista_Ortografica(shader_programID, 2, OPV.R, c_fons, col_obj, objecte, mida, pas, front_faces, oculta,
 			test_vis, back_line, ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
 			eixos, grid, hgrid);
 		// Dibuix de l'Objecte o l'Escena
 		configura_Escena();     // Aplicar Transformacions Geom?triques segons persiana Transformacio i configurar objectes
-		  // glScalef();			// Escalat d'objectes, per adequar-los a les vistes ortogr‡fiques (Pr‡ctica 2)
+		  // glScalef();			// Escalat d'objectes, per adequar-los a les vistes ortogr√†fiques (Pr√†ctica 2)
 		dibuixa_Escena();		// Dibuix geometria de l'escena amb comandes GL.
 */
-// Entorn VGI: TransferËncia del buffer OpenGL a buffer de pantalla
+// Entorn VGI: Transfer√®ncia del buffer OpenGL a buffer de pantalla
 		//glfwSwapBuffers(window);
 
 		break;
 
 	case PERSPECT:
-// Entorn VGI: PROJECCI” PERSPECTIVA
+// Entorn VGI: PROJECCI√ì PERSPECTIVA
 		//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Set Perspective Calculations To Most Accurate
-		glDisable(GL_SCISSOR_TEST);		// DesactivaciÛ del retall de pantalla
+		glDisable(GL_SCISSOR_TEST);		// Desactivaci√≥ del retall de pantalla
 
-// Entorn VGI: Activar shader VisualitzaciÛ Escena
+// Entorn VGI: Activar shader Visualitzaci√≥ Escena
 		glUseProgram(shader_programID);
 
-// Entorn VGI: DefiniciÛ de Viewport, ProjecciÛ i C‡mara
+// Entorn VGI: Definici√≥ de Viewport, Projecci√≥ i C√†mara
 		ProjectionMatrix = Projeccio_Perspectiva(shader_programID, 0, 0, w, h, OPV.R);
 
-// Entorn VGI: DefiniciÛ de la c‡mera.
+// Entorn VGI: Definici√≥ de la c√†mera.
 		if (camera == CAM_ESFERICA) {
 				n[0] = 0;		n[1] = 0;		n[2] = 0;
 				ViewMatrix = Vista_Esferica(shader_programID, OPV, Vis_Polar, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, mida, pas,
@@ -558,30 +558,30 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 		configura_Escena();     // Aplicar Transformacions Geometriques segons persiana Transformacio i configurar objectes.
 		dibuixa_Escena(time);		// Dibuix geometria de l'escena amb comandes GL.
 
-// Entorn VGI: TransferËncia del buffer OpenGL a buffer de pantalla
+// Entorn VGI: Transfer√®ncia del buffer OpenGL a buffer de pantalla
 		//glfwSwapBuffers(window);
 		break;
 
 	default:
-// Entorn VGI: C‡rrega SHADERS
-// Entorn VGI: C‡rrega Shader Eixos
+// Entorn VGI: C√†rrega SHADERS
+// Entorn VGI: C√†rrega Shader Eixos
 		if (!eixos_programID) eixos_programID = shaderEixos.loadFileShaders(".\\shaders\\eixos.VERT", ".\\shaders\\eixos.FRAG");
 
-// Entorn VGI: C‡rrega Shader de Gouraud
+// Entorn VGI: C√†rrega Shader de Gouraud
 		if (!shader_programID) shader_programID = shaderLighting.loadFileShaders(".\\shaders\\gouraud_shdrML.vert", ".\\shaders\\gouraud_shdrML.frag");
 
-// Entorn VGI: CreaciÛ de la llista que dibuixar‡ els eixos Coordenades MÛn. FunciÛ on est‡ codi per dibuixar eixos	
-		if (!eixos_Id) eixos_Id = deixos();						// FunciÛ que defineix els Eixos Coordenades MÛn com un VAO.
+// Entorn VGI: Creaci√≥ de la llista que dibuixar√† els eixos Coordenades M√≥n. Funci√≥ on est√† codi per dibuixar eixos	
+		if (!eixos_Id) eixos_Id = deixos();						// Funci√≥ que defineix els Eixos Coordenades M√≥n com un VAO.
 
-// Entorn VGI: Crida a la funciÛ Fons Blanc
+// Entorn VGI: Crida a la funci√≥ Fons Blanc
 		FonsB();
 
-// Entorn VGI: TransferËncia del buffer OpenGL a buffer de pantalla
+// Entorn VGI: Transfer√®ncia del buffer OpenGL a buffer de pantalla
 		//glfwSwapBuffers(window);
 		break;
 }
 
-//  Actualitzar la barra d'estat de l'aplicaciÛ amb els valors R,A,B,PVx,PVy,PVz
+//  Actualitzar la barra d'estat de l'aplicaci√≥ amb els valors R,A,B,PVx,PVy,PVz
 	if (statusB) Barra_Estat();
 }
 
@@ -598,25 +598,25 @@ void dibuixa_Escena(float time) {
 
 	//glUseProgram(shader_programID);
 
-//	Dibuix SkyBox C˙bic.
+//	Dibuix SkyBox C√∫bic.
 	if (SkyBoxCube) dibuixa_Skybox(skC_programID, cubemapTexture, Vis_Polar, ProjectionMatrix, ViewMatrix);
 
-//	Dibuix Coordenades MÛn i Reixes.
+//	Dibuix Coordenades M√≥n i Reixes.
 	dibuixa_Eixos(eixos_programID, eixos, eixos_Id, grid, hgrid, ProjectionMatrix, ViewMatrix);
 
-// Escalat d'objectes, per adequar-los a les vistes ortogr‡fiques (Pr‡ctica 2)
+// Escalat d'objectes, per adequar-los a les vistes ortogr√†fiques (Pr√†ctica 2)
 //	GTMatrix = glm::scale();
 
 //	Dibuix geometria de l'escena amb comandes GL.
 	dibuixa_EscenaGL(shader_programID, eixos, eixos_Id, grid, hgrid, objecte, col_obj, sw_material,
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet,
-		ObOBJ,				// Classe de l'objecte OBJ que contÈ els VAO's
+		ObOBJ,				// Classe de l'objecte OBJ que cont√© els VAO's
 		ViewMatrix, GTMatrix, time, PROPULSIO_NAU);
 }
 
-// Barra_Estat: Actualitza la barra d'estat (Status Bar) de l'aplicaciÛ amb els
-//      valors R,A,B,PVx,PVy,PVz en VisualitzaciÛ Interactiva.
+// Barra_Estat: Actualitza la barra d'estat (Status Bar) de l'aplicaci√≥ amb els
+//      valors R,A,B,PVx,PVy,PVz en Visualitzaci√≥ Interactiva.
 void Barra_Estat()
 {
 	std::string buffer, sss;
@@ -626,19 +626,19 @@ void Barra_Estat()
 // Status Bar fitxer fractal
 	if (nom != "") fprintf(stderr, "Fitxer: %s \n",nom.c_str());
 
-// C‡lcul dels valors per l'opciÛ Vista->Navega
+// C√†lcul dels valors per l'opci√≥ Vista->Navega
 	if (projeccio != CAP && projeccio != ORTO) {
 		if (camera == CAM_ESFERICA)
-		{	// C‡mera EsfËrica
+		{	// C√†mera Esf√®rica
 			OPVAux.R = OPV.R; OPVAux.alfa = OPV.alfa; OPVAux.beta = OPV.beta;
 		}
 		else if (camera == CAM_NAVEGA)
-		{	// C‡mera Navega
+		{	// C√†mera Navega
 			OPVAux.R = sqrt(opvN.x * opvN.x + opvN.y * opvN.y + opvN.z * opvN.z);
 			OPVAux.alfa = (asin(opvN.z / OPVAux.R) * 180) / PI;
 			OPVAux.beta = (atan(opvN.y / opvN.x)) * 180 / PI;
 		}
-		else {	// C‡mera Geode
+		else {	// C√†mera Geode
 			OPVAux.R = OPV_G.R; OPVAux.alfa = OPV_G.alfa; OPVAux.beta = OPV_G.beta;
 		}
 	}
@@ -651,7 +651,7 @@ void Barra_Estat()
 		else if (projeccio == ORTO) buffer = " ORTO   ";
 			else if (camera == CAM_NAVEGA) buffer = " NAV   ";
 				else buffer= std::to_string(OPVAux.R);
-	// Refrescar posiciÛ R Status Bar
+	// Refrescar posici√≥ R Status Bar
 	fprintf(stderr, "R=: %s", buffer.c_str());
 
 // Status Bar angle alfa Origen Punt de Vista
@@ -659,7 +659,7 @@ void Barra_Estat()
 		else if (projeccio == ORTO) buffer = "ORTO   ";
 			else if (camera == CAM_NAVEGA) buffer = " NAV   ";
 				else buffer = std::to_string(OPVAux.alfa);
-	// Refrescar posiciÛ angleh Status Bar
+	// Refrescar posici√≥ angleh Status Bar
 	fprintf(stderr, " a=: %s", buffer.c_str());
 
 	// Status Bar angle beta Origen Punt de Vista
@@ -667,10 +667,10 @@ void Barra_Estat()
 		else if (projeccio == ORTO) buffer = "ORTO   ";
 			else if (camera == CAM_NAVEGA) buffer = " NAV   ";
 				else buffer = std::to_string(OPVAux.beta);
-	// Refrescar posiciÛ anglev Status Bar
-	fprintf(stderr, " ﬂ=: %s  ", buffer.c_str());
+	// Refrescar posici√≥ anglev Status Bar
+	fprintf(stderr, " √ü=: %s  ", buffer.c_str());
 
-// TransformaciÛ PV de Coord. esfËriques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
+// Transformaci√≥ PV de Coord. esf√®riques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
 	if (camera == CAM_NAVEGA) { PVx = opvN.x; PVy = opvN.y; PVz = opvN.z; }
 	else {	if (Vis_Polar == POLARZ) 
 			{	PVx = OPVAux.R * cos(OPVAux.beta * PI / 180) * cos(OPVAux.alfa * PI / 180);
@@ -693,7 +693,7 @@ void Barra_Estat()
 	else if (pan) buffer = std::to_string(tr_cpv.x);
 	else buffer = std::to_string(PVx);
 	//sss = _T("PVx=") + buffer;
-// Refrescar posiciÛ PVx Status Bar
+// Refrescar posici√≥ PVx Status Bar
 	fprintf(stderr, "PVx= %s", buffer.c_str());
 
 // Status Bar PVy
@@ -701,7 +701,7 @@ void Barra_Estat()
 	else if (pan) buffer = std::to_string(tr_cpv.y);
 	else buffer = std::to_string(PVy);
 	//sss = "PVy=" + buffer;
-// Refrescar posiciÛ PVy Status Bar
+// Refrescar posici√≥ PVy Status Bar
 	fprintf(stderr, " PVy= %s", buffer.c_str());
 
 // Status Bar PVz
@@ -709,7 +709,7 @@ void Barra_Estat()
 	else if (pan) buffer = std::to_string(tr_cpv.z);
 	else buffer = std::to_string(PVz);
 	//sss = "PVz=" + buffer;
-// Refrescar posiciÛ PVz Status Bar
+// Refrescar posici√≥ PVz Status Bar
 	fprintf(stderr, " PVz= %s \n", buffer.c_str());
 
 // Status Bar per indicar el modus de canvi de color (FONS o OBJECTE)
@@ -719,10 +719,10 @@ void Barra_Estat()
 			else if (camera == CAM_NAVEGA) sss = "NAV ";
 				else if (sw_color) sss = "OBJ ";
 					else sss = "FONS ";
-// Refrescar posiciÛ Transformacions en Status Bar
+// Refrescar posici√≥ Transformacions en Status Bar
 	fprintf(stderr, "%s ", sss.c_str());
 
-// Status Bar per indicar tipus de TransformaciÛ (TRAS, ROT, ESC)
+// Status Bar per indicar tipus de Transformaci√≥ (TRAS, ROT, ESC)
 	sss = " ";
 	if (transf) {	if (rota) sss = "ROT";
 					else if (trasl) sss = "TRA";
@@ -738,10 +738,10 @@ void Barra_Estat()
 		else if (fonsG) sss = "   G ";
 		else if (fonsB) sss = "      B";
 	}
-// Refrescar posiciÛ Transformacions en Status Bar
+// Refrescar posici√≥ Transformacions en Status Bar
 	fprintf(stderr, "%s ", sss.c_str());
 
-// Status Bar dels par‡metres de TransformaciÛ, Color i posicions de Robot i Cama
+// Status Bar dels par√†metres de Transformaci√≥, Color i posicions de Robot i Cama
 	sss = " ";
 	if (transf)
 	{	if (rota)
@@ -800,7 +800,7 @@ void Barra_Estat()
 		}
 	}
 
-// Refrescar posiciÛ PVz Status Bar
+// Refrescar posici√≥ PVz Status Bar
 	fprintf(stderr, "%s \n", sss.c_str());
 
 // Status Bar per indicar el pas del Fractal
@@ -839,7 +839,7 @@ void draw_Menu_ImGui()
 		ImGui::End();
 	}
 
-	// 1. Show the EntornVGI window. Finestra amb totes les opcions de l'aplicaciÛ.
+	// 1. Show the EntornVGI window. Finestra amb totes les opcions de l'aplicaci√≥.
 	if (show_EntornVGI_window)
 		ShowEntornVGIWindow(&show_EntornVGI_window); //ShowEntornVGIWindow(&show_EntornVGI_window);
 
@@ -878,8 +878,8 @@ void draw_Menu_ImGui()
 		ImGui::Begin("Opcions", &show_user_windows, window_flags+ ImGuiWindowFlags_NoBringToFrontOnFocus);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 		
 		// Configura els colors i l'estil
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botÛ (blanc)
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolÌ (grisa clara)
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del bot√≥ (blanc)
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratol√≠ (grisa clara)
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
 
 		// Arrodoniment
@@ -898,7 +898,7 @@ void draw_Menu_ImGui()
 
 		//ImGui::SetNextWindowPos(ImVec2(0, 0));
 		
-		// Calcula la posiciÛ per centrar la finestra a la pantalla
+		// Calcula la posici√≥ per centrar la finestra a la pantalla
 		ImVec2 windowPos = ImVec2(
 			(screenSize.x - windowSize.x) * 0.5f,
 			(screenSize.y - windowSize.y)-50 
@@ -911,13 +911,13 @@ void draw_Menu_ImGui()
 
 		// Afegeix el text amb mida augmentada
 		//ImGui::PushFont(font); 
-		//ImGui::Text("Text amb mida augmentada"); // El text utilitzar‡ la font carregada
+		//ImGui::Text("Text amb mida augmentada"); // El text utilitzar√† la font carregada
 		//ImGui::PopFont();
 		// Restaura l'estil de color del text
 		ImGui::PopStyleColor();
-		// Mida del botÛ
+		// Mida del bot√≥
 		if (ImGui::Button("Iniciar Simulador", ImVec2(200, 55))) {
-			// AcciÛ del botÛ
+			// Acci√≥ del bot√≥
 		}
 
 		// Restaura l'estil
@@ -941,7 +941,7 @@ void draw_Menu_ImGui()
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		// TransformaciÛ PV de Coord. esfËriques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
+		// Transformaci√≥ PV de Coord. esf√®riques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
 		if (camera == CAM_NAVEGA) { PV[0] = opvN.x; PV[1] = opvN.y; PV[2] = opvN.z; }
 		else {
 			cam_Esferica[0] = OPV.R;	cam_Esferica[1] = OPV.alfa; cam_Esferica[2] = OPV.beta;
@@ -1088,7 +1088,7 @@ void ShowArxiusOptions()
 			objecte = OBJOBJ;	textura = true;		tFlag_invert_Y = false;
 			//char* nomfitx = nomfitxer;
 			if (ObOBJ == NULL) ObOBJ = ::new COBJModel;
-			else { // Si inst‡ncia ja s'ha utilitzat en un objecte OBJ
+			else { // Si inst√†ncia ja s'ha utilitzat en un objecte OBJ
 				ObOBJ->netejaVAOList_OBJ();		// Netejar VAO, EBO i VBO
 				ObOBJ->netejaTextures_OBJ();	// Netejar buffers de textures
 				}
@@ -1096,7 +1096,7 @@ void ShowArxiusOptions()
 			//int error = ObOBJ->LoadModel(nomfitx);			// Carregar objecte OBJ amb textura com a varis VAO's
 			int error = ObOBJ->LoadModel(nomFitxer);			// Carregar objecte OBJ amb textura com a varis VAO's
 
-			//	Pas de par‡metres textura al shader
+			//	Pas de par√†metres textura al shader
 			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
 			if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
 
@@ -1164,27 +1164,27 @@ void ShowAboutWindow(bool* p_open)
 	ImGui::End();
 }
 
-// Entorn VGI: FunciÛ que retorna opciÛ de men˙ TIPUS CAMERA segons variable camera (si modificada per teclat)
+// Entorn VGI: Funci√≥ que retorna opci√≥ de men√∫ TIPUS CAMERA segons variable camera (si modificada per teclat)
 int shortCut_Camera()
 {
 	int auxCamera;
 
-	// Entorn VGI. GestiÛ opcions desplegable TIPUS CAMERA segons el valor de la variable selected
+	// Entorn VGI. Gesti√≥ opcions desplegable TIPUS CAMERA segons el valor de la variable selected
 	switch (camera)
 	{
-	case CAM_ESFERICA:	// C‡mera ESF»RICA
+	case CAM_ESFERICA:	// C√†mera ESF√àRICA
 		auxCamera = 0;
 		break;
-	case CAM_NAVEGA:	// C‡mera NAVEGA
+	case CAM_NAVEGA:	// C√†mera NAVEGA
 		auxCamera = 1;
 		break;
-	case CAM_GEODE:		// C‡mera GEODE
+	case CAM_GEODE:		// C√†mera GEODE
 		auxCamera = 2;
 		break;
-	case CAM_NAU:		// C‡mera NAU
+	case CAM_NAU:		// C√†mera NAU
 		auxCamera = 3;
 		break;
-	default:			// OpciÛ C¿MERA <Altres C‡meres>
+	default:			// Opci√≥ C√ÄMERA <Altres C√†meres>
 		auxCamera = 0;
 		break;
 	}
@@ -1192,39 +1192,39 @@ int shortCut_Camera()
 }
 
 
-// Entorn VGI: FunciÛ que retorna opciÛ de men˙ TIPUS PROJECCIO segons variable projecte (si modificada per teclat)
+// Entorn VGI: Funci√≥ que retorna opci√≥ de men√∫ TIPUS PROJECCIO segons variable projecte (si modificada per teclat)
 int shortCut_Projeccio()
 {
 	int auxProjeccio;
 
-	// Entorn VGI. GestiÛ opcions desplegable TIPUS PROJECCIO segons el valor de la variable selected
+	// Entorn VGI. Gesti√≥ opcions desplegable TIPUS PROJECCIO segons el valor de la variable selected
 	switch (projeccio)
 	{
 	case CAP:	// Projeccio CAP
 		auxProjeccio = 0;
 		break;
-	case AXONOM:		// Projeccio AXONOM»TRICA
+	case AXONOM:		// Projeccio AXONOM√àTRICA
 		auxProjeccio = 1;
 		break;
-	case ORTO:			// Projeccio ORTOGR¿FICA
+	case ORTO:			// Projeccio ORTOGR√ÄFICA
 		auxProjeccio = 2;
 		break;
 	case PERSPECT:		// Projeccio PERSPECTIVA
 		auxProjeccio = 3;
 		break;
-	default:			// OpciÛ PROJECCI” <Altres Projeccions>
+	default:			// Opci√≥ PROJECCI√ì <Altres Projeccions>
 		auxProjeccio = 0;
 		break;
 	}
 	return auxProjeccio;
 }
 
-// Entorn VGI: FunciÛ que retorna opciÛ de men˙ Objecte segons variable objecte (si modificada per teclat)
+// Entorn VGI: Funci√≥ que retorna opci√≥ de men√∫ Objecte segons variable objecte (si modificada per teclat)
 int shortCut_Objecte()
 {
 	int auxObjecte;
 
-// Entorn VGI. GestiÛ opcions desplegable OBJECTES segons el valor de la variable selected
+// Entorn VGI. Gesti√≥ opcions desplegable OBJECTES segons el valor de la variable selected
 	switch (objecte)
 	{
 	case CAP:			// Objecte CAP
@@ -1283,19 +1283,19 @@ int shortCut_Objecte()
 	case SHIP:
 		auxObjecte = 21; break;
 
-	default:			// OpciÛ OBJECTE <Altres Objectes>
+	default:			// Opci√≥ OBJECTE <Altres Objectes>
 		auxObjecte = 0;
 		break;
 	}
 	return auxObjecte;
 }
 
-// Entorn VGI: FunciÛ que retorna opciÛ de men˙ TIPUS ILUMINACIO segons variable ilumina (si modificada per teclat)
+// Entorn VGI: Funci√≥ que retorna opci√≥ de men√∫ TIPUS ILUMINACIO segons variable ilumina (si modificada per teclat)
 int shortCut_Iluminacio()
 {
 	int auxIlumina;
 
-// Entorn VGI. GestiÛ opcions desplegable OBJECTES segons el valor de la variable selected
+// Entorn VGI. Gesti√≥ opcions desplegable OBJECTES segons el valor de la variable selected
 	switch (ilumina)
 	{
 	case PUNTS:		// Ilumninacio PUNTS
@@ -1310,7 +1310,7 @@ int shortCut_Iluminacio()
 	case SUAU:	// Iluminacio SUAU
 		auxIlumina = 3;
 		break;
-	default:		 // OpciÛ Iluminacio <Altres Iluminacio>
+	default:		 // Opci√≥ Iluminacio <Altres Iluminacio>
 		auxIlumina = 0;
 		break;
 	}
@@ -1323,7 +1323,7 @@ int shortCut_Iluminacio()
 // You may then search for keywords in the code when you are interested by a specific feature.
 void ShowEntornVGIWindow(bool* p_open)
 {
-	int i = 0; // Variable per a men˙s de selecciÛ.
+	int i = 0; // Variable per a men√∫s de selecci√≥.
 	static int selected = -1;
 
 // Exceptionally add an extra assert here for people confused about initial Dear ImGui setup
@@ -1484,7 +1484,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		// EntornVGI: Si s'ha apretat el botÛ "Origen EsfËrica"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Origen Esf√®rica"
 		if (clickCE)
 		{
 			clickCE = 0;
@@ -1499,7 +1499,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		// EntornVGI: Si s'ha apretat el botÛ "Origen Navega"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Origen Navega"
 		if (clickCN)
 		{
 			clickCN = 0;
@@ -1516,11 +1516,11 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		// EntornVGI: Si s'ha apretat el botÛ "Origen Geode"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Origen Geode"
 		if (clickCG)
 		{	clickCG = 0;
 			if (camera == CAM_GEODE) {
-				OPV.R = 0.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;				// Origen PV en esfËriques
+				OPV.R = 0.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;				// Origen PV en esf√®riques
 				mobil = true;		zzoom = true;	zzoomO = false;	 satelit = false;	pan = false;
 				Vis_Polar = POLARZ;	llumGL[5].encesa = true;
 				glFrontFace(GL_CW);
@@ -1531,7 +1531,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::RadioButton("Nau (n/a)", &oCamera, 3); ImGui::SameLine();
 		if (ImGui::Button("Origen Nau")) clickCNa++;
 
-		// EntornVGI: Si s'ha apretat el botÛ "Origen Geode"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Origen Geode"
 		if (clickCNa)
 		{
 			clickCNa = 0;
@@ -1545,26 +1545,26 @@ void ShowEntornVGIWindow(bool* p_open)
 			}
 		}
 
-		// Entorn VGI. GestiÛ opcions desplegable OBJECTES segons el valor de la variable selected
+		// Entorn VGI. Gesti√≥ opcions desplegable OBJECTES segons el valor de la variable selected
 		switch (oCamera)
 		{
-		case 0: // OpciÛ CAMERA EsfËrica
+		case 0: // Opci√≥ CAMERA Esf√®rica
 			if ((projeccio != ORTO) && (projeccio != CAP)) camera = CAM_ESFERICA;
-			// ActivaciÛ de zoom, mobil
+			// Activaci√≥ de zoom, mobil
 			mobil = true;	zzoom = true;
 			break;
-		case 1: // OpciÛ CAMERA Navega
+		case 1: // Opci√≥ CAMERA Navega
 			if ((projeccio != ORTO) && (projeccio != CAP))
 				{	camera = CAM_NAVEGA;
-					// DesactivaciÛ de zoom, mobil, Transformacions GeomËtriques via mouse i pan 
+					// Desactivaci√≥ de zoom, mobil, Transformacions Geom√®triques via mouse i pan 
 					//		si navega activat
 					mobil = true;	zzoom = true;
 					transX = false;	transY = false;	transZ = false;
 					//pan = false;
-					tr_cpv.x = 0.0;		tr_cpv.y = 0.0;		tr_cpv.z = 0.0;		// Inicialitzar a 0 desplaÁament de pantalla
-					tr_cpvF.x = 0.0;	tr_cpvF.y = 0.0;	tr_cpvF.x = 0.0;	// Inicialitzar a 0 desplaÁament de pantalla
+					tr_cpv.x = 0.0;		tr_cpv.y = 0.0;		tr_cpv.z = 0.0;		// Inicialitzar a 0 despla√ßament de pantalla
+					tr_cpvF.x = 0.0;	tr_cpvF.y = 0.0;	tr_cpvF.x = 0.0;	// Inicialitzar a 0 despla√ßament de pantalla
 
-					// Incialitzar variables Navega segons configuraciÛ eixos en Polars
+					// Incialitzar variables Navega segons configuraci√≥ eixos en Polars
 					if (Vis_Polar == POLARZ) {
 						opvN.x = 10.0;	opvN.y = 0.0;	opvN.z = 0.0; // opvN = (10,0,0)
 						n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
@@ -1582,22 +1582,22 @@ void ShowEntornVGIWindow(bool* p_open)
 											}
 				}
 			break;
-		case 2:	// OpciÛ CAMERA Geode
+		case 2:	// Opci√≥ CAMERA Geode
 			if ((projeccio != ORTO) && (projeccio != CAP))
 				{	camera = CAM_GEODE;
-					// Inicialitzar par‡metres C‡mera Geode
-					OPV.R = 0.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;				// Origen PV en esfËriques
+					// Inicialitzar par√†metres C√†mera Geode
+					OPV.R = 0.0;		OPV.alfa = 0.0;		OPV.beta = 0.0;				// Origen PV en esf√®riques
 					mobil = true;	zzoom = true;	zzoomO = false;	 satelit = false;	pan = false;
 					Vis_Polar = POLARZ;
 					llumGL[5].encesa = true;
 				}
 			break;
-		case 3: // OpciÛ CAMERA Nau
+		case 3: // Opci√≥ CAMERA Nau
 			if ((projeccio != ORTO) && (projeccio != CAP)) camera = CAM_NAU;
-			// ActivaciÛ de zoom, mobil
+			// Activaci√≥ de zoom, mobil
 			mobil = true;	zzoom = true;
 			break;
-		default: // OpciÛ PROJECCI” <Altres Projeccions>
+		default: // Opci√≥ PROJECCI√ì <Altres Projeccions>
 			break;
 		}
 
@@ -1612,30 +1612,30 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::RadioButton("Polars Y (<Shift>+Y)", &oPolars, 1); ImGui::SameLine();
 		ImGui::RadioButton("Polars Z (<Shift>+Z)", &oPolars, 2);
 
-		// Entorn VGI. GestiÛ opcions desplegable OBJECTES segons el valor de la variable selected
+		// Entorn VGI. Gesti√≥ opcions desplegable OBJECTES segons el valor de la variable selected
 		switch (oPolars)
 		{
-		case 0: // OpciÛ POLARS X
+		case 0: // Opci√≥ POLARS X
 			if ((camera == CAM_ESFERICA) || (camera == CAM_NAVEGA)) Vis_Polar = POLARX;
-			// EntornVGI: Inicialitzar la c‡mera en l'opciÛ NAVEGA (posiciÛ i orientaciÛ eixos)
+			// EntornVGI: Inicialitzar la c√†mera en l'opci√≥ NAVEGA (posici√≥ i orientaci√≥ eixos)
 			if (camera == CAM_NAVEGA) {
 				opvN.x = 0.0;	opvN.y = 10.0;	opvN.z = 0.0;	 // opvN = (0,10,0)
 				n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
 				angleZ = 0.0;
 				}
 			break;
-		case 1: // OpciÛ POLARS Y
+		case 1: // Opci√≥ POLARS Y
 			if ((camera == CAM_ESFERICA) || (camera == CAM_NAVEGA)) Vis_Polar = POLARY;
-			// EntornVGI: Inicialitzar la c‡mera en l'opciÛ NAVEGA (posiciÛ i orientaciÛ eixos)
+			// EntornVGI: Inicialitzar la c√†mera en l'opci√≥ NAVEGA (posici√≥ i orientaci√≥ eixos)
 			if (camera == CAM_NAVEGA) {
 				opvN.x = 0.0;	opvN.y = 0.0;	opvN.z = 10.0; // opvN = (0,0,10)
 				n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
 				angleZ = 0.0;
 				}
 			break;
-		case 2:	// OpciÛ POLARS Z
+		case 2:	// Opci√≥ POLARS Z
 			if ((camera == CAM_ESFERICA) || (camera == CAM_NAVEGA)) Vis_Polar = POLARZ;
-			// EntornVGI: Inicialitzar la c‡mera en l'opciÛ NAVEGA (posiciÛ i orientaciÛ eixos)
+			// EntornVGI: Inicialitzar la c√†mera en l'opci√≥ NAVEGA (posici√≥ i orientaci√≥ eixos)
 			if (camera == CAM_NAVEGA) {
 				opvN.x = 10.0;	opvN.y = 0.0;	opvN.z = 0.0; // opvN = (10,0,0)
 				n[0] = 0.0;		n[1] = 0.0;		n[2] = 0.0;
@@ -1659,10 +1659,10 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::Separator();
 
 		if (SkyBoxCube) {
-			// C‡rrega Shader Skybox
+			// C√†rrega Shader Skybox
 			if (!skC_programID) skC_programID = shader_SkyBoxC.loadFileShaders(".\\shaders\\skybox.VERT", ".\\shaders\\skybox.FRAG");
 
-			// C‡rrega VAO Skybox Cube
+			// C√†rrega VAO Skybox Cube
 			if (skC_VAOID.vaoId == 0) skC_VAOID = loadCubeSkybox_VAO();
 			Set_VAOList(CUBE_SKYBOX, skC_VAOID);
 
@@ -1723,30 +1723,30 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::RadioButton("Ortografica (<Shift>+O)", &oProjeccio, 2); ImGui::SameLine();
 		ImGui::RadioButton("Perspectiva (<Shift>+P)", &oProjeccio, 3);
 
-		// Entorn VGI. GestiÛ opcions desplegable OBJECTES segons el valor de la variable selected
+		// Entorn VGI. Gesti√≥ opcions desplegable OBJECTES segons el valor de la variable selected
 		switch (oProjeccio)
 		{
-		case 1: // OpciÛ PROJECCI” AxonomËtrica
+		case 1: // Opci√≥ PROJECCI√ì Axonom√®trica
 			if (projeccio != AXONOM) {
 				projeccio = AXONOM;
 				mobil = true;			zzoom = true;
 			}
 			break;
 
-		case 2: // OpciÛ PROJECCI” Ortogr‡fica
+		case 2: // Opci√≥ PROJECCI√ì Ortogr√†fica
 			if (projeccio != ORTO) {
 				projeccio = ORTO;
 				mobil = false;			zzoom = false;	zzoom = true;
 			}
 			break;
 
-		case 3:	// OpciÛ PROJECCI” Perspectiva
+		case 3:	// Opci√≥ PROJECCI√ì Perspectiva
 			if (projeccio != PERSPECT) {
 				projeccio = PERSPECT;
 				mobil = true;			zzoom = true;
 			}break;
 
-		default: // OpciÛ PROJECCI” <Altres Projeccions>
+		default: // Opci√≥ PROJECCI√ì <Altres Projeccions>
 			break;
 		}
 	}
@@ -1823,100 +1823,100 @@ void ShowEntornVGIWindow(bool* p_open)
 		nfdchar_t* nomFitxer = NULL;
 		nfdresult_t result; // = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
-// Entorn VGI. GestiÛ opcions desplegable OBJECTES segons el valor de la variable selected
+// Entorn VGI. Gesti√≥ opcions desplegable OBJECTES segons el valor de la variable selected
 		switch (oObjecte)
 		{
-		case 0: // OpciÛ OBJECTE Cap
+		case 0: // Opci√≥ OBJECTE Cap
 			if (objecte != CAP) {
 				objecte = CAP;
 				netejaVAOList();											// Neteja Llista VAO.
 			}
 			break;
-		case 1: // OpciÛ OBJECTE Cub
+		case 1: // Opci√≥ OBJECTE Cub
 			if (objecte != CUB) {
 				objecte = CUB;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 				netejaVAOList();											// Neteja Llista VAO.
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
-				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Genera EBO de cub mida 1 i el guarda a la posiciÛ GLUT_CUBE.
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Genera EBO de cub mida 1 i el guarda a la posici√≥ GLUT_CUBE.
 			}
 			break;
-		case 2:	// OpciÛ OBJECTE Cub RGB
+		case 2:	// Opci√≥ OBJECTE Cub RGB
 			if (objecte != CUB_RGB) {
 				objecte = CUB_RGB;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 				netejaVAOList();						// Neteja Llista VAO.
-				Set_VAOList(GLUT_CUBE_RGB, loadglutSolidCubeRGB_EBO(1.0));	// Genera EBO de cub mida 1 i el guarda a la posiciÛ GLUT_CUBE_RGB.
+				Set_VAOList(GLUT_CUBE_RGB, loadglutSolidCubeRGB_EBO(1.0));	// Genera EBO de cub mida 1 i el guarda a la posici√≥ GLUT_CUBE_RGB.
 			}
 			break;
-		case 3: // OpciÛ OBJECTE Esfera
+		case 3: // Opci√≥ OBJECTE Esfera
 			if (objecte != ESFERA) {
 				objecte = ESFERA;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 				netejaVAOList();						// Neteja Llista VAO.
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1.0, 30, 30));
 			}
 			break;
-		case 4: // OpciÛ OBJECTE Tetera
+		case 4: // Opci√≥ OBJECTE Tetera
 			if (objecte != TETERA) {
 				objecte = TETERA;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 				netejaVAOList();						// Neteja Llista VAO.
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 				//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
-				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO()); //Genera VAO tetera mida 1 i el guarda a la posiciÛ GLUT_TEAPOT.
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO()); //Genera VAO tetera mida 1 i el guarda a la posici√≥ GLUT_TEAPOT.
 			}
 			break;
-		case 5: // OpciÛ OBJECTE Arc
+		case 5: // Opci√≥ OBJECTE Arc
 			if (objecte != ARC) {
 				objecte = ARC;
 				color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 
-				// C‡rrega dels VAO's per a construir objecte ARC
+				// C√†rrega dels VAO's per a construir objecte ARC
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				//if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
-				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// C‡rrega Cub de costat 1 com a EBO a la posiciÛ GLUT_CUBE.
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// C√†rrega Cub de costat 1 com a EBO a la posici√≥ GLUT_CUBE.
 
 				//if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
-				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// C‡rrega Esfera a la posiciÛ GLU_SPHERE.
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// C√†rrega Esfera a la posici√≥ GLU_SPHERE.
 
 				//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
-				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posiciÛ GLUT_TEAPOT.
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posici√≥ GLUT_TEAPOT.
 
 				//if (Get_VAOId(MAR_FRACTAL_VAO) != 0) deleteVAOList(MAR_FRACTAL_VAO);
-				Set_VAOList(MAR_FRACTAL_VAO, loadSea_VAO(color_Mar));		// Carrega Mar a la posiciÛ MAR_FRACTAL_VAO.
+				Set_VAOList(MAR_FRACTAL_VAO, loadSea_VAO(color_Mar));		// Carrega Mar a la posici√≥ MAR_FRACTAL_VAO.
 			}
 			break;
-		case 6: // OpciÛ OBJECTE MatrVAOiu Primitives
+		case 6: // Opci√≥ OBJECTE MatrVAOiu Primitives
 			objecte = MATRIUP;
 			break;
-		case 7: // OpciÛ OBJECTE Matriu Primitives VAO
+		case 7: // Opci√≥ OBJECTE Matriu Primitives VAO
 			if (objecte != MATRIUP_VAO) {
 				objecte = MATRIUP_VAO;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 
-				// C‡rrega dels VAO's per a construir objecte ARC
+				// C√†rrega dels VAO's per a construir objecte ARC
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
@@ -1932,61 +1932,61 @@ void ShowEntornVGIWindow(bool* p_open)
 				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1.0, 20, 20));
 			}
 			break;
-		case 8: // OpciÛ OBJECTE Tie
+		case 8: // Opci√≥ OBJECTE Tie
 			if (objecte != TIE) {
 				objecte = TIE;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 
-				// C‡rrega dels VAO's per a construir objecte TIE
+				// C√†rrega dels VAO's per a construir objecte TIE
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				//if (Get_VAOId(GLU_CYLINDER) != 0) deleteVAOList(GLU_CYLINDER);
-				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(5.0f, 5.0f, 0.5f, 6, 1));// C‡rrega cilindre com a VAO.
+				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(5.0f, 5.0f, 0.5f, 6, 1));// C√†rrega cilindre com a VAO.
 
 				//if (Get_VAOId(GLU_DISK) != 0)deleteVAOList(GLU_DISK);
-				Set_VAOList(GLU_DISK, loadgluDisk_EBO(0.0f, 5.0f, 6, 1));	// C‡rrega disc com a VAO
+				Set_VAOList(GLU_DISK, loadgluDisk_EBO(0.0f, 5.0f, 6, 1));	// C√†rrega disc com a VAO
 
 				//if (Get_VAOId(GLU_SPHERE) != 0)deleteVAOList(GLU_SPHERE);
-				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(10.0f, 80, 80));	// C‡rrega disc com a VAO
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(10.0f, 80, 80));	// C√†rrega disc com a VAO
 
 				//if (Get_VAOId(GLUT_USER1) != 0)deleteVAOList(GLUT_USER1);
-				Set_VAOList(GLUT_USER1, loadgluCylinder_EBO(5.0f, 5.0f, 2.0f, 6, 1)); // C‡rrega cilindre com a VAO
+				Set_VAOList(GLUT_USER1, loadgluCylinder_EBO(5.0f, 5.0f, 2.0f, 6, 1)); // C√†rrega cilindre com a VAO
 
 				//if (Get_VAOId(GLUT_CUBE) != 0)deleteVAOList(GLUT_CUBE);
-				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));			// C‡rrega cub com a EBO
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));			// C√†rrega cub com a EBO
 
 				//if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
 				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(1.0, 5.0, 20, 20));
 
 				//if (Get_VAOId(GLUT_USER2) != 0)deleteVAOList(GLUT_USER2);	
-				Set_VAOList(GLUT_USER2, loadgluCylinder_EBO(1.0f, 0.5f, 5.0f, 60, 1)); // C‡rrega cilindre com a VAO
+				Set_VAOList(GLUT_USER2, loadgluCylinder_EBO(1.0f, 0.5f, 5.0f, 60, 1)); // C√†rrega cilindre com a VAO
 
 				//if (Get_VAOId(GLUT_USER3) != 0)deleteVAOList(GLUT_USER3);
-				Set_VAOList(GLUT_USER3, loadgluCylinder_EBO(0.35f, 0.35f, 5.0f, 80, 1)); // C‡rrega cilindre com a VAO
+				Set_VAOList(GLUT_USER3, loadgluCylinder_EBO(0.35f, 0.35f, 5.0f, 80, 1)); // C√†rrega cilindre com a VAO
 
 				//if (Get_VAOId(GLUT_USER4) != 0)deleteVAOList(GLUT_USER4);
-				Set_VAOList(GLUT_USER4, loadgluCylinder_EBO(4.0f, 2.0f, 10.25f, 40, 1)); // C‡rrega cilindre com a VAO
+				Set_VAOList(GLUT_USER4, loadgluCylinder_EBO(4.0f, 2.0f, 10.25f, 40, 1)); // C√†rrega cilindre com a VAO
 
 				//if (Get_VAOId(GLUT_USER5) != 0) deleteVAOList(GLUT_USER5);
-				Set_VAOList(GLUT_USER5, loadgluCylinder_EBO(1.5f, 4.5f, 2.0f, 8, 1)); // C‡rrega cilindre com a VAO
+				Set_VAOList(GLUT_USER5, loadgluCylinder_EBO(1.5f, 4.5f, 2.0f, 8, 1)); // C√†rrega cilindre com a VAO
 
 				//if (Get_VAOId(GLUT_USER6) != 0) deleteVAOList(GLUT_USER6);
-				Set_VAOList(GLUT_USER6, loadgluDisk_EBO(0.0f, 1.5f, 8, 1)); // C‡rrega disk com a VAO
+				Set_VAOList(GLUT_USER6, loadgluDisk_EBO(0.0f, 1.5f, 8, 1)); // C√†rrega disk com a VAO
 			}
 			break;
-		case 9: // OpciÛ OBJECTE Arxiu OBJ
+		case 9: // Opci√≥ OBJECTE Arxiu OBJ
 			objecte = OBJOBJ;
 			textura = true;
 			break;
-		case 10: // OpciÛ OBJECTE CORBA BEZIER
+		case 10: // Opci√≥ OBJECTE CORBA BEZIER
 			if (objecte != C_BEZIER) {
 				nomFitxer = NULL;
-				// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.CRV)
+				// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.CRV)
 				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
 				if (result == NFD_OKAY) {
@@ -1997,25 +1997,25 @@ void ShowEntornVGIWindow(bool* p_open)
 					npts_T = llegir_ptsC(nomFitxer);
 					free(nomFitxer);
 
-					// C‡rrega dels VAO's per a construir la corba Bezier
+					// C√†rrega dels VAO's per a construir la corba Bezier
 					netejaVAOList();						// Neteja Llista VAO.
 
 					// Posar color objecte (col_obj) al vector de colors del VAO.
 					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 					// Definir Esfera EBO per a indicar punts de control de la corba
-					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Genera esfera i la guarda a la posiciÛ GLUT_CUBE.
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Genera esfera i la guarda a la posici√≥ GLUT_CUBE.
 
 					// Definir Corba Bezier com a VAO
-						//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
-					Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
+						//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
+					Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
 				}
 			}
 			break;
-		case 11: // OpciÛ OBJECTE CORBA B-SPLINE
+		case 11: // Opci√≥ OBJECTE CORBA B-SPLINE
 			if (objecte != C_BSPLINE) {
 				nomFitxer = NULL;
-				// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.CRV)
+				// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.CRV)
 				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
 				if (result == NFD_OKAY) {
@@ -2026,40 +2026,40 @@ void ShowEntornVGIWindow(bool* p_open)
 					npts_T = llegir_ptsC(nomFitxer);
 					free(nomFitxer);
 
-					// C‡rrega dels VAO's per a construir la corba BSpline
+					// C√†rrega dels VAO's per a construir la corba BSpline
 					netejaVAOList();						// Neteja Llista VAO.
 
 					// Posar color objecte (col_obj) al vector de colors del VAO.
 					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 					// Definir Esfera EBO per a indicar punts de control de la corba
-					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posiciÛ GLUT_CUBE.
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posici√≥ GLUT_CUBE.
 
 					// Definr Corba BSpline com a VAO
-						//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
-					Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
+						//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
+					Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
 					}
 				}
 			break;
-		case 12: // OpciÛ OBJECTE CORBA LEMNISCATA
+		case 12: // Opci√≥ OBJECTE CORBA LEMNISCATA
 			if (objecte != C_LEMNISCATA) {
 				objecte = C_LEMNISCATA;		sw_material[4] = true;
 
-				// C‡rrega dels VAO's per a construir la corba Bezier
+				// C√†rrega dels VAO's per a construir la corba Bezier
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				// Definr Corba Lemniscata 3D com a VAO
-					//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
-				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
+					//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
 				}
 			break;
-		case 13: // OpciÛ OBJECTE CORBA HERMITTE
+		case 13: // Opci√≥ OBJECTE CORBA HERMITTE
 			if (objecte != C_HERMITTE) {
 				nomFitxer = NULL;
-				// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.CRV)
+				// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.CRV)
 				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
 				if (result == NFD_OKAY) {
@@ -2070,25 +2070,25 @@ void ShowEntornVGIWindow(bool* p_open)
 					npts_T = llegir_ptsC(nomFitxer);
 					free(nomFitxer);
 
-					// C‡rrega dels VAO's per a construir la corba BSpline
+					// C√†rrega dels VAO's per a construir la corba BSpline
 					netejaVAOList();						// Neteja Llista VAO.
 
 					// Posar color objecte (col_obj) al vector de colors del VAO.
 					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 					// Definir Esfera EBO per a indicar punts de control de la corba
-					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posiciÛ GLUT_CUBE.
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posici√≥ GLUT_CUBE.
 
 					// Definr Corba Hermitte com a VAO
-					//Set_VAOList(CRV_HERMITTE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
-					Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
+					//Set_VAOList(CRV_HERMITTE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
+					Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
 					}
 				}
 			break;
-		case 14: // OpciÛ OBJECTE CORBA CATMULL-ROM
+		case 14: // Opci√≥ OBJECTE CORBA CATMULL-ROM
 			if (objecte != C_CATMULL_ROM) {
 				nomFitxer = NULL;
-				// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.CRV)
+				// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.CRV)
 				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
 				if (result == NFD_OKAY) {
@@ -2099,18 +2099,18 @@ void ShowEntornVGIWindow(bool* p_open)
 					npts_T = llegir_ptsC(nomFitxer);
 					free(nomFitxer);
 
-					// C‡rrega dels VAO's per a construir la corba BSpline
+					// C√†rrega dels VAO's per a construir la corba BSpline
 					netejaVAOList();						// Neteja Llista VAO.
 
 					// Posar color objecte (col_obj) al vector de colors del VAO.
 					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 					// Definir Esfera EBO per a indicar punts de control de la corba
-					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posiciÛ GLUT_CUBE.
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posici√≥ GLUT_CUBE.
 
 					// Definr Corba Catmull-Rom com a VAO
-					//Set_VAOList(CRV_CATMULL_ROM, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
-					Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
+					//Set_VAOList(CRV_CATMULL_ROM, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
+					Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
 					}
 				}
 			break;
@@ -2120,7 +2120,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				objecte = CILINDRE;
 				netejaVAOList();											// Neteja Llista VAO.// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
-				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.5f, 1.0f, 20, 1));		// Genera EBO de cub mida 1 i el guarda a la posiciÛ GLUT_CUBE.
+				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.5f, 1.0f, 20, 1));		// Genera EBO de cub mida 1 i el guarda a la posici√≥ GLUT_CUBE.
 			}
 			break;
 		case 16: // OBJECTE T
@@ -2129,13 +2129,13 @@ void ShowEntornVGIWindow(bool* p_open)
 				netejaVAOList();
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 				//if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
-				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// C‡rrega Cub de costat 1 com a EBO a la posiciÛ GLUT_CUBE.
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// C√†rrega Cub de costat 1 com a EBO a la posici√≥ GLUT_CUBE.
 
 				//if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
-				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// C‡rrega Esfera a la posiciÛ GLU_SPHERE.
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// C√†rrega Esfera a la posici√≥ GLU_SPHERE.
 
 				//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
-				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posiciÛ GLUT_TEAPOT.
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posici√≥ GLUT_TEAPOT.
 			}
 			break;
 		case 17: // SPUTNIK
@@ -2145,7 +2145,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				//if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
-				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1, 20, 20));	// C‡rrega Esfera a la posiciÛ GLU_SPHERE.
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1, 20, 20));	// C√†rrega Esfera a la posici√≥ GLU_SPHERE.
 
 				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.0f, 1.0f, 20, 1));
 			}
@@ -2180,7 +2180,7 @@ void ShowEntornVGIWindow(bool* p_open)
 				objecte = PROVA_PLANETA;
 				netejaVAOList();
 				// ISMAEL CONTINUAR
-				for (int i = 0; i < 9; i++)
+				for (int i = 0; i < 10; i++)
 				{
 					Planeta planeta;
 					PLANETES.push_back(planeta);
@@ -2258,7 +2258,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		else transf = rota || escal;
 
 		//static int clickTT = 0;
-		// EntornVGI: Si s'ha apretat el botÛ "Origen EsfËrica"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Origen Esf√®rica"
 		if (clickTT)
 		{
 			clickTT = 0;
@@ -2273,7 +2273,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		if (rota) { trasl = false; escal = false; transf = true; }
 		else transf = trasl || escal;
 
-		// EntornVGI: Si s'ha apretat el botÛ "Origen Navega"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Origen Navega"
 		if (clickTR)
 		{
 			clickTR = 0;
@@ -2288,7 +2288,7 @@ void ShowEntornVGIWindow(bool* p_open)
 		if (escal) { trasl = false; rota = false; transf = true; }
 		else transf = trasl || rota;
 
-		// EntornVGI: Si s'ha apretat el botÛ "Origen Geode"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Origen Geode"
 		if (clickTE)
 		{
 			clickTE = 0;
@@ -2409,29 +2409,29 @@ void ShowEntornVGIWindow(bool* p_open)
 			ImGui::EndCombo();
 		}
 
-		// Entorn VGI. GestiÛ opcions desplegable TIPUS ILUMINACIO segons el valor de la variable selected
+		// Entorn VGI. Gesti√≥ opcions desplegable TIPUS ILUMINACIO segons el valor de la variable selected
 		switch (oIlumina)
 		{
-		case 0: // OpciÛ ILUMINACIO Punts
+		case 0: // Opci√≥ ILUMINACIO Punts
 			if (ilumina != PUNTS) {
 				ilumina = PUNTS;
 				test_vis = false;		oculta = false;
 			}
 			break;
-		case 1: // OpciÛ ILUMINACIO Filferros
+		case 1: // Opci√≥ ILUMINACIO Filferros
 			if (ilumina != FILFERROS) {
 				ilumina = FILFERROS;
 				test_vis = false;		oculta = false;
 			}
 			break;
-		case 2:	// OpciÛ ILUMINACIO Plana
+		case 2:	// Opci√≥ ILUMINACIO Plana
 			if (ilumina != PLANA) {
 				ilumina = PLANA;
 				test_vis = false;		oculta = true;
 			}
 			break;
 
-		case 3:	// OpciÛ ILUMINACIO Suau
+		case 3:	// Opci√≥ ILUMINACIO Suau
 			if (ilumina != SUAU) {
 				ilumina = SUAU;
 				test_vis = false;		oculta = true;
@@ -2477,12 +2477,12 @@ void ShowEntornVGIWindow(bool* p_open)
 
 		static int clickITS = 0;
 		if (ImGui::Button("Imatge Textura SOIL")) clickITS++;
-		// EntornVGI: Si s'ha apretat el botÛ "Image Textura SOIL"
+		// EntornVGI: Si s'ha apretat el bot√≥ "Image Textura SOIL"
 		if (clickITS)	{
 			clickITS = 0;
 			t_textura = FITXERIMA;		tFlag_invert_Y = true;
 
-			// Entorn VGI: Di‡leg de la cerca de fitxer textura.
+			// Entorn VGI: Di√†leg de la cerca de fitxer textura.
 			nfdchar_t* nomFitxer = NULL;
 			nfdresult_t result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
@@ -2533,31 +2533,31 @@ void ShowEntornVGIWindow(bool* p_open)
 
 		if (llum_ambient) 
 			{	sw_il = true;
-				//if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[1]"), (llum_ambient && sw_material[1])); // Pas m‡scara llums al shade
+				//if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[1]"), (llum_ambient && sw_material[1])); // Pas m√†scara llums al shade
 			}
 			else sw_il = true;
 
 		if (llumGL[0].encesa)
 			{	sw_il = true;
-				glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[0].encesa); // Pas m‡scara Llum #0 al shader
+				glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[0].encesa); // Pas m√†scara Llum #0 al shader
 			}
 			else sw_il = true;
 
 		if (llumGL[1].encesa)
 			{	sw_il = true;
-				glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[1].encesa); // Pas m‡scara Llum #1 al shader
+				glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[1].encesa); // Pas m√†scara Llum #1 al shader
 			}
 			else sw_il = true;
 
 		if (llumGL[2].encesa)
 			{	sw_il = true;
-			glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[2].encesa); // Pas m‡scara Llum #2 al shader
+			glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[2].encesa); // Pas m√†scara Llum #2 al shader
 			}
 			else sw_il = true;
 
 		if (llumGL[3].encesa)
 			{	sw_il = true;
-				glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[3].encesa); // Pas m‡scara Llum #3 al shader
+				glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[3].encesa); // Pas m√†scara Llum #3 al shader
 			}
 			else sw_il = true;
 	}
@@ -2589,54 +2589,54 @@ void ShowEntornVGIWindow(bool* p_open)
 			}
 			ImGui::EndCombo();
 		}
-		// Entorn VGI. DefiniciÛ de nou Program que substituir‡ l'actual
+		// Entorn VGI. Definici√≥ de nou Program que substituir√† l'actual
 		GLuint newShaderID = 0;
-		// Entorn VGI. GestiÛ opcions desplegable TIPUS ILUMINACIO segons el valor de la variable selected
+		// Entorn VGI. Gesti√≥ opcions desplegable TIPUS ILUMINACIO segons el valor de la variable selected
 		switch (oShader)
 		{
-		case 0: // OpciÛ SHADER Flat
+		case 0: // Opci√≥ SHADER Flat
 			if (shader != FLAT_SHADER) {
 				shader = FLAT_SHADER;
 				test_vis = false;		oculta = true;
-				// C‡rrega Shader de Gouraud
+				// C√†rrega Shader de Gouraud
 				fprintf(stderr, "Flat Shader: \n");
 				// Elimina shader anterior
 				shaderLighting.DeleteProgram();	shader_programID = 0;
-				// C‡rrega Gouraud shader
+				// C√†rrega Gouraud shader
 				shader_programID = shaderLighting.loadFileShaders(".\\shaders\\flat_shdrML.vert", ".\\shaders\\flat_shdrML.frag");
 				glUseProgram(shader_programID); // shaderLighting.use();
 			}
 			break;
 
-		case 1:	// OpciÛ SHADER Gouraud
+		case 1:	// Opci√≥ SHADER Gouraud
 			if (shader != GOURAUD_SHADER) {
 				shader = GOURAUD_SHADER;
 				test_vis = false;		oculta = true;
-				// C‡rrega Shader de Gouraud
+				// C√†rrega Shader de Gouraud
 				fprintf(stderr, "Gouraud_shdrML Shader: \n");
 				// Elimina shader anterior
 				shaderLighting.DeleteProgram();	shader_programID = 0;
-				// C‡rrega Gouraud shader
+				// C√†rrega Gouraud shader
 				shader_programID = shaderLighting.loadFileShaders(".\\shaders\\gouraud_shdrML.vert", ".\\shaders\\gouraud_shdrML.frag");
 				glUseProgram(shader_programID); // shaderLighting.use();
 			}
 			break;
 
-		case 2:	// OpciÛ SHADER Phong
+		case 2:	// Opci√≥ SHADER Phong
 			if (shader != PHONG_SHADER) {
 				shader = PHONG_SHADER;
 				test_vis = false;		oculta = true;
-				// C‡rrega Shader de Phong
+				// C√†rrega Shader de Phong
 				fprintf(stderr, "Phong_shdrML: \n");
 				// Elimina shader anterior
 				shaderLighting.DeleteProgram(); shader_programID = 0;
-				// C‡rrega Phong Shader
+				// C√†rrega Phong Shader
 				shader_programID = shaderLighting.loadFileShaders(".\\shaders\\phong_shdrML.vert", ".\\shaders\\phong_shdrML.frag");
 				glUseProgram(shader_programID); // shaderLighting.use();
 			}
 			break;
 
-		case 3:	// OpciÛ SHADER Carregar fitxers shader (.vert, .frag)
+		case 3:	// Opci√≥ SHADER Carregar fitxers shader (.vert, .frag)
 			if (shader != FILE_SHADER) {
 				shader = FILE_SHADER;	ilumina = SUAU;
 				test_vis = false;		oculta = true;
@@ -2668,8 +2668,8 @@ void Menu_Shaders_Opcio_CarregarVSFS()
 {
 	GLuint newShaderID = 0;
 
-	// C‡rrega fitxer VERT
-	// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.VERT)
+	// C√†rrega fitxer VERT
+	// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.VERT)
 	nfdchar_t* nomVert = NULL;
 	nfdresult_t dialeg_Fitxer = NFD_OpenDialog("vert,vrt,vs", NULL, &nomVert);
 	//				nfdresult_t result = NFD_OpenDialog(NULL, NULL, &nomVert);
@@ -2686,8 +2686,8 @@ void Menu_Shaders_Opcio_CarregarVSFS()
 		return;
 	}
 
-	// C‡rrega fitxer FRAG
-	// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.FRAG)
+	// C√†rrega fitxer FRAG
+	// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.FRAG)
 	nfdchar_t* nomFrag = NULL;
 	dialeg_Fitxer = NFD_OpenDialog("frag,frg,fs", NULL, &nomFrag);
 	//				nfdresult_t resultFS = NFD_OpenDialog(NULL, NULL, &nomFrag);
@@ -2703,13 +2703,13 @@ void Menu_Shaders_Opcio_CarregarVSFS()
 		printf("Error: %s\n", NFD_GetError());
 		return;
 	}
-	// C‡rrega Fitxers de shader .vert, .frag
-	fprintf(stderr, "C‡rregar fitxers .vert, .frag. \n");
+	// C√†rrega Fitxers de shader .vert, .frag
+	fprintf(stderr, "C√†rregar fitxers .vert, .frag. \n");
 	//				GLuint newShaderID = 0;
 					// Elimina shader anterior
 	shaderLighting.DeleteProgram();
 	newShaderID = shaderLighting.loadFileShadersTest(nomVert, nomFrag);
-	// C‡rrega shaders dels fitxers
+	// C√†rrega shaders dels fitxers
 	if (!newShaderID) fprintf(stderr, "GLSL_Error. Fitxers .vert o .frag amb errors");
 	else shader_programID = newShaderID;
 	glUseProgram(shader_programID); // shaderLighting.use();
@@ -2720,15 +2720,15 @@ void Menu_Shaders_Opcio_CarregarVSFS()
 /*                           CONTROL DEL TECLAT                              */
 /* ------------------------------------------------------------------------- */
 
-// OnKeyDown: FunciÛ de tractament de teclat (funciÛ que es crida quan es prem una tecla)
-//   PAR¿METRES:
+// OnKeyDown: Funci√≥ de tractament de teclat (funci√≥ que es crida quan es prem una tecla)
+//   PAR√ÄMETRES:
 //    - key: Codi del caracter seleccionat
-//    - scancode: Nombre de vegades que s'ha apretat la tecla (acceleraciÛ)
-//    - action: AcciÛ de la tecla: GLFW_PRESS (si s'ha apretat), GLFW_REPEAT, si s'ha repetit pressiÛ i GL_RELEASE, si es deixa d'apretar.
+//    - scancode: Nombre de vegades que s'ha apretat la tecla (acceleraci√≥)
+//    - action: Acci√≥ de la tecla: GLFW_PRESS (si s'ha apretat), GLFW_REPEAT, si s'ha repetit pressi√≥ i GL_RELEASE, si es deixa d'apretar.
 //    - mods: Variable que identifica si la tecla s'ha pulsat directa (mods=0), juntament amb la tecla Shift (mods=1) o la tecla Ctrl (mods=2).
 void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-// TODO: Agregue aquÌ su cÛdigo de controlador de mensajes o llame al valor predeterminado
+// TODO: Agregue aqu√≠ su c√≥digo de controlador de mensajes o llame al valor predeterminado
 	const double incr = 0.025f;
 	double modul = 0;
 	GLdouble vdir[3] = { 0, 0, 0 };
@@ -2739,8 +2739,8 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 	//io.AddMouseButtonEvent(button, true);
 
 	// (2) ONLY forward mouse data to your underlying app/game.
-	if (!io.WantCaptureKeyboard) { //<Tractament mouse de l'aplicaciÛ>}
-		// EntornVGI: Si tecla pulsada Ès ESCAPE, tancar finestres i aplicaciÛ.
+	if (!io.WantCaptureKeyboard) { //<Tractament mouse de l'aplicaci√≥>}
+		// EntornVGI: Si tecla pulsada √©s ESCAPE, tancar finestres i aplicaci√≥.
 		if (mods == 0 && key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
 		else if (mods == 0 && key == GLFW_KEY_PRINT_SCREEN && action == GLFW_PRESS) statusB = !statusB;
 		else if ((mods == 1) && (action == GLFW_PRESS)) Teclat_Shift(key, window);	// Shorcuts Shift Key
@@ -2749,8 +2749,8 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 				|| objecte == C_CATMULL_ROM) && (action == GLFW_PRESS)) Teclat_PasCorbes(key, action);
 		else if ((sw_grid) && ((grid.x) || (grid.y) || (grid.z))) Teclat_Grid(key, action);
 		else if (((key == GLFW_KEY_G) && (action == GLFW_PRESS)) && ((grid.x) || (grid.y) || (grid.z))) sw_grid = !sw_grid;
-		else if ((key == GLFW_KEY_O) && (action == GLFW_PRESS)) sw_color = true; // ActivaciÛ color objecte
-		else if ((key == GLFW_KEY_F) && (action == GLFW_PRESS)) sw_color = false; // ActivaciÛ color objecte
+		else if ((key == GLFW_KEY_O) && (action == GLFW_PRESS)) sw_color = true; // Activaci√≥ color objecte
+		else if ((key == GLFW_KEY_F) && (action == GLFW_PRESS)) sw_color = false; // Activaci√≥ color objecte
 		else if (pan) Teclat_Pan(key, action);
 		else if (transf)
 				{	if (rota) Teclat_TransRota(key, action);
@@ -2810,7 +2810,7 @@ void OnTextDown(GLFWwindow* window, unsigned int codepoint)
 
 }
 
-// Teclat_Shift: Shortcuts per Pop Ups Fitxer, Finestra, Vista, ProjecciÛ i Objecte
+// Teclat_Shift: Shortcuts per Pop Ups Fitxer, Finestra, Vista, Projecci√≥ i Objecte
 void Teclat_Shift(int key, GLFWwindow* window)
 {
 	//const char* nomfitxer;
@@ -2828,7 +2828,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Obrir Fractal
 		case GLFW_KEY_F1:
 			nomFitxer = NULL;
-			// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.MNT)
+			// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.MNT)
 			result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
 			if (result == NFD_OKAY) {
@@ -2836,7 +2836,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 				puts(nomFitxer);
 
 				objecte = O_FRACTAL;
-				// Entorn VGI: TO DO -> Llegir fitxer fractal (nomFitxer) i inicialitzar alÁades
+				// Entorn VGI: TO DO -> Llegir fitxer fractal (nomFitxer) i inicialitzar al√ßades
 
 				free(nomFitxer);
 				}
@@ -2844,7 +2844,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 
 		// Tecla Obrir Fitxer OBJ
 		case GLFW_KEY_F2:
-			// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.OBJ)
+			// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.OBJ)
 			nomFitxer = NULL;
 			result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
@@ -2855,7 +2855,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 				objecte = OBJOBJ;	textura = true;		tFlag_invert_Y = false;
 				//char* nomfitx = nomFitxer;
 				if (ObOBJ == NULL) ObOBJ = ::new COBJModel;
-				else { // Si inst‡ncia ja s'ha utilitzat en un objecte OBJ
+				else { // Si inst√†ncia ja s'ha utilitzat en un objecte OBJ
 					ObOBJ->netejaVAOList_OBJ();		// Netejar VAO, EBO i VBO
 					ObOBJ->netejaTextures_OBJ();	// Netejar buffers de textures
 					}
@@ -2863,7 +2863,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 				//int error = ObOBJ->LoadModel(nomfitx);			// Carregar objecte OBJ amb textura com a varis VAO's
 				int error = ObOBJ->LoadModel(nomFitxer);			// Carregar objecte OBJ amb textura com a varis VAO's
 
-				//	Pas de par‡metres textura al shader
+				//	Pas de par√†metres textura al shader
 				if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
 				if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
 				free(nomFitxer);
@@ -2881,7 +2881,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 // 		// Tecla Camera Esferica
 		case GLFW_KEY_L:
 			if ((projeccio != ORTO) && (projeccio != CAP)) camera = CAM_ESFERICA;
-			// ActivaciÛ de zoom, mobil
+			// Activaci√≥ de zoom, mobil
 			mobil = true;	zzoom = true;
 			break;
 
@@ -2889,8 +2889,8 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Mobil?
 		case GLFW_KEY_M:
 			if ((projeccio != ORTO) && (projeccio != CAP)) mobil = !mobil;
-			// DesactivaciÛ de Transformacions GeomËtriques via mouse 
-			//		si VisualitzaciÛ Interactiva activada.	
+			// Desactivaci√≥ de Transformacions Geom√®triques via mouse 
+			//		si Visualitzaci√≥ Interactiva activada.	
 			if (mobil) {	transX = false;	transY = false; transZ = false;
 						}
 			break;
@@ -2898,7 +2898,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Zoom
 		case GLFW_KEY_Q:
 			if ((projeccio != ORTO) && (projeccio != CAP)) zzoom = !zzoom;
-			// DesactivaciÛ de Transformacions GeomËtriques via mouse 
+			// Desactivaci√≥ de Transformacions Geom√®triques via mouse 
 			//		si Zoom activat.
 			if (zzoom) {
 				zzoomO = false;  transX = false;	transY = false;	transZ = false;
@@ -2908,31 +2908,31 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Zoom Orto
 		case GLFW_KEY_F3:
 			if (projeccio == ORTO || projeccio==AXONOM) zzoomO = !zzoomO;
-			// DesactivaciÛ de Transformacions GeomËtriques via mouse 
+			// Desactivaci√≥ de Transformacions Geom√®triques via mouse 
 			//		si Zoom Orto activat.
 			if (zzoomO) {
 				zzoom = false;  transX = false;		transY = false;		transZ = false;
 				}
 			break;
 
-		// Tecla SatËl.lit?
+		// Tecla Sat√®l.lit?
 		case GLFW_KEY_S:
 			if ((projeccio != CAP && projeccio != ORTO)) satelit = !satelit;
 			if (satelit) mobil = true;
-			testA = anima;				// Testejar si hi ha alguna animaciÛ activa apart de SatËlit.
+			testA = anima;				// Testejar si hi ha alguna animaci√≥ activa apart de Sat√®lit.
 			break;
 
 		// Tecla Camera Navega
 		case GLFW_KEY_N:
 			if ((projeccio != ORTO) && (projeccio != CAP)) camera = CAM_NAVEGA;
-			// DesactivaciÛ de zoom, mobil, Transformacions GeomËtriques via mouse i pan 
+			// Desactivaci√≥ de zoom, mobil, Transformacions Geom√®triques via mouse i pan 
 			//		si navega activat
 			if (camera == CAM_NAVEGA)
 			{	mobil = false;	zzoom = false;
 				transX = false;	transY = false;	transZ = false;
 				pan = false;
-				tr_cpv.x = 0.0;		tr_cpv.y = 0.0;		tr_cpv.z = 0.0;	// Inicialitzar a 0 desplaÁament de pantalla
-				tr_cpvF.x = 0.0;	tr_cpvF.y = 0.0;	tr_cpvF.x = 0.0; // Inicialitzar a 0 desplaÁament de pantalla
+				tr_cpv.x = 0.0;		tr_cpv.y = 0.0;		tr_cpv.z = 0.0;	// Inicialitzar a 0 despla√ßament de pantalla
+				tr_cpvF.x = 0.0;	tr_cpvF.y = 0.0;	tr_cpvF.x = 0.0; // Inicialitzar a 0 despla√ßament de pantalla
 			}
 			else {	mobil = true;
 					zzoom = true;
@@ -2942,12 +2942,12 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Camera Geode
 		case GLFW_KEY_J:
 			if ((projeccio != ORTO) && (projeccio != CAP)) camera = CAM_GEODE;
-			// DesactivaciÛ de zoom, mobil, Transformacions GeomËtriques via mouse i pan 
+			// Desactivaci√≥ de zoom, mobil, Transformacions Geom√®triques via mouse i pan 
 			//		si navega activat
 			if (camera == CAM_GEODE)
 			{
 				OPV_G.R = 0.0;		OPV_G.alfa = 0.0;		OPV_G.beta = 0.0;
-				OPV.R = 0.0;		OPV.alfa = 0.0;			OPV.beta = 0.0;				// Origen PV en esfËriques
+				OPV.R = 0.0;		OPV.alfa = 0.0;			OPV.beta = 0.0;				// Origen PV en esf√®riques
 				mobil = true;		zzoom = true;	zzoomO = false;	 satelit = false;	pan = false;
 				Vis_Polar = POLARZ;	llumGL[5].encesa = true;
 				glFrontFace(GL_CW);
@@ -2997,7 +2997,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 			SkyBoxCube = !SkyBoxCube;
 			if (SkyBoxCube)
 			{	Vis_Polar = POLARY;
-				// C‡rrega VAO Skybox Cube
+				// C√†rrega VAO Skybox Cube
 				if (skC_VAOID.vaoId == 0) skC_VAOID = loadCubeSkybox_VAO();
 				
 				if (!cubemapTexture)
@@ -3019,7 +3019,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Pan?
 		case GLFW_KEY_G:
 			if ((projeccio != ORTO) && (projeccio != CAP)) pan = !pan;
-			// DesactivaciÛ de Transformacions GeomËtriques via mouse i navega si pan activat
+			// Desactivaci√≥ de Transformacions Geom√®triques via mouse i navega si pan activat
 			if (pan) {	mobil = true;		zzoom = true;
 						transX = false;		transY = false;	transZ = false;
 					}
@@ -3051,8 +3051,8 @@ void Teclat_Shift(int key, GLFWwindow* window)
 				}
 			break;
 
-// ----------- POP UP ProjecciÛ
-		// Tecla AxonomËtrica
+// ----------- POP UP Projecci√≥
+		// Tecla Axonom√®trica
 		case GLFW_KEY_A:
 			if (projeccio != AXONOM) {
 				projeccio = AXONOM;
@@ -3060,7 +3060,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 			}
 			break;
 
-		// Tecla Ortogr‡fica
+		// Tecla Ortogr√†fica
 		case GLFW_KEY_O:
 			if (projeccio != ORTO) {
 				projeccio = ORTO;
@@ -3088,33 +3088,33 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Cub
 		case GLFW_KEY_C:
 			objecte = CUB;
-			//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+			//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-			//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 			netejaVAOList();											// Neteja Llista VAO.
 
 			// Posar color objecte (col_obj) al vector de colors del VAO.
 			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
-			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Genera EBO de cub mida 1 i el guarda a la posiciÛ GLUT_CUBE.
+			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Genera EBO de cub mida 1 i el guarda a la posici√≥ GLUT_CUBE.
 			break;
 
 		// Tecla Cub RGB
 		case GLFW_KEY_D:
 			objecte = CUB_RGB;
-			//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+			//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-			//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 			netejaVAOList();						// Neteja Llista VAO.
 
-			Set_VAOList(GLUT_CUBE_RGB, loadglutSolidCubeRGB_EBO(1.0));	// Genera EBO de cub mida 1 i el guarda a la posiciÛ GLUT_CUBE_RGB.
+			Set_VAOList(GLUT_CUBE_RGB, loadglutSolidCubeRGB_EBO(1.0));	// Genera EBO de cub mida 1 i el guarda a la posici√≥ GLUT_CUBE_RGB.
 			break;
 
 		// Tecla Esfera
 		case GLFW_KEY_E:
 			objecte = ESFERA;
-			//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+			//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-			//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 			netejaVAOList();						// Neteja Llista VAO.
 
 			// Posar color objecte (col_obj) al vector de colors del VAO.
@@ -3126,99 +3126,99 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// Tecla Tetera
 		case GLFW_KEY_T:
 			objecte = TETERA;
-			//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+			//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-			//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 			netejaVAOList();						// Neteja Llista VAO.
 
 			// Posar color objecte (col_obj) al vector de colors del VAO.
 			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 			//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
-			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO()); //Genera VAO tetera mida 1 i el guarda a la posiciÛ GLUT_TEAPOT.
+			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO()); //Genera VAO tetera mida 1 i el guarda a la posici√≥ GLUT_TEAPOT.
 			break;
 
 		// Tecla Arc
 		case GLFW_KEY_R:
 			objecte = ARC;
 			//  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
-			//	Canviar l'escala per a centrar la vista (Ortogr‡fica)
+			//	Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
 			color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 1.0;
-			//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+			//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-			//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 
-			// C‡rrega dels VAO's per a construir objecte ARC
+			// C√†rrega dels VAO's per a construir objecte ARC
 			netejaVAOList();						// Neteja Llista VAO.
 
 			// Posar color objecte (col_obj) al vector de colors del VAO.
 			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 			//if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
-			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// C‡rrega Cub de costat 1 com a EBO a la posiciÛ GLUT_CUBE.
+			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// C√†rrega Cub de costat 1 com a EBO a la posici√≥ GLUT_CUBE.
 
 			//if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
-			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// C‡rrega Esfera a la posiciÛ GLU_SPHERE.
+			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// C√†rrega Esfera a la posici√≥ GLU_SPHERE.
 
 			//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
-			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posiciÛ GLUT_TEAPOT.
+			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posici√≥ GLUT_TEAPOT.
 
 			//if (Get_VAOId(MAR_FRACTAL_VAO) != 0) deleteVAOList(MAR_FRACTAL_VAO);
-			Set_VAOList(MAR_FRACTAL_VAO, loadSea_VAO(color_Mar));		// Carrega Mar a la posiciÛ MAR_FRACTAL_VAO.
+			Set_VAOList(MAR_FRACTAL_VAO, loadSea_VAO(color_Mar));		// Carrega Mar a la posici√≥ MAR_FRACTAL_VAO.
 			break;
 
 		// Tecla Tie (Star Wars)
 		case GLFW_KEY_I:
 			objecte = TIE;		textura = true;
-				//	---- Entorn VGI: ATENCI”!!. Canviar l'escala per a centrar la vista (Ortogr‡fica)
+				//	---- Entorn VGI: ATENCI√ì!!. Canviar l'escala per a centrar la vista (Ortogr√†fica)
 
-				//  ---- Entorn VGI: ATENCI”!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				//  ---- Entorn VGI: ATENCI√ì!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
 
-			// C‡rrega dels VAO's per a construir objecte TIE
+			// C√†rrega dels VAO's per a construir objecte TIE
 			netejaVAOList();						// Neteja Llista VAO.
 
 			// Posar color objecte (col_obj) al vector de colors del VAO.
 			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 			//if (Get_VAOId(GLU_CYLINDER) != 0) deleteVAOList(GLU_CYLINDER);
-			Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(5.0f, 5.0f, 0.5f, 6, 1));// C‡rrega cilindre com a VAO.
+			Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(5.0f, 5.0f, 0.5f, 6, 1));// C√†rrega cilindre com a VAO.
 
 			//if (Get_VAOId(GLU_DISK) != 0)deleteVAOList(GLU_DISK);
-			Set_VAOList(GLU_DISK, loadgluDisk_EBO(0.0f, 5.0f, 6, 1));	// C‡rrega disc com a VAO
+			Set_VAOList(GLU_DISK, loadgluDisk_EBO(0.0f, 5.0f, 6, 1));	// C√†rrega disc com a VAO
 
 			//if (Get_VAOId(GLU_SPHERE) != 0)deleteVAOList(GLU_SPHERE);
-			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(10.0f, 80, 80));	// C‡rrega disc com a VAO
+			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(10.0f, 80, 80));	// C√†rrega disc com a VAO
 
 			//if (Get_VAOId(GLUT_USER1) != 0)deleteVAOList(GLUT_USER1);
-			Set_VAOList(GLUT_USER1, loadgluCylinder_EBO(5.0f, 5.0f, 2.0f, 6, 1)); // C‡rrega cilindre com a VAO
+			Set_VAOList(GLUT_USER1, loadgluCylinder_EBO(5.0f, 5.0f, 2.0f, 6, 1)); // C√†rrega cilindre com a VAO
 
 			//if (Get_VAOId(GLUT_CUBE) != 0)deleteVAOList(GLUT_CUBE);
-			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));			// C‡rrega cub com a EBO
+			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));			// C√†rrega cub com a EBO
 
 			//if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
 			Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(1.0, 5.0, 20, 20));
 
 			//if (Get_VAOId(GLUT_USER2) != 0)deleteVAOList(GLUT_USER2);	
-			Set_VAOList(GLUT_USER2, loadgluCylinder_EBO(1.0f, 0.5f, 5.0f, 60, 1)); // C‡rrega cilindre com a VAO
+			Set_VAOList(GLUT_USER2, loadgluCylinder_EBO(1.0f, 0.5f, 5.0f, 60, 1)); // C√†rrega cilindre com a VAO
 
 			//if (Get_VAOId(GLUT_USER3) != 0)deleteVAOList(GLUT_USER3);
-			Set_VAOList(GLUT_USER3, loadgluCylinder_EBO(0.35f, 0.35f, 5.0f, 80, 1)); // C‡rrega cilindre com a VAO
+			Set_VAOList(GLUT_USER3, loadgluCylinder_EBO(0.35f, 0.35f, 5.0f, 80, 1)); // C√†rrega cilindre com a VAO
 
 			//if (Get_VAOId(GLUT_USER4) != 0)deleteVAOList(GLUT_USER4);
-			Set_VAOList(GLUT_USER4, loadgluCylinder_EBO(4.0f, 2.0f, 10.25f, 40, 1)); // C‡rrega cilindre com a VAO
+			Set_VAOList(GLUT_USER4, loadgluCylinder_EBO(4.0f, 2.0f, 10.25f, 40, 1)); // C√†rrega cilindre com a VAO
 
 			//if (Get_VAOId(GLUT_USER5) != 0) deleteVAOList(GLUT_USER5);
-			Set_VAOList(GLUT_USER5, loadgluCylinder_EBO(1.5f, 4.5f, 2.0f, 8, 1)); // C‡rrega cilindre com a VAO
+			Set_VAOList(GLUT_USER5, loadgluCylinder_EBO(1.5f, 4.5f, 2.0f, 8, 1)); // C√†rrega cilindre com a VAO
 
 			//if (Get_VAOId(GLUT_USER6) != 0) deleteVAOList(GLUT_USER6);
-			Set_VAOList(GLUT_USER6, loadgluDisk_EBO(0.0f, 1.5f, 8, 1)); // C‡rrega disk com a VAO
+			Set_VAOList(GLUT_USER6, loadgluDisk_EBO(0.0f, 1.5f, 8, 1)); // C√†rrega disk com a VAO
 			break;
 
 		// Tecla Corbes Bezier
 		case GLFW_KEY_F9:
 			nomFitxer = NULL;
-			// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.MNT)
+			// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.MNT)
 			result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
 			if (result == NFD_OKAY) {
@@ -3229,25 +3229,25 @@ void Teclat_Shift(int key, GLFWwindow* window)
 				npts_T = llegir_ptsC(nomFitxer);
 				free(nomFitxer);
 
-				// C‡rrega dels VAO's per a construir la corba Bezier
+				// C√†rrega dels VAO's per a construir la corba Bezier
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				// Definir Esfera EBO per a indicar punts de control de la corba
-				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Genera esfera i la guarda a la posiciÛ GLUT_CUBE.
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Genera esfera i la guarda a la posici√≥ GLUT_CUBE.
 
 				// Definir Corba Bezier com a VAO
-					//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
-				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
+					//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
 				}
 			break;
 
 		// Tecla Corbes B-Spline
 		case GLFW_KEY_F10:
 			nomFitxer = NULL;
-			// Entorn VGI: Obrir di‡leg de lectura de fitxer (fitxers (*.MNT)
+			// Entorn VGI: Obrir di√†leg de lectura de fitxer (fitxers (*.MNT)
 			result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 
 			if (result == NFD_OKAY) {
@@ -3258,18 +3258,18 @@ void Teclat_Shift(int key, GLFWwindow* window)
 				npts_T = llegir_ptsC(nomFitxer);
 				free(nomFitxer);
 
-				// C‡rrega dels VAO's per a construir la corba BSpline
+				// C√†rrega dels VAO's per a construir la corba BSpline
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				// Definir Esfera EBO per a indicar punts de control de la corba
-				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posiciÛ GLUT_CUBE.
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posici√≥ GLUT_CUBE.
 
 				// Definr Corba BSpline com a VAO
-					//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
-				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
+					//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
 				}
 			break;
 
@@ -3277,15 +3277,15 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		case GLFW_KEY_F11:
 			if (objecte != C_LEMNISCATA) {
 				objecte = C_LEMNISCATA;
-				// C‡rrega dels VAO's per a construir la corba Bezier
+				// C√†rrega dels VAO's per a construir la corba Bezier
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
 				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
 
 				// Definr Corba Lemniscata 3D com a VAO
-					//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
-				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
+					//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
 				}
 			break;
 
@@ -3304,7 +3304,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 			if (objecte != MATRIUP_VAO) {
 				objecte = MATRIUP_VAO;
 
-				// C‡rrega dels VAO's per a construir objecte ARC
+				// C√†rrega dels VAO's per a construir objecte ARC
 				netejaVAOList();						// Neteja Llista VAO.
 
 				// Posar color objecte (col_obj) al vector de colors del VAO.
@@ -3327,7 +3327,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 }
 
 
-// Teclat_Ctrl: Shortcuts per Pop Ups Transforma, IluminaciÛ, llums, Shaders
+// Teclat_Ctrl: Shortcuts per Pop Ups Transforma, Iluminaci√≥, llums, Shaders
 void Teclat_Ctrl(int key)
 {
 	//const char* nomfitxer;
@@ -3339,7 +3339,7 @@ void Teclat_Ctrl(int key)
 	switch (key)
 	{
 		// ----------- POP UP TRANSFORMA
-			// Tecla Transforma --> TraslaciÛ?
+			// Tecla Transforma --> Traslaci√≥?
 	case GLFW_KEY_T:
 		trasl = !trasl;
 		rota = false;
@@ -3347,7 +3347,7 @@ void Teclat_Ctrl(int key)
 		transf = trasl || rota || escal;
 		break;
 
-		// Tecla Transforma --> RotaciÛ?
+		// Tecla Transforma --> Rotaci√≥?
 	case GLFW_KEY_R:
 		rota = !rota;
 		trasl = false;
@@ -3361,7 +3361,7 @@ void Teclat_Ctrl(int key)
 		transf = trasl || rota || escal;
 		break;
 
-		// Tecla Escape (per a Transforma --> Origen TraslaciÛ, Transforma --> Origen RotaciÛ i Transforma --> Origen Escalat)
+		// Tecla Escape (per a Transforma --> Origen Traslaci√≥, Transforma --> Origen Rotaci√≥ i Transforma --> Origen Escalat)
 	case GLFW_KEY_ESCAPE:
 		if (trasl)
 		{
@@ -3375,7 +3375,7 @@ void Teclat_Ctrl(int key)
 		else if (escal) { TG.VScal.x = 1;	TG.VScal.y = 1;	TG.VScal.z = 1; }
 		break;
 
-		// Tecla Transforma --> Mobil Eix X? (opciÛ booleana).
+		// Tecla Transforma --> Mobil Eix X? (opci√≥ booleana).
 	case GLFW_KEY_X:
 		if (transf)
 		{
@@ -3391,7 +3391,7 @@ void Teclat_Ctrl(int key)
 		}
 		break;
 
-		// Tecla Transforma --> Mobil Eix Y? (opciÛ booleana).
+		// Tecla Transforma --> Mobil Eix Y? (opci√≥ booleana).
 	case GLFW_KEY_Y:
 		if (transf)
 		{
@@ -3407,7 +3407,7 @@ void Teclat_Ctrl(int key)
 		}
 		break;
 
-		// Tecla Transforma --> Mobil Eix Z? (opciÛ booleana).
+		// Tecla Transforma --> Mobil Eix Z? (opci√≥ booleana).
 	case GLFW_KEY_Z:
 		if (transf)
 		{
@@ -3424,7 +3424,7 @@ void Teclat_Ctrl(int key)
 		break;
 
 		// ----------- POP UP OCULTACIONS
-			// Tecla Ocultacions --> Front faces? (opciÛ booleana).
+			// Tecla Ocultacions --> Front faces? (opci√≥ booleana).
 	case GLFW_KEY_D:
 		front_faces = !front_faces;
 		break;
@@ -3434,29 +3434,29 @@ void Teclat_Ctrl(int key)
 		test_vis = !test_vis;
 		break;
 
-		// Tecla Ocultacions --> Z-Buffer? (opciÛ booleana).
+		// Tecla Ocultacions --> Z-Buffer? (opci√≥ booleana).
 	case GLFW_KEY_O:
 		oculta = !oculta;
 		break;
 
-		// Tecla Ocultacions --> Back-lines? (opciÛ booleana).
+		// Tecla Ocultacions --> Back-lines? (opci√≥ booleana).
 	case GLFW_KEY_B:
 		back_line = !back_line;
 		break;
 
-// ----------- POP UP ILUMINACI”
-	// Tecla Llum Fixe? (opciÛ booleana).
+// ----------- POP UP ILUMINACI√ì
+	// Tecla Llum Fixe? (opci√≥ booleana).
 	case GLFW_KEY_F:
 		ifixe = !ifixe;
 		break;
 
-	// Tecla IluminaciÛ --> Punts
+	// Tecla Iluminaci√≥ --> Punts
 	case GLFW_KEY_F1:
 		ilumina = PUNTS;
 		test_vis = false;		oculta = false;
 		break;
 
-	// Tecla IluminaciÛ --> Filferros
+	// Tecla Iluminaci√≥ --> Filferros
 	case GLFW_KEY_F2:
 		if (ilumina != FILFERROS) {
 			ilumina = FILFERROS;
@@ -3464,19 +3464,19 @@ void Teclat_Ctrl(int key)
 		}
 		break;
 
-	// Tecla IluminaciÛ --> Plana
+	// Tecla Iluminaci√≥ --> Plana
 	case GLFW_KEY_F3:
 		if (ilumina != PLANA) {
 			ilumina = PLANA;
 			test_vis = false;		oculta = true;
 			// Elimina shader anterior
 			shaderLighting.DeleteProgram();
-			// C‡rrega Flat shader
+			// C√†rrega Flat shader
 			shader_programID = shaderLighting.loadFileShaders(".\\shaders\\flat_shdrML.vert", ".\\shaders\\flat_shdrML.frag");
 		}
 		break;
 
-	// Tecla IluminaciÛ --> Suau
+	// Tecla Iluminaci√≥ --> Suau
 	case GLFW_KEY_F4:
 		if (ilumina != SUAU) {
 			ilumina = SUAU;
@@ -3484,45 +3484,45 @@ void Teclat_Ctrl(int key)
 		}
 		break;
 
-	// Tecla IluminaciÛ --> ReflexiÛ Material --> EmissiÛ?
+	// Tecla Iluminaci√≥ --> Reflexi√≥ Material --> Emissi√≥?
 	case GLFW_KEY_F6:
 		sw_material[0] = !sw_material[0];
-		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[0]"), sw_material[0]); // Pas m‡scara llums al shader
+		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[0]"), sw_material[0]); // Pas m√†scara llums al shader
 		break;
 
-	// Tecla IluminaciÛ --> ReflexiÛ Material -> Ambient?
+	// Tecla Iluminaci√≥ --> Reflexi√≥ Material -> Ambient?
 	case GLFW_KEY_F7:
 		sw_material[1] = !sw_material[1];
-		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[1]"), sw_material[1]); // Pas m‡scara llums al shader
+		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[1]"), sw_material[1]); // Pas m√†scara llums al shader
 		break;
 
-	// Tecla IluminaciÛ --> ReflexiÛ Material -> Difusa?
+	// Tecla Iluminaci√≥ --> Reflexi√≥ Material -> Difusa?
 	case GLFW_KEY_F8:
 		sw_material[2] = !sw_material[2];
-		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[2]"), sw_material[2]); // Pas m‡scara llums al shader
+		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[2]"), sw_material[2]); // Pas m√†scara llums al shader
 		break;
 
-	// Tecla IluminaciÛ --> ReflexiÛ Material -> Especular?
+	// Tecla Iluminaci√≥ --> Reflexi√≥ Material -> Especular?
 	case GLFW_KEY_F9:
 		sw_material[3] = !sw_material[3];
-		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[3]"), sw_material[3]); // Pas m‡scara llums al shader
+		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[3]"), sw_material[3]); // Pas m√†scara llums al shader
 		break;
 
-// Tecla IluminaciÛ --> ReflexiÛ Material -> Especular?
+// Tecla Iluminaci√≥ --> Reflexi√≥ Material -> Especular?
 	case GLFW_KEY_F10:
 		sw_material[4] = !sw_material[4];
-		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[4]"), sw_material[4]); // Pas m‡scara llums al shader
+		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[4]"), sw_material[4]); // Pas m√†scara llums al shader
 		break;
 
-	// Tecla IluminaciÛ --> Textura?.
+	// Tecla Iluminaci√≥ --> Textura?.
 	case GLFW_KEY_I:
 		textura = !textura;
 		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "texture"), textura); //	Pas de textura al shader
 		break;
 
-	// Tecla IluminaciÛ --> Fitxer Textura?
+	// Tecla Iluminaci√≥ --> Fitxer Textura?
 	case GLFW_KEY_J:
-		// Entorn VGI: Di‡leg de la cerca de fitxer textura.
+		// Entorn VGI: Di√†leg de la cerca de fitxer textura.
 		//nfdchar_t* nomFitxer = NULL;
 		//nfdresult_t result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
 		result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
@@ -3553,14 +3553,14 @@ void Teclat_Ctrl(int key)
 	case GLFW_KEY_A:
 		llum_ambient = !llum_ambient;
 		sw_il = true;
-		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[1]"), (llum_ambient && sw_material[1])); // Pas m‡scara llums al shader
+		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_intensity[1]"), (llum_ambient && sw_material[1])); // Pas m√†scara llums al shader
 		break;
 
 	// Tecla Llums --> Llum #0? (+Z)
 	case GLFW_KEY_0:
 		llumGL[0].encesa = !llumGL[0].encesa;
 		sw_il = true;
-		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[0].encesa); // Pas m‡scara Llum #0 al shader
+		if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "sw_lights[0]"), llumGL[0].encesa); // Pas m√†scara Llum #0 al shader
 		break;
 
 	// Tecla Llums --> Llum #1? (+X)
@@ -3609,16 +3609,16 @@ void Teclat_ColorObjecte(int key, int action)
 
 	if (action == GLFW_PRESS)
 	{
-		// FRACTAL: Canvi resoluciÛ del fractal pe tecles '+' i'-'
+		// FRACTAL: Canvi resoluci√≥ del fractal pe tecles '+' i'-'
 		if (objecte == O_FRACTAL)
 		{
-			if (key == GLFW_KEY_KP_SUBTRACT) // Car‡cter '-' (ASCII 109)
+			if (key == GLFW_KEY_KP_SUBTRACT) // Car√†cter '-' (ASCII 109)
 			{
 				pas = pas * 2;
 				if (pas > 64) pas = 64;
 				sw_il = true;
 			}
-			else if (key == GLFW_KEY_KP_ADD) // Car‡cter '+' (ASCII 107)
+			else if (key == GLFW_KEY_KP_ADD) // Car√†cter '+' (ASCII 107)
 			{
 				pas = pas / 2;
 				if (pas < 1) pas = 1;
@@ -3626,7 +3626,7 @@ void Teclat_ColorObjecte(int key, int action)
 			}
 		}
 		//	else 
-		if (key == GLFW_KEY_DOWN) // Car‡cter VK_DOWN
+		if (key == GLFW_KEY_DOWN) // Car√†cter VK_DOWN
 		{
 			if (fonsR) {
 				col_obj.r -= incr;
@@ -3697,16 +3697,16 @@ void Teclat_ColorFons(int key, int action)
 
 		if (action == GLFW_PRESS)
 		{
-			// FRACTAL: Canvi resoluciÛ del fractal pe tecles '+' i'-'
+			// FRACTAL: Canvi resoluci√≥ del fractal pe tecles '+' i'-'
 			if (objecte == O_FRACTAL)
 			{
-				if (key == GLFW_KEY_KP_SUBTRACT) // Car‡cter '-' - (ASCII:109)
+				if (key == GLFW_KEY_KP_SUBTRACT) // Car√†cter '-' - (ASCII:109)
 				{
 					pas = pas * 2;
 					if (pas > 64) pas = 64;
 					sw_il = true;
 				}
-				else if (key == GLFW_KEY_KP_ADD) // Car‡cter '+' - (ASCII:107)
+				else if (key == GLFW_KEY_KP_ADD) // Car√†cter '+' - (ASCII:107)
 				{
 					pas = pas / 2;
 					if (pas < 1) pas = 1;
@@ -3775,13 +3775,13 @@ void Teclat_ColorFons(int key, int action)
 		}
 }
 
-// Teclat_Navega: Teclat pels moviments de navegaciÛ.
+// Teclat_Navega: Teclat pels moviments de navegaci√≥.
 void Teclat_Navega(int key, int action)
 {
 	GLdouble vdir[3] = { 0, 0, 0 };
 	double modul = 0;
 
-	// Entorn VGI: Controls de moviment de navegaciÛ
+	// Entorn VGI: Controls de moviment de navegaci√≥
 	vdir[0] = n[0] - opvN.x;
 	vdir[1] = n[1] - opvN.y;
 	vdir[2] = n[2] - opvN.z;
@@ -4027,7 +4027,7 @@ void rotate_vector(double vec1[3], double axis[3], double angle) {
 	// Copiem vec1
 	//double cvec1[3] = {vec1[0], vec1[1], vec1[2]};
 
-	// Aplicar la fÛrmula de RodrÌguez
+	// Aplicar la f√≥rmula de Rodr√≠guez
 	vec1[0] = vec1[0] * cos_theta + vec2[0] * sin_theta + axis[0] * dot_product1 * (1 - cos_theta);
 	vec1[1] = vec1[1] * cos_theta + vec2[1] * sin_theta + axis[1] * dot_product1 * (1 - cos_theta);
 	vec1[2] = vec1[2] * cos_theta + vec2[2] * sin_theta + axis[2] * dot_product1 * (1 - cos_theta);
@@ -4050,7 +4050,7 @@ void Moviment_Nau()
 	double modulV = 0;
 	double modulU = 0;
 
-	// Entorn VGI: Controls de moviment de navegaciÛ
+	// Entorn VGI: Controls de moviment de navegaci√≥
 
 	//vector normalitzat n: vdir
 	vdir[0] = n[0] - opvN.x;
@@ -4261,9 +4261,9 @@ void Teclat_Pan(int key, int action)
 			if (fact_pan > 2048) fact_pan = 2048;
 			break;
 
-		// Tecla Insert: Fixar el desplaÁament de pantalla (pan)
+		// Tecla Insert: Fixar el despla√ßament de pantalla (pan)
 		case GLFW_KEY_INSERT:
-			// Acumular desplaÁaments de pan (tr_cpv) en variables fixes (tr_cpvF).
+			// Acumular despla√ßaments de pan (tr_cpv) en variables fixes (tr_cpvF).
 			tr_cpvF.x += tr_cpv.x;		tr_cpv.x = 0.0;
 			if (tr_cpvF.x > 100000) tr_cpvF.y = 100000;
 			tr_cpvF.y += tr_cpv.y;		tr_cpv.y = 0.0;
@@ -4272,7 +4272,7 @@ void Teclat_Pan(int key, int action)
 			if (tr_cpvF.z > 100000) tr_cpvF.z = 100000;
 			break;
 
-		// Tecla Delete: Inicialitzar el desplaÁament de pantalla (pan)
+		// Tecla Delete: Inicialitzar el despla√ßament de pantalla (pan)
 		case GLFW_KEY_DELETE:
 			// Inicialitzar els valors de pan tant de la variable tr_cpv com de la tr_cpvF.
 			tr_cpv.x = 0.0;			tr_cpv.y = 0.0;			tr_cpv.z = 0.0;
@@ -4292,7 +4292,7 @@ void Teclat_TransEscala(int key, int action)
 	{
 		switch (key)
 		{
-// Modificar vector d'Escalatge per teclat (actiu amb Escalat ˙nicament)
+// Modificar vector d'Escalatge per teclat (actiu amb Escalat √∫nicament)
 		// Tecla '+' (augmentar tot l'escalat)
 		case GLFW_KEY_KP_ADD:
 			TG.VScal.x = TG.VScal.x * 2;
@@ -4351,7 +4351,7 @@ void Teclat_TransEscala(int key, int action)
 
 		// Tecla INSERT
 		case GLFW_KEY_INSERT:
-			// Acumular transformacions GeomËtriques (variable TG) i de pan en variables fixes (variable TGF)
+			// Acumular transformacions Geom√®triques (variable TG) i de pan en variables fixes (variable TGF)
 			TGF.VScal.x *= TG.VScal.x;	TGF.VScal.y *= TG.VScal.y; TGF.VScal.z *= TG.VScal.z;
 			if (TGF.VScal.x > 8192)		TGF.VScal.x = 8192;
 			if (TGF.VScal.y > 8192)		TGF.VScal.y = 8192;
@@ -4369,9 +4369,9 @@ void Teclat_TransEscala(int key, int action)
 			TG.VTras.x = 0.0;		TG.VTras.y = 0.0;		TG.VTras.z = 0.0;
 			break;
 
-		// Tecla Delete: Esborrar les Transformacions GeomËtriques Calculades
+		// Tecla Delete: Esborrar les Transformacions Geom√®triques Calculades
 		case GLFW_KEY_DELETE:
-			// Inicialitzar els valors de transformacions GeomËtriques i de pan en variables fixes.
+			// Inicialitzar els valors de transformacions Geom√®triques i de pan en variables fixes.
 			TGF.VScal.x = 1.0;		TGF.VScal.y = 1.0;;		TGF.VScal.z = 1.0;
 			TG.VScal.x = 1.0;		TG.VScal.y = 1.0;		TG.VScal.z = 1.0;
 			TGF.VRota.x = 0.0;		TGF.VRota.y = 0.0;		TGF.VRota.z = 0.0;
@@ -4386,7 +4386,7 @@ void Teclat_TransEscala(int key, int action)
 	}
 }
 
-// Teclat_TransRota: Teclat pels canvis del valor del vector de l'angle de rotaciÛ per X,Y,Z.
+// Teclat_TransRota: Teclat pels canvis del valor del vector de l'angle de rotaci√≥ per X,Y,Z.
 void Teclat_TransRota(int key, int action)
 {
 	if (action == GLFW_PRESS)
@@ -4441,7 +4441,7 @@ void Teclat_TransRota(int key, int action)
 			if (fact_Rota > 90) fact_Rota = 90;
 			break;
 
-			// Modificar vector d'Escalatge per teclat (actiu amb RotaciÛ)
+			// Modificar vector d'Escalatge per teclat (actiu amb Rotaci√≥)
 				// Tecla '+' (augmentar escalat)
 		case GLFW_KEY_KP_ADD:
 			TG.VScal.x = TG.VScal.x * 2;
@@ -4462,7 +4462,7 @@ void Teclat_TransRota(int key, int action)
 			if (TG.VScal.z < 0.25) TG.VScal.z = 0.25;
 			break;
 
-			// Tecla Insert: Acumular transformacions GeomËtriques (variable TG) i de pan en variables fixes (variable TGF)
+			// Tecla Insert: Acumular transformacions Geom√®triques (variable TG) i de pan en variables fixes (variable TGF)
 		case GLFW_KEY_INSERT:
 			TGF.VScal.x *= TG.VScal.x;	TGF.VScal.y *= TG.VScal.y; TGF.VScal.z *= TG.VScal.z;
 			if (TGF.VScal.x > 8192)		TGF.VScal.x = 8192;
@@ -4481,9 +4481,9 @@ void Teclat_TransRota(int key, int action)
 			TG.VTras.x = 0.0;		TG.VTras.y = 0.0;		TG.VTras.z = 0.0;
 			break;
 
-			// Tecla Delete: Esborrar les Transformacions GeomËtriques Calculades
+			// Tecla Delete: Esborrar les Transformacions Geom√®triques Calculades
 		case GLFW_KEY_DELETE:
-			// Inicialitzar els valors de transformacions GeomËtriques i de pan en variables fixes.
+			// Inicialitzar els valors de transformacions Geom√®triques i de pan en variables fixes.
 			TGF.VScal.x = 1.0;	TGF.VScal.y = 1.0;;	TGF.VScal.z = 1.0;
 			TG.VScal.x = 1.0;		TG.VScal.y = 1.0;		TG.VScal.z = 1.0;
 			TGF.VRota.x = 0.0;	TGF.VRota.y = 0.0;	TGF.VRota.z = 0.0;
@@ -4505,7 +4505,7 @@ void Teclat_TransRota(int key, int action)
 }
 
 
-// Teclat_TransTraslada: Teclat pels canvis del valor de traslaciÛ per X,Y,Z.
+// Teclat_TransTraslada: Teclat pels canvis del valor de traslaci√≥ per X,Y,Z.
 void Teclat_TransTraslada(int key, int action)
 {
 	GLdouble vdir[3] = { 0, 0, 0 };
@@ -4563,7 +4563,7 @@ void Teclat_TransTraslada(int key, int action)
 			if (fact_Tras > 100000) fact_Tras = 100000;
 			break;
 
-			// Modificar vector d'Escalatge per teclat (actiu amb TraslaciÛ)
+			// Modificar vector d'Escalatge per teclat (actiu amb Traslaci√≥)
 				// Tecla '+' (augmentar escalat)
 		case GLFW_KEY_KP_ADD:
 			TG.VScal.x = TG.VScal.x * 2;
@@ -4586,7 +4586,7 @@ void Teclat_TransTraslada(int key, int action)
 
 			// Tecla INSERT
 		case GLFW_KEY_INSERT:
-			// Acumular transformacions GeomËtriques (variable TG) i de pan en variables fixes (variable TGF)
+			// Acumular transformacions Geom√®triques (variable TG) i de pan en variables fixes (variable TGF)
 			TGF.VScal.x *= TG.VScal.x;	TGF.VScal.y *= TG.VScal.y; TGF.VScal.z *= TG.VScal.z;
 			if (TGF.VScal.x > 8192)		TGF.VScal.x = 8192;
 			if (TGF.VScal.y > 8192)		TGF.VScal.y = 8192;
@@ -4604,9 +4604,9 @@ void Teclat_TransTraslada(int key, int action)
 			TG.VTras.x = 0.0;		TG.VTras.y = 0.0;		TG.VTras.z = 0.0;
 			break;
 
-			// Tecla Delete: Esborrar les Transformacions GeomËtriques Calculades
+			// Tecla Delete: Esborrar les Transformacions Geom√®triques Calculades
 		case GLFW_KEY_DELETE:
-			// Inicialitzar els valors de transformacions GeomËtriques i de pan en variables fixes.
+			// Inicialitzar els valors de transformacions Geom√®triques i de pan en variables fixes.
 			TGF.VScal.x = 1.0;		TGF.VScal.y = 1.0;;		TGF.VScal.z = 1.0;
 			TG.VScal.x = 1.0;		TG.VScal.y = 1.0;		TG.VScal.z = 1.0;
 			TGF.VRota.x = 0.0;		TGF.VRota.y = 0.0;		TGF.VRota.z = 0.0;
@@ -4628,7 +4628,7 @@ void Teclat_TransTraslada(int key, int action)
 }
 
 
-// Teclat_Grid: Teclat pels desplaÁaments dels gridXY, gridXZ i gridYZ.
+// Teclat_Grid: Teclat pels despla√ßaments dels gridXY, gridXZ i gridYZ.
 void Teclat_Grid(int key, int action)
 {
 	if (action == GLFW_PRESS)
@@ -4697,27 +4697,27 @@ void Teclat_PasCorbes(int key, int action)
 			if (pas_CS > 0.5) pas_CS = 0.5;
 			if (objecte == C_BSPLINE) {
 				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
-				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
 			}
 			else if (objecte == C_BEZIER) {
 				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
-				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
 			}
 			else if (objecte == C_LEMNISCATA) {
 				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
-				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
 			}
 			else if (objecte == C_HERMITTE) {
 				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
-				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
 			}
 			else if (objecte == C_CATMULL_ROM) {
 				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
-				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
 			}
 			break;
 
@@ -4727,28 +4727,28 @@ void Teclat_PasCorbes(int key, int action)
 			if (pas_CS < 0.0125) pas_CS = 0.00625;
 			if (objecte == C_BSPLINE) {
 				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
-				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
 			}
 			else if (objecte == C_BEZIER) {
 				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
-				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
 			}
 			else if (objecte == C_LEMNISCATA) {
 				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
-				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.	
+				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.	
 			}
 			else if (objecte == C_HERMITTE) {
 				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
-				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
 			}
 			else if (objecte == C_CATMULL_ROM) {
 				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
-				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
 			}
 			break;
 
@@ -4758,28 +4758,28 @@ void Teclat_PasCorbes(int key, int action)
 			if (pas_CS > 0.5) pas_CS = 0.5;
 			if (objecte == C_BSPLINE) {
 				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
-				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
 			}
 			else if (objecte == C_BEZIER) {
 				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
-				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
 			}
 			else if (objecte == C_LEMNISCATA) {
 				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
-				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
+				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
 			}
 			else if (objecte == C_HERMITTE) {
 				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
-				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
 			}
 			else if (objecte == C_CATMULL_ROM) {
 				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
-				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
 			}
 			break;
 
@@ -4789,28 +4789,28 @@ void Teclat_PasCorbes(int key, int action)
 			if (pas_CS < 0.0125) pas_CS = 0.00625;
 			if (objecte == C_BSPLINE) {
 				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
-				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_BSPLINE.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_BSPLINE.
 			}
 			else if (objecte == C_BEZIER) {
 				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
-				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posiciÛ CRV_BEZIER.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posici√≥ CRV_BEZIER.
 			}
 			else if (objecte == C_LEMNISCATA) {
 				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
-				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posiciÛ CRV_LEMNISCATA3D.
+				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posici√≥ CRV_LEMNISCATA3D.
 			}
 			else if (objecte == C_HERMITTE) {
 				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
-				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_HERMITTE.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_HERMITTE.
 			}
 			else if (objecte == C_CATMULL_ROM) {
 				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
-				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
-				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posiciÛ CRV_CATMULL_ROM.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posici√≥ CRV_CATMULL_ROM.
 			}
 			break;
 
@@ -4836,13 +4836,13 @@ void Teclat_PasCorbes(int key, int action)
 /*                           CONTROL DEL RATOLI                              */
 /* ------------------------------------------------------------------------- */
 
-// OnMouseButton: FunciÛ que es crida quan s'apreta algun botÛ (esquerra o dreta) del mouse.
+// OnMouseButton: Funci√≥ que es crida quan s'apreta algun bot√≥ (esquerra o dreta) del mouse.
 //      PARAMETRES: - window: Finestra activa
-//					- button: BotÛ seleccionat (GLFW_MOUSE_BUTTON_LEFT o GLFW_MOUSE_BUTTON_RIGHT)
-//					- action: AcciÛ de la tecla: GLFW_PRESS (si s'ha apretat), GLFW_REPEAT, si s'ha repetit pressiÛ i GL_RELEASE, si es deixa d'apretar.
+//					- button: Bot√≥ seleccionat (GLFW_MOUSE_BUTTON_LEFT o GLFW_MOUSE_BUTTON_RIGHT)
+//					- action: Acci√≥ de la tecla: GLFW_PRESS (si s'ha apretat), GLFW_REPEAT, si s'ha repetit pressi√≥ i GL_RELEASE, si es deixa d'apretar.
 void OnMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
-// TODO: Agregue aquÌ su cÛdigo de controlador de mensajes o llame al valor predeterminado
+// TODO: Agregue aqu√≠ su c√≥digo de controlador de mensajes o llame al valor predeterminado
 // Get the cursor position when the mouse key has been pressed or released.
 	double xpos, ypos;
 	glfwGetCursorPos(window, &xpos, &ypos);
@@ -4853,22 +4853,22 @@ void OnMouseButton(GLFWwindow* window, int button, int action, int mods)
 	io.AddMouseButtonEvent(button, action);
 
 // (2) ONLY forward mouse data to your underlying app/game.
-	if (!io.WantCaptureMouse) { //<Tractament mouse de l'aplicaciÛ>}
+	if (!io.WantCaptureMouse) { //<Tractament mouse de l'aplicaci√≥>}
 		// OnLButtonDown
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		{
-			// Entorn VGI: Detectem en quina posiciÛ s'ha apretat el botÛ esquerra del
+			// Entorn VGI: Detectem en quina posici√≥ s'ha apretat el bot√≥ esquerra del
 			//				mouse i ho guardem a la variable m_PosEAvall i activem flag m_ButoEAvall
 			m_ButoEAvall = true;
 			m_PosEAvall.x = xpos;	m_PosEAvall.y = ypos;
 			m_EsfeEAvall = OPV;
 		}
-		// OnLButtonUp: FunciÛ que es crida quan deixem d'apretar el botÛ esquerra del mouse.
+		// OnLButtonUp: Funci√≥ que es crida quan deixem d'apretar el bot√≥ esquerra del mouse.
 		else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-		{	// Entorn VGI: Desactivem flag m_ButoEAvall quan deixem d'apretar botÛ esquerra del mouse.
+		{	// Entorn VGI: Desactivem flag m_ButoEAvall quan deixem d'apretar bot√≥ esquerra del mouse.
 			m_ButoEAvall = false;
 
-			// OPCI” VISTA-->SAT»LIT: C‡lcul increment desplaÁament del Punt de Vista
+			// OPCI√ì VISTA-->SAT√àLIT: C√†lcul increment despla√ßament del Punt de Vista
 			if ((satelit) && (projeccio != ORTO))
 			{	//m_EsfeIncEAvall.R = m_EsfeEAvall.R - OPV.R;
 				m_EsfeIncEAvall.alfa = 0.01f * (OPV.alfa - m_EsfeEAvall.alfa); //if (abs(m_EsfeIncEAvall.alfa)<0.01) { if ((m_EsfeIncEAvall.alfa)>0.0) m_EsfeIncEAvall.alfa = 0.01 else m_EsfeIncEAvall.alfa=0.01}
@@ -4884,30 +4884,30 @@ void OnMouseButton(GLFWwindow* window, int button, int action, int mods)
 		}
 		// OnRButtonDown
 		else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-		{	// Entorn VGI: Detectem en quina posiciÛ s'ha apretat el botÛ esquerra del
+		{	// Entorn VGI: Detectem en quina posici√≥ s'ha apretat el bot√≥ esquerra del
 			//				mouse i ho guardem a la variable m_PosEAvall i activem flag m_ButoEAvall
 			m_ButoDAvall = true;
 			//m_PosDAvall = point;
 			m_PosDAvall.x = xpos;	m_PosDAvall.y = ypos;
 		}
-		// OnLButtonUp: FunciÛ que es crida quan deixem d'apretar el botÛ esquerra del mouse.
+		// OnLButtonUp: Funci√≥ que es crida quan deixem d'apretar el bot√≥ esquerra del mouse.
 		else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-		{	// Entorn VGI: Desactivem flag m_ButoEAvall quan deixem d'apretar botÛ esquerra del mouse.
+		{	// Entorn VGI: Desactivem flag m_ButoEAvall quan deixem d'apretar bot√≥ esquerra del mouse.
 			m_ButoDAvall = false;
 		}
 	}
 }
 
-// OnMouseMove: FunciÛ que es crida quan es mou el mouse. La utilitzem per la 
-//				  VisualitzaciÛ Interactiva amb les tecles del mouse apretades per 
-//				  modificar els par‡metres de P.V. (R,angleh,anglev) segons els 
+// OnMouseMove: Funci√≥ que es crida quan es mou el mouse. La utilitzem per la 
+//				  Visualitzaci√≥ Interactiva amb les tecles del mouse apretades per 
+//				  modificar els par√†metres de P.V. (R,angleh,anglev) segons els 
 //				  moviments del mouse.
 //      PARAMETRES: - window: Finestra activa
-//					- xpos: PosiciÛ X del cursor del mouse (coord. pantalla) quan el botÛ s'ha apretat.
-//					- ypos: PosiciÛ Y del cursor del mouse(coord.pantalla) quan el botÛ s'ha apretat.
+//					- xpos: Posici√≥ X del cursor del mouse (coord. pantalla) quan el bot√≥ s'ha apretat.
+//					- ypos: Posici√≥ Y del cursor del mouse(coord.pantalla) quan el bot√≥ s'ha apretat.
 void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 {
-// TODO: Agregue aquÌ su cÛdigo de controlador de mensajes o llame al valor predeterminado
+// TODO: Agregue aqu√≠ su c√≥digo de controlador de mensajes o llame al valor predeterminado
 	double modul = 0;
 	GLdouble vdir[3] = { 0, 0, 0 };
 	CSize gir = { 0,0 }, girn = { 0,0 }, girT = { 0,0 }, zoomincr = { 0,0 };
@@ -4915,12 +4915,12 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 	// TODO: Add your message handler code here and/or call default
 	if (m_ButoEAvall && mobil && projeccio != CAP)
 	{
-// Entorn VGI: DeterminaciÛ dels angles (en graus) segons l'increment
-//				horitzontal i vertical de la posiciÛ del mouse.
+// Entorn VGI: Determinaci√≥ dels angles (en graus) segons l'increment
+//				horitzontal i vertical de la posici√≥ del mouse.
 		gir.cx = m_PosEAvall.x - xpos;		gir.cy = m_PosEAvall.y - ypos;
 		m_PosEAvall.x = xpos;				m_PosEAvall.y = ypos;
 		if (camera == CAM_ESFERICA)
-		{	// C‡mera EsfËrica
+		{	// C√†mera Esf√®rica
 			OPV.beta = OPV.beta - gir.cx / 2.0;
 			OPV.alfa = OPV.alfa + gir.cy / 2.0;
 
@@ -4930,7 +4930,7 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 			if (OPV.beta >= 360)	OPV.beta = OPV.beta - 360.0;
 			if (OPV.beta < 0)		OPV.beta = OPV.beta + 360.0;
 		}
-		else { // C‡mera Geode
+		else { // C√†mera Geode
 			OPV_G.beta = OPV_G.beta + gir.cx / 2;
 			OPV_G.alfa = OPV_G.alfa + gir.cy / 2;
 			// Entorn VGI: Control per evitar el creixement desmesurat dels angles
@@ -4942,16 +4942,16 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 		// Crida a OnPaint() per redibuixar l'escena
 		//OnPaint(window);
 	}
-	else if (m_ButoEAvall && (camera == CAM_NAVEGA) && (projeccio != CAP && projeccio != ORTO)) // OpciÛ NavegaciÛ
+	else if (m_ButoEAvall && (camera == CAM_NAVEGA) && (projeccio != CAP && projeccio != ORTO)) // Opci√≥ Navegaci√≥
 	{
-		// Entorn VGI: Canviar orientaciÛ en opciÛ de NavegaciÛ
+		// Entorn VGI: Canviar orientaci√≥ en opci√≥ de Navegaci√≥
 		girn.cx = m_PosEAvall.x - xpos;		girn.cy = m_PosEAvall.y - ypos;
 		angleZ = girn.cx / 2.0;
 		// Entorn VGI: Control per evitar el creixement desmesurat dels angles.
 		if (angleZ >= 360) angleZ = angleZ - 360;
 		if (angleZ < 0)	angleZ = angleZ + 360;
 
-		// Entorn VGI: Segons orientaciÛ dels eixos Polars (Vis_Polar)
+		// Entorn VGI: Segons orientaci√≥ dels eixos Polars (Vis_Polar)
 		if (Vis_Polar == POLARZ) { // (X,Y,Z)
 			n[0] = n[0] - opvN.x;
 			n[1] = n[1] - opvN.y;
@@ -4982,7 +4982,7 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 		//OnPaint(window);
 	}
 
-	// Entorn VGI: TransformaciÛ GeomËtrica interactiva pels eixos X,Y boto esquerra del mouse.
+	// Entorn VGI: Transformaci√≥ Geom√®trica interactiva pels eixos X,Y boto esquerra del mouse.
 	else {
 		bool transE = transX || transY;
 		if (m_ButoEAvall && transE && transf)
@@ -5046,8 +5046,8 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 		}
 	}
 
-	// Entorn VGI: DeterminaciÛ del desplaÁament del pan segons l'increment
-	//				vertical de la posiciÛ del mouse (tecla dreta apretada).
+	// Entorn VGI: Determinaci√≥ del despla√ßament del pan segons l'increment
+	//				vertical de la posici√≥ del mouse (tecla dreta apretada).
 	if (m_ButoDAvall && pan && (projeccio != CAP && projeccio != ORTO))
 	{
 		//CSize zoomincr = m_PosDAvall - point;
@@ -5055,12 +5055,12 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 		long int incrx = zoomincr.cx;
 		long int incry = zoomincr.cy;
 
-		// DesplaÁament pan vertical
+		// Despla√ßament pan vertical
 		tr_cpv.y -= incry * fact_pan;
 		if (tr_cpv.y > 100000) tr_cpv.y = 100000;
 		else if (tr_cpv.y < -100000) tr_cpv.y = -100000;
 
-		// DesplaÁament pan horitzontal
+		// Despla√ßament pan horitzontal
 		tr_cpv.x += incrx * fact_pan;
 		if (tr_cpv.x > 100000) tr_cpv.x = 100000;
 		else if (tr_cpv.x < -100000) tr_cpv.x = -100000;
@@ -5070,8 +5070,8 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 		// Crida a OnPaint() per redibuixar l'escena
 		//OnPaint(window);
 	}
-	// DeterminaciÛ del par‡metre R segons l'increment
-	//   vertical de la posiciÛ del mouse (tecla dreta apretada)
+	// Determinaci√≥ del par√†metre R segons l'increment
+	//   vertical de la posici√≥ del mouse (tecla dreta apretada)
 		//else if (m_ButoDAvall && zzoom && (projeccio!=CAP && projeccio!=ORTO))
 	else if (m_ButoDAvall && zzoom && (projeccio != CAP))
 	{
@@ -5089,7 +5089,7 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 		//OnPaint(window);
 	}
 	else if (m_ButoDAvall &&  (camera == CAM_NAVEGA) && (projeccio != CAP && projeccio != ORTO))
-	{	// AvanÁar en opciÛ de NavegaciÛ
+	{	// Avan√ßar en opci√≥ de Navegaci√≥
 		if ((m_PosDAvall.x != xpos) && (m_PosDAvall.y != ypos))
 		{
 			//CSize zoomincr = m_PosDAvall - point;
@@ -5114,7 +5114,7 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 		}
 	}
 
-// Entorn VGI: TransformaciÛ GeomËtrica interactiva per l'eix Z amb boto dret del mouse.
+// Entorn VGI: Transformaci√≥ Geom√®trica interactiva per l'eix Z amb boto dret del mouse.
 	else if (m_ButoDAvall && transZ && transf)
 	{
 		// Calcular increment
@@ -5148,14 +5148,14 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 	}
 }
 
-// OnMouseWheel: FunciÛ que es crida quan es mou el rodet del mouse. La utilitzem per la 
-//				  VisualitzaciÛ Interactiva per modificar el par‡metre R de P.V. (R,angleh,anglev) 
+// OnMouseWheel: Funci√≥ que es crida quan es mou el rodet del mouse. La utilitzem per la 
+//				  Visualitzaci√≥ Interactiva per modificar el par√†metre R de P.V. (R,angleh,anglev) 
 //				  segons el moviment del rodet del mouse.
-//      PARAMETRES: -  (xoffset,yoffset): Estructura (x,y) que dÛna la posiciÛ del mouse 
-//							 (coord. pantalla) quan el botÛ s'ha apretat.
+//      PARAMETRES: -  (xoffset,yoffset): Estructura (x,y) que d√≥na la posici√≥ del mouse 
+//							 (coord. pantalla) quan el bot√≥ s'ha apretat.
 void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 {
-	// TODO: Agregue aquÌ su cÛdigo de controlador de mensajes o llame al valor predeterminado
+	// TODO: Agregue aqu√≠ su c√≥digo de controlador de mensajes o llame al valor predeterminado
 	double modul = 0;
 	GLdouble vdir[3] = { 0, 0, 0 };
 
@@ -5165,8 +5165,8 @@ void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 	//io.AddMouseButtonEvent(button, true);
 
 // (2) ONLY forward mouse data to your underlying app/game.
-	if (!io.WantCaptureMouse) { // <Tractament mouse de l'aplicaciÛ>}
-		// FunciÛ de zoom quan est‡ activada la funciÛ pan o les T. GeomËtriques
+	if (!io.WantCaptureMouse) { // <Tractament mouse de l'aplicaci√≥>}
+		// Funci√≥ de zoom quan est√† activada la funci√≥ pan o les T. Geom√®triques
 		if ((zzoom) || (transX) || (transY) || (transZ))
 		{	OPV.R = OPV.R + yoffset / 4;
 			if (OPV.R < 1) OPV.R = 1;
@@ -5189,18 +5189,18 @@ void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 
 
 /* ------------------------------------------------------------------------- */
-/*					     TIMER (ANIMACI”)									 */
+/*					     TIMER (ANIMACI√ì)									 */
 /* ------------------------------------------------------------------------- */
 void OnTimer()
 {
-	// TODO: Agregue aquÌ su cÛdigo de controlador de mensajes o llame al valor predeterminado
+	// TODO: Agregue aqu√≠ su c√≥digo de controlador de mensajes o llame al valor predeterminado
 	if (anima) {
-		// Codi de tractament de l'animaciÛ quan transcorren els ms. del crono.
+		// Codi de tractament de l'animaci√≥ quan transcorren els ms. del crono.
 
 		// Crida a OnPaint() per redibuixar l'escena
 		//InvalidateRect(NULL, false);
 	}
-	else if (satelit) {	// OPCI” SAT»LIT: Increment OPV segons moviments mouse.
+	else if (satelit) {	// OPCI√ì SAT√àLIT: Increment OPV segons moviments mouse.
 		//OPV.R = OPV.R + m_EsfeIncEAvall.R;
 		OPV.alfa = OPV.alfa + m_EsfeIncEAvall.alfa;
 		while (OPV.alfa > 360) OPV.alfa = OPV.alfa - 360;	while (OPV.alfa < 0) OPV.alfa = OPV.alfa + 360;
@@ -5214,7 +5214,7 @@ void OnTimer()
 
 // ---------------- Entorn VGI: Funcions locals a main.cpp
 
-// Log2: C‡lcul del log base 2 de num
+// Log2: C√†lcul del log base 2 de num
 int Log2(int num)
 {
 	int tlog;
@@ -5283,7 +5283,7 @@ int llegir_ptsC(const char* nomf)
 }
 
 
-// Entorn VGI. OnFull_Screen: FunciÛ per a pantalla completa
+// Entorn VGI. OnFull_Screen: Funci√≥ per a pantalla completa
 void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow *window)
 {   
 	//int winPosX, winPosY;
@@ -5440,7 +5440,7 @@ int main(void)
 // Make the window's context current
     glfwMakeContextCurrent(window);
 
-// Llegir resoluciÛ actual de pantalla
+// Llegir resoluci√≥ actual de pantalla
 	glfwGetWindowSize(window, &width_old, &height_old);
 ;
 
@@ -5464,11 +5464,11 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor); // GL4.3
 
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Si funcions deprecades sÛn eliminades (no ARB_COMPATIBILITY)
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);  // Si funcions deprecades NO sÛn eliminades (Si ARB_COMPATIBILITY)
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Si funcions deprecades s√≥n eliminades (no ARB_COMPATIBILITY)
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);  // Si funcions deprecades NO s√≥n eliminades (Si ARB_COMPATIBILITY)
 
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	// CreaciÛ contexte CORE
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);	// CreaciÛ contexte ARB_COMPATIBILITY
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	// Creaci√≥ contexte CORE
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);	// Creaci√≥ contexte ARB_COMPATIBILITY
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE); // comment this line in a release build! 
 
 
@@ -5541,19 +5541,19 @@ int main(void)
 // Poll for and process events
 		glfwPollEvents();
 
-// Entorn VGI.ImGui: Dibuixa men˙ ImGui
+// Entorn VGI.ImGui: Dibuixa men√∫ ImGui
 		draw_Menu_ImGui();
 
 // Crida a OnPaint() per redibuixar l'escena
 		OnPaint(/*window,*/ time);
 
-// Entorn VGI.ImGui: Capta dades del men˙ InGui
+// Entorn VGI.ImGui: Capta dades del men√∫ InGui
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 // Entorn VGI: Activa la finestra actual
 		glfwMakeContextCurrent(window);
 
-// Entorn VGI: TransferËncia del buffer OpenGL a buffer de pantalla
+// Entorn VGI: Transfer√®ncia del buffer OpenGL a buffer de pantalla
 		glfwSwapBuffers(window);
     }
 
