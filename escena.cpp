@@ -842,8 +842,7 @@ void updatePlanetes(float deltaTime)
 			continue;
 
 		// LCR - ORBITA LLUNA AL VOLTANT DE LA TERRA //
-		// ACTUALITZAR AMB NOVES FISIQUES: ISMAEL
-		/*
+		
 		else if (i == 9) //si es lluna
 		{
 			Planeta& terra = PLANETES[3];
@@ -859,7 +858,7 @@ void updatePlanetes(float deltaTime)
 
 			planeta.setPosition(terra.getPosition() + posLluna);
 		}
-		*/
+	
 
 		else
 		{
@@ -881,22 +880,6 @@ void updatePlanetes(float deltaTime)
 				planeta.setAcceleracio(acceleracio);
 			}
 
-			if (planeta.getName() == "Lluna")
-			{
-				Planeta& terra = PLANETES[3];
-				glm::dvec3 direccioTerra = terra.getPosition() - planeta.getPosition();
-				double distanciaTerra = glm::length(direccioTerra);
-
-				if (distanciaTerra > 0.0f)
-				{
-					glm::dvec3 direccioForçaTerra = glm::normalize(direccioTerra);
-					double magnitudForçaTerra = G * (terra.getMassa() * planeta.getMassa()) / (distanciaTerra * distanciaTerra);
-					glm::dvec3 forçaTerra = direccioForçaTerra * magnitudForçaTerra;
-
-					glm::dvec3 acceleracioActual = planeta.getAcceleracio()*10.0;
-					planeta.setAcceleracio(acceleracioActual + forçaTerra / planeta.getMassa());
-				}
-			}
 		}
 	}
 

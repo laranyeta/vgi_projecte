@@ -128,7 +128,7 @@ const int NUM_MAX_LLUMS = 8;
 #define PROG_BINARY_SHADERW 'W'
 
 const double AU_IN_METERS = 1.496e11;
-const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0 * 20.0;
+const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0;
 //LCR: s'afegeixen parametres lluna //
 const std::string NAMES[10] = { "Sol", "Mercuri", "Venus", "Terra", "Mart", "Júpiter", "Saturn", "Urà", "Neptú", "Lluna" };
 const std::string RUTES_TEXTURA[10] = { "sun.jpg","mercury.jpg","venus.jpg","earth.jpg","mars.jpg","jupiter.jpg","saturn.jpg","uranus.jpg","neptune.jpg", "moon.jpg" };
@@ -137,7 +137,7 @@ const double ESCALA_DISTANCIA = DISTANCIA_DEFAULT_TERRA / (1.0 * 1.496e11); //1.
 const double ESCALA_MASSA = 1.0;
 const double RADIS[10] = { 12.96340e11, 2.4397e10, 6.0518e10 , 6.3710e10 , 3.3895e10 , 6.9911e11 , 5.8232e11 , 2.5362e11 , 2.4622e11, 0.737e10 }; // e + 3
 const double SEMIEIXOS_MAJORS[9] = {
-	0.3871, 0.7233, 1.0000, 1.5237, 5.2026, 9.5549, 19.2184, 30.1104, 1.00000257
+	0.3871, 0.7233, 1.0000, 1.5237, 5.2026, 9.5549, 19.2184, 30.1104, 0.0000257
 };
 const double EXCENTRICITATS[10] = {
 	0.2056, 0.0068, 0.0167, 0.0934, 0.0484, 0.0555, 0.0463, 0.0095, 0.0549
