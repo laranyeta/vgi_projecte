@@ -667,6 +667,17 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	draw_TriVAO_Object(GLUT_TEAPOT); //gluSphere(0.5, 20, 20);
 }
 
+void inicialitzaDades()
+{
+	for (int i = 1; i < PLANETES.size(); i++)
+	{
+		PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i - 1]);
+		PLANETES[i].setExcentricitat(EXCENTRICITATS[i - 1]);
+		PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i - 1] * DEG_A_RAD);
+		PLANETES[i].setInclinacio(INCLINACIONS[i - 1] * DEG_A_RAD);
+		PLANETES[i].setPeriapsis(PERIAPSIS[i - 1] * DEG_A_RAD);
+	}
+}
 
 
 void processaRotacions()
@@ -701,12 +712,17 @@ void processaFisica()
 	for (int i = 0; i < PLANETES.size(); i++)
 	{
 		// Mida planeta
-		PLANETES[i].setRadi(RADIS[i] * ESCALA_DISTANCIA);
+		// TEMPORAL: ISMAEL
+		if (i == 0)
+			PLANETES[i].setRadi(RADIS[i] * (1.0 / 1.496e11));
+		else
+			PLANETES[i].setRadi(RADIS[i] * (1.0 / 1.496e11) * 2.1);
 
 		// Massa planeta
 		double massa = MASSES[i] * ESCALA_MASSA;
 		PLANETES[i].setMassa(massa);
 
+		double mu = G * PLANETES[0].getMassa(); // Paràmetre gravitacional
 		// Sol no es mou (valors per defecte del constructor, es pot eliminar)
 		if (i == 0)
 		{
@@ -715,36 +731,71 @@ void processaFisica()
 		}
 		else
 		{
-			// Posició inicial del planeta
-			double distancia = RADI_ORBITAL[i] * ESCALA_DISTANCIA;
-			// ISMAEL: Planetes repartits al voltant del sol, canviar
-			double angleRad = 2.0 * PI * (i - 1) / (PLANETES.size() - 1); // Distribución uniforme
 
-			float x = distancia * cos(angleRad);
-			float y = distancia * sin(angleRad);
-			float z = 0.0f; // Puedes modificar esto para distribución en 3D
+			// TEMPORAL: ISMAEL
+			if (PLANETES[i].getName() == "Lluna")
+			{
+				double distanciaTerraLluna = 3.844e8 * ESCALA_DISTANCIA;
+				glm::vec3 posRelativa = glm::vec3(distanciaTerraLluna, 0.0f, 0.0f);
 
-			PLANETES[i].setPosition(glm::vec3(x, y, z));
-			/*
-			PLANETES[i].setPosition(glm::vec3(distancia, 0.0f, 0.0f));
-			std::cout << PLANETES[i].getPosition().x << " " << PLANETES[i].getPosition().y << std::endl;
-			*/
-			// Calcular velocitat orbital
-			double M = PLANETES[0].getMassa(); // Massa del Sol
-			double v = sqrt(G * M / distancia);
+				PLANETES[i].setPosition(PLANETES[3].getPosition() + posRelativa);
 
-			// velocitat perpendicular a la posició
-			glm::dvec3 direccio = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), PLANETES[i].getPosition()));
-			glm::dvec3 velocitat = direccio * v;
+				double v = sqrt(G * PLANETES[3].getMassa() / distanciaTerraLluna);
 
-			PLANETES[i].setVelocitat(velocitat);
+				glm::dvec3 direccio = glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), posRelativa));
+				glm::dvec3 velocitat = direccio * v;
 
-			// Orbites 3D, en procés
-			PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i - 1]);
-			PLANETES[i].setExcentricitat(EXCENTRICITATS[i - 1]);
-			PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i - 1] * DEG_A_RAD);
-			PLANETES[i].setInclinacio(INCLINACIONS[i - 1] * DEG_A_RAD);
-			PLANETES[i].setPeriapsis(PERIAPSIS[i - 1] * DEG_A_RAD);
+				PLANETES[i].setVelocitat(PLANETES[3].getVelocitat() + velocitat);
+			}
+			else {
+				// Elements orbitals keplerians
+				double a = PLANETES[i].getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA;
+				double e = PLANETES[i].getExcentricitat();
+				double inclinacio = PLANETES[i].getInclinacio() * DEG_A_RAD;
+				double longNodeAsc = PLANETES[i].getLongitudNodeAscendent() * DEG_A_RAD;
+				double periapsis = PLANETES[i].getPeriapsis() * DEG_A_RAD;
+				// True anomaly
+				// CANVIAR: Modificat per repartir els planetes
+				//double nu = 2.0 * PI * (i - 1) / (PLANETES.size() - 1);
+				double nu = 0.0;
+
+				// Distancia del planeta al sol
+				double r = a * (1 - e * e) / (1 + e * cos(nu));
+
+				// Posició en el pla orbital (2D)
+				double x_plaOrbital = r * cos(nu);
+				double y_plaOrbital = r * sin(nu);
+				double z_plaOrbital = 0.0;
+
+				// Moment angular relatiu específic
+				double h = sqrt(mu * a * (1 - e * e));
+
+				// Velocitat en el pla orbital
+				// Ens diu cap a on i que tant ràpid es mou el planeta en la seva órbita
+				double vx_plaOrbital = -(mu / h) * sin(nu);
+				double vy_plaOrbital = (mu / h) * (e + cos(nu));
+				double vz_plaOrbital = 0.0;
+
+				// Vector de posició i velocitat en el pla orbital
+				glm::dvec3 posicio_plaOrbital(x_plaOrbital, y_plaOrbital, z_plaOrbital);
+				glm::dvec3 velocitat_plaOrbital(vx_plaOrbital, vy_plaOrbital, vz_plaOrbital);
+
+				// Matrius de rotació per passar del pla orbital a l'espai 3D
+				// S'inclinen i es giren les òrbites per passar del pla al 3D 
+				glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0), (float)periapsis, glm::vec3(0.0, 0.0, 1.0)));
+				glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0), (float)inclinacio, glm::vec3(1.0, 0.0, 0.0)));
+				glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0), (float)longNodeAsc, glm::vec3(0.0, 0.0, 1.0)));
+
+				// Combinem totes les rotacions
+				glm::mat3 R = R_periapsis * R_inclinacio * R_longNodeAsc;
+
+				// Transformem les posicions i velocitats del pla orbital a espai 3D
+				glm::dvec3 posicio_3D = R * posicio_plaOrbital;
+				glm::dvec3 velocitat_3D = R * velocitat_plaOrbital;
+
+				PLANETES[i].setPosition(glm::vec3(posicio_3D));
+				PLANETES[i].setVelocitat(velocitat_3D);
+			}
 		}
 	}
 }
@@ -766,8 +817,9 @@ void processaTextures()
 
 void processaPlanetes()
 {
-	processaFisica();
+	inicialitzaDades();
 	processaRotacions();
+	processaFisica();
 	processaTextures();
 }
 
@@ -790,6 +842,7 @@ void updatePlanetes(float deltaTime)
 			continue;
 
 		// LCR - ORBITA LLUNA AL VOLTANT DE LA TERRA //
+		
 		else if (i == 9) //si es lluna
 		{
 			Planeta& terra = PLANETES[3];
@@ -805,6 +858,8 @@ void updatePlanetes(float deltaTime)
 
 			planeta.setPosition(terra.getPosition() + posLluna);
 		}
+	
+
 		else
 		{
 			Planeta& sol = PLANETES[0];
@@ -813,16 +868,18 @@ void updatePlanetes(float deltaTime)
 			//std::cout << "Distancia: " << distance << std::endl;
 			if (distancia > 0.0f)
 			{
-				// Fisica orbita
+				// Força d'atracció gravitacional entre el sol i el planeta
+				// Llei universal gravitacional de Newton
 				glm::dvec3 direccioForça = glm::normalize(direccio);
 				double magnitudForça = G * (sol.getMassa() * planeta.getMassa()) / (distancia * distancia);
-
 				glm::dvec3 força = direccioForça * magnitudForça;
 
 				// F=m*a => a=F/m
+				// Segona llei de newton
 				glm::dvec3 acceleracio = força / planeta.getMassa();
 				planeta.setAcceleracio(acceleracio);
 			}
+
 		}
 	}
 
@@ -852,25 +909,20 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		inicialitzat = true;
 	}
 	// Un dia per segon
+	// Un dia per segon
 	double deltaTime = time - lastTime;
 	lastTime = time;
-	double velocitatSimulacio = 60.0 * 60.0 * 24.0;
-	deltaTime *= velocitatSimulacio;
+
+	deltaTime *= VELOCITAT_SIMULACIO;
 	// Física orbites 2D de moment
-	updatePlanetes(velocitatSimulacio);
+	updatePlanetes(deltaTime);
 	for (auto& planeta : PLANETES)
 	{
 		// Posició inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
 		// LCR: cas lluna //
-		if (planeta.getName() == "Lluna")
-		{
-			glm::vec3 posLluna = planeta.getPosition();
-			ModelMatrix = glm::translate(MatriuTG, posLluna);
-		}
-		else
-			ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
+		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
 
 		// Rotació sobre ell mateix
 		float velocitatRotacio = planeta.getVelocitatRotacio();    // Graus per segon
