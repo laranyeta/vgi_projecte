@@ -830,203 +830,128 @@ void draw_Menu_ImGui()
 		ImGui::ShowDemoWindow(&show_demo_window);
 
 	// 2. Show another simple window.
-	if (show_another_window)
+	/*if (show_another_window)
 	{
 		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 		ImGui::Text("Hello from another window!");
 		if (ImGui::Button("Close Me"))
 			show_another_window = false;
 		ImGui::End();
-	}
+	}*/
 
 	// 1. Show the EntornVGI window. Finestra amb totes les opcions de l'aplicació.
-	if (show_EntornVGI_window)
+	/*if (show_EntornVGI_window)
 		ShowEntornVGIWindow(&show_EntornVGI_window); //ShowEntornVGIWindow(&show_EntornVGI_window);
-
+	*/
 	if (show_user_windows) {
-
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
-		/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-		if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-		if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-		if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-		if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-		if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-		if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-		if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-		if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-		if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
-		if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
-		*/
-
-
-		//GLuint backgroundTextureID = loadIMA_SOIL("textures/fons.png");
-		/*ImGui::Text("pointer = %x", my_image_texture);
-		ImGui::Text("size = %d x %d", my_image_width, my_image_height);
-		ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));*/
-		//ImGui::Image((void*)(intptr_t)backgroundTextureID, screenSize);
-		// Estableix el color de fons d'ImGui a negre
-		ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons de la finestra
-		ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del frame
-		ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del child
-		ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons dels popups
-
-		ImVec2 screenSize = ImGui::GetIO().DisplaySize;
-		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetNextWindowSize(screenSize);
-
-		ImGui::Begin("Opcions", &show_user_windows, window_flags+ ImGuiWindowFlags_NoBringToFrontOnFocus);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		
-		// Configura els colors i l'estil
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
-
-		// Arrodoniment
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
-
-
-
-		if (ImGui::Button("Debug", ImVec2(50, 20))) {
-			show_debug_windows = true;
-			show_user_windows = false;
-			show_user_windows_button_inici = false;
-		}
-
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor(3);
-		ImGui::End();
-
-		// Calcula les dimensions de la finestra principal
-		ImVec2 windowSize(200, 100); // Canvia aquestes dimensions segons el tamany de la finestra desitjada
-		// Calcula la posició per centrar la finestra a la pantalla
-		ImVec2 windowPos = ImVec2(
-			(screenSize.x - windowSize.x) * 0.5f,
-			(screenSize.y - windowSize.y) - 50 
-		);
-		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
-
-		ImGui::Begin("Finestra Usuari", &show_user_windows_button_inici, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-
-
-		// Configura els colors i l'estil
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
-
-		// Arrodoniment
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
-
-
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Blanc
-
-		// Afegeix el text amb mida augmentada
-		//ImGui::PushFont(font); 
-		//ImGui::Text("Text amb mida augmentada"); // El text utilitzarà la font carregada
-		//ImGui::PopFont();
-		// Restaura l'estil de color del text
-		ImGui::PopStyleColor();
-		// Mida del botó
-		if (ImGui::Button("Iniciar Simulador", ImVec2(200, 55))) {
-			show_user_windows = false;
-			show_user_windows_button_inici = false;
-			Iniciar_simulador();
-		}
-
-		ImGui::PopStyleVar();
-		ImGui::PopStyleColor(3);
-		ImGui::End();
+		MostrarInterficieUsuari();
 	}
 
 	// 3. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
 	if(show_debug_windows){
-		static float f = 0.0f;
-		static int counter = 0;
-		static float PV[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-		ImGui::Begin("Status Menu");                          // Create a window called "Status Menu" and append into it.
-
-		ImGui::Text("FInestres EntornVGI:");               // Display some text (you can use a format strings too)
-		ImGui::SameLine();
-		ImGui::Checkbox("EntornVGI Window", &show_EntornVGI_window);
-		ImGui::Separator();
-		ImGui::Spacing();
-
-		// Transformació PV de Coord. esfèriques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
-		if (camera == CAM_NAVEGA) { PV[0] = opvN.x; PV[1] = opvN.y; PV[2] = opvN.z; }
-		else {
-			cam_Esferica[0] = OPV.R;	cam_Esferica[1] = OPV.alfa; cam_Esferica[2] = OPV.beta;
-			if (Vis_Polar == POLARZ)
-			{
-				PV[0] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-				PV[1] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-				PV[2] = OPV.R * sin(OPV.alfa * PI / 180);
-			}
-			else if (Vis_Polar == POLARY)
-			{
-				PV[0] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-				PV[1] = OPV.R * sin(OPV.alfa * PI / 180);
-				PV[2] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-			}
-			else {
-				PV[0] = OPV.R * sin(OPV.alfa * PI / 180);
-				PV[1] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-				PV[2] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-			}
-		}
-
-		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-		ImGui::SeparatorText("CAMERA:");
-		ImGui::PopStyleColor();
-		
-		ImGui::InputFloat3("Esferiques (R,alfa,beta)", cam_Esferica);
-		ImGui::InputFloat3("Cartesianes (PVx,PVy,PVz)", PV);
-		//ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		
-		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-		ImGui::SeparatorText("COLORS:");
-		ImGui::PopStyleColor();
-		ImGui::ColorEdit3("Color de Fons", (float*)&clear_colorB); // Edit 3 floats representing a background color
-		ImGui::ColorEdit3("Color d'Objecte", (float*)&clear_colorO); // Edit 3 floats representing a object color
-		c_fons.r = clear_colorB.x;	c_fons.g = clear_colorB.y;	c_fons.b = clear_colorB.z;	c_fons.a = clear_colorB.w;
-		col_obj.r = clear_colorO.x;	col_obj.g = clear_colorO.y;	col_obj.b = clear_colorO.z;		col_obj.a = clear_colorO.w;
-		ImGui::Separator();
-
-
-		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-		ImGui::SeparatorText("TRANSFORMA:");
-		ImGui::PopStyleColor();
-		float tras_ImGui[3] = { (float) TG.VTras.x,(float) TG.VTras.y,(float) TG.VTras.z };
-		ImGui::InputFloat3("Traslacio (Tx,Ty,Tz)", tras_ImGui);
-		float rota_ImGui[3] = { (float) TG.VRota.x,(float) TG.VRota.y,(float) TG.VRota.z };
-		ImGui::InputFloat3("Rotacio (Rx,Ry,Rz)", rota_ImGui);
-		float scal_ImGui[3] = { (float) TG.VScal.x,(float) TG.VScal.y,(float) TG.VScal.z };
-		ImGui::InputFloat3("Escala (Sx, Sy, Sz)", scal_ImGui);
-
-		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-		ImGui::SeparatorText("ImGui:");               // Display some text (you can use a format strings too)
-		ImGui::PopStyleColor();
-		ImGui::Checkbox("Demo ImGui Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::SameLine();
-		ImGui::Checkbox("Another ImGui Window", &show_another_window);
-		ImGui::Spacing();
-
-		ImGui::Text("imgui versions: (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
-		ImGui::Spacing();
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		if (ImGui::Button("Reset time")) G_TIME = 0.0;
-		if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
-		ImGui::End();
+		MostrarMenuDebug();
 	}
 
 	// Rendering ImGui Menus
 	ImGui::Render();
 	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+void MostrarInterficieUsuari() {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
 
-void Iniciar_simulador() {
+
+	//GLuint backgroundTextureID = loadIMA_SOIL("textures/fons.png");
+	/*ImGui::Text("pointer = %x", my_image_texture);
+	ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+	ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));*/
+	//ImGui::Image((void*)(intptr_t)backgroundTextureID, screenSize);
+	// Estableix el color de fons d'ImGui a negre
+	ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons de la finestra
+	ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del frame
+	ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del child
+	ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons dels popups
+
+	ImVec2 screenSize = ImGui::GetIO().DisplaySize;
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(screenSize);
+
+	ImGui::Begin("Opcions", &show_user_windows, window_flags + ImGuiWindowFlags_NoBringToFrontOnFocus);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+
+	// Configura els colors i l'estil
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+
+	// Arrodoniment
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
+
+
+	if (ImGui::Button("Debug", ImVec2(50, 20))) {
+		show_debug_windows = true;
+		show_user_windows = false;
+		show_user_windows_button_inici = false;
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+
+	// Calcula les dimensions de la finestra principal
+	ImVec2 windowSize(200, 100); // Canvia aquestes dimensions segons el tamany de la finestra desitjada
+	// Calcula la posició per centrar la finestra a la pantalla
+	ImVec2 windowPos = ImVec2(
+		(screenSize.x - windowSize.x) * 0.5f,
+		(screenSize.y - windowSize.y) - 50
+	);
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+
+	ImGui::Begin("Finestra Usuari", &show_user_windows_button_inici, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+
+
+	// Configura els colors i l'estil
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+
+	// Arrodoniment
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
+
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Blanc
+
+	// Afegeix el text amb mida augmentada
+	//ImGui::PushFont(font); 
+	//ImGui::Text("Text amb mida augmentada"); // El text utilitzarà la font carregada
+	//ImGui::PopFont();
+	// Restaura l'estil de color del text
+	ImGui::PopStyleColor();
+	// Mida del botó
+	if (ImGui::Button("Iniciar Simulador", ImVec2(200, 55))) {
+		show_user_windows = false;
+		show_user_windows_button_inici = false;
+		InicarSimulador();
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+}
+
+void InicarSimulador() {
 	//Varibales Importants
 	// Acció del botó
 	oCamera = 3;
@@ -1111,8 +1036,124 @@ void Iniciar_simulador() {
 
 }
 
+void MostrarMenuDebug() {
+	static float f = 0.0f;
+	static int counter = 0;
+	static float PV[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(400, 400));
+	ImGui::Begin("Menu Estat", &show_debug_windows, window_flags);                          // Create a window called "Status Menu" and append into it.
+
+	/*ImGui::Text("FInestres EntornVGI:");               // Display some text (you can use a format strings too)
+	ImGui::SameLine();
+	ImGui::Checkbox("EntornVGI Window", &show_EntornVGI_window);
+	ImGui::Separator();
+	ImGui::Spacing();*/
+
+	// Transformació PV de Coord. esfèriques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
+	if (camera == CAM_NAVEGA) { PV[0] = opvN.x; PV[1] = opvN.y; PV[2] = opvN.z; }
+	else {
+		cam_Esferica[0] = OPV.R;	cam_Esferica[1] = OPV.alfa; cam_Esferica[2] = OPV.beta;
+		if (Vis_Polar == POLARZ)
+		{
+			PV[0] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[1] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[2] = OPV.R * sin(OPV.alfa * PI / 180);
+		}
+		else if (Vis_Polar == POLARY)
+		{
+			PV[0] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[1] = OPV.R * sin(OPV.alfa * PI / 180);
+			PV[2] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+		}
+		else {
+			PV[0] = OPV.R * sin(OPV.alfa * PI / 180);
+			PV[1] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[2] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+		}
+	}
+
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("CAMERA:");
+	ImGui::PopStyleColor();
+
+	ImGui::InputFloat3("Esferiques (R,alfa,beta)", cam_Esferica);
+	ImGui::InputFloat3("Cartesianes (PVx,PVy,PVz)", PV);
+	//ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("COLORS:");
+	ImGui::PopStyleColor();
+	ImGui::ColorEdit3("Color de Fons", (float*)&clear_colorB); // Edit 3 floats representing a background color
+	ImGui::ColorEdit3("Color d'Objecte", (float*)&clear_colorO); // Edit 3 floats representing a object color
+	c_fons.r = clear_colorB.x;	c_fons.g = clear_colorB.y;	c_fons.b = clear_colorB.z;	c_fons.a = clear_colorB.w;
+	col_obj.r = clear_colorO.x;	col_obj.g = clear_colorO.y;	col_obj.b = clear_colorO.z;		col_obj.a = clear_colorO.w;
+	ImGui::Separator();
 
 
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("TRANSFORMA:");
+	ImGui::PopStyleColor();
+	float tras_ImGui[3] = { (float)TG.VTras.x,(float)TG.VTras.y,(float)TG.VTras.z };
+	ImGui::InputFloat3("Traslacio (Tx,Ty,Tz)", tras_ImGui);
+	float rota_ImGui[3] = { (float)TG.VRota.x,(float)TG.VRota.y,(float)TG.VRota.z };
+	ImGui::InputFloat3("Rotacio (Rx,Ry,Rz)", rota_ImGui);
+	float scal_ImGui[3] = { (float)TG.VScal.x,(float)TG.VScal.y,(float)TG.VScal.z };
+	ImGui::InputFloat3("Escala (Sx, Sy, Sz)", scal_ImGui);
+
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("ImGui:");               // Display some text (you can use a format strings too)
+	ImGui::PopStyleColor();
+	ImGui::Checkbox("Demo ImGui Window", &show_demo_window);      // Edit bools storing our window open/close state
+
+
+	ImGui::Text("imgui versions: (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+	ImGui::Spacing();
+
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	//if (ImGui::Button("Reset time")) G_TIME = 0.0;
+	//if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
+	ImGui::End();
+	//MostrarMenuDebug();
+
+
+
+
+	ImGui::SetNextWindowPos(ImVec2(400, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1020, 50));
+	ImGui::Begin("Bottons", &show_user_windows_button_inici, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+
+	if (ImGui::Button("Reset time")) G_TIME = 0.0;
+	ImGui::SameLine();
+	//ImGui::Separator();
+	//ImGui::Spacing();
+	if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
+	ImGui::End();
+
+
+	/*ImGui::SetNextWindowPos(ImVec2(1120, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(400, 1080));
+	ImGui::Begin("Bottons", &show_user_windows_button_inici, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+	ImGui::End();*/
+	ShowEntornVGIWindow(&show_user_windows_button_inici, 1420, 0, 500, 1080, window_flags);//550, 680
+}
+
+/*
 void MostraEntornVGIWindow(bool* p_open)
 {
 // Exceptionally add an extra assert here for people confused about initial Dear ImGui setup
@@ -1167,7 +1208,7 @@ void MostraEntornVGIWindow(bool* p_open)
 // End of ShowEntornVGIWindow()
 	ImGui::PopItemWidth();
 	ImGui::End();
-}
+}*/
 
 void ShowArxiusOptions()
 {
@@ -1245,7 +1286,7 @@ void ShowArxiusOptions()
 }
 
 
-void ShowAboutWindow(bool* p_open)
+/*void ShowAboutWindow(bool* p_open)
 {
 	// For the demo: add a debug button _BEFORE_ the normal log window contents
 // We take advantage of a rarely used feature: multiple calls to Begin()/End() are appending to the _same_ window.
@@ -1260,7 +1301,7 @@ void ShowAboutWindow(bool* p_open)
 	if (ImGui::Button("Acceptar"))
 		show_window_about = false;
 	ImGui::End();
-}
+}*/
 
 // Entorn VGI: Funció que retorna opció de menú TIPUS CAMERA segons variable camera (si modificada per teclat)
 int shortCut_Camera()
@@ -1419,7 +1460,7 @@ int shortCut_Iluminacio()
 // Demonstrate most Dear ImGui features (this is big function!)
 // You may execute this function to experiment with the UI and understand what it does.
 // You may then search for keywords in the code when you are interested by a specific feature.
-void ShowEntornVGIWindow(bool* p_open)
+void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int size_y, ImGuiWindowFlags window_flags)
 {
 	int i = 0; // Variable per a menús de selecció.
 	static int selected = -1;
@@ -1446,7 +1487,7 @@ void ShowEntornVGIWindow(bool* p_open)
 	// Examples Apps (accessible from the "Examples" menu)
 	//static bool show_window_about = false;
 
-	if (show_window_about)      ShowAboutWindow(&show_window_about);
+	//if (show_window_about)      ShowAboutWindow(&show_window_about);
 
 /*
 	if (show_app_main_menu_bar)       ShowExampleAppMainMenuBar();
@@ -1486,37 +1527,8 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::End();
 	}
 
-// Demonstrate the various window flags. Typically you would just use the default!
-	static bool no_titlebar = false;
-	static bool no_scrollbar = false;
-	static bool no_menu = false;
-	static bool no_move = false;
-	static bool no_resize = false;
-	static bool no_collapse = false;
-	static bool no_close = false;
-	static bool no_nav = false;
-	static bool no_background = false;
-	static bool no_bring_to_front = false;
-	static bool unsaved_document = false;
-
-	ImGuiWindowFlags window_flags = 0;
-	if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
-	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
-
-// We specify a default position/size in case there's no data in the .ini file.
-// We only do it to make the demo applications a little more welcoming, but typically this isn't required.
-	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(pos_x,pos_y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(size_x, size_y));
 
 	// Main body of the Demo window starts here.
 	if (!ImGui::Begin("EntornVGI Menu", p_open, window_flags))
@@ -1747,7 +1759,7 @@ void ShowEntornVGIWindow(bool* p_open)
 	//IMGUI_DEMO_MARKER("Help");
 	if (ImGui::CollapsingHeader("VISTA"))
 	{
-		if (ImGui::BeginTable("split", 2))
+		if (ImGui::BeginTable("split", 1))
 		{	ImGui::TableNextColumn(); ImGui::Checkbox("Full Screen? ", &fullscreen);
 			ImGui::TableNextColumn(); ImGui::Checkbox("Eixos?", &eixos);
 			ImGui::TableNextColumn(); ImGui::Checkbox("SkyBox?", &SkyBoxCube);
@@ -1856,34 +1868,6 @@ void ShowEntornVGIWindow(bool* p_open)
 		// Entorn VGI. Mostrar Opcions desplegable OBJECTES
 		//IMGUI_DEMO_MARKER("Widgets/Basic/RadioButton");
 		oObjecte = shortCut_Objecte(); //static int oObjecte = 0;
-/*
-		ImGui::RadioButton("Cap(<Shift>+B)", &oObjecte, 0);
-		if (ImGui::BeginTable("split", 3))
-		{
-			ImGui::TableNextColumn(); ImGui::RadioButton("Cub (<Shift>+C)", &oObjecte, 1);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Cub RGB (<Shift>+D)", &oObjecte, 2);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Esfera (<Shift>+E)", &oObjecte, 3);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Tetera (<Shift>+T)", &oObjecte, 4);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Arc (<Shift>+R)", &oObjecte, 5);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Matriu Primitives (<Shift>+H)", &oObjecte, 6);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Matriu Primitives VAO (<Shift>+V)", &oObjecte, 7);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Tie (<Shift>+I)", &oObjecte, 8);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Arxiu OBJ", &oObjecte, 9);
-			ImGui::EndTable();
-		}
-		
-		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-		ImGui::SeparatorText("CORBES:");
-		ImGui::PopStyleColor();
-		if (ImGui::BeginTable("split", 3))
-		{	ImGui::TableNextColumn(); ImGui::RadioButton("Bezier (<Shift>+F9)", &oObjecte, 10);
-			ImGui::TableNextColumn(); ImGui::RadioButton("B-spline (<Shift>+F10)", &oObjecte, 11);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Lemniscata (<Shift>+F11)", &oObjecte, 12);
-			ImGui::EndTable();
-		}
-		//ImGui::Separator();
-		ImGui::Spacing();
-*/
 
 		// Using the _simplified_ one-liner Combo() api here
 		// See "Combo" section for examples of how to use the more flexible BeginCombo()/EndCombo() api.
@@ -2461,30 +2445,6 @@ void ShowEntornVGIWindow(bool* p_open)
 
 		oIlumina = shortCut_Iluminacio();	//static int oIlumina = 1;
 
-/*
-		//IMGUI_DEMO_MARKER("Widgets/Basic/RadioButton");
-		if (ImGui::BeginTable("split", 3))
-		{
-			ImGui::TableNextColumn(); ImGui::RadioButton("Punts (<Ctrl>+F1)", &oIlumina, 0);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Filferros (<Ctrl>+F2)", &oIlumina, 1);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Plana (<Ctrl>+F3)", &oIlumina, 2);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Gouraud (<Ctrl>+F4)", &oIlumina, 3);
-			ImGui::TableNextColumn(); ImGui::RadioButton("Phong (<Ctrl>+F5)", &oIlumina, 4);
-			ImGui::EndTable();
-		}
-		ImGui::Spacing();
-*/
-
-/*
-		// Using the _simplified_ one-liner Combo() api here
-		// See "Combo" section for examples of how to use the more flexible BeginCombo()/EndCombo() api.
-		//IMGUI_DEMO_MARKER("Widgets/Basic/Combo");
-		const char* itemsI[] = { "Punts (<Ctrl>+F1)", "Filferros (<Ctrl>+F2)", "Plana (<Ctrl>+F3)", 
-			"Gouraud (<Ctrl>+F4)", "Phong (<Ctrl>+F5)"};
-		ImGui::Combo(" ", &oIlumina, itemsI, IM_ARRAYSIZE(itemsI));
-		ImGui::Spacing();
-*/
-
 		// Combo Boxes are also called "Dropdown" in other systems
 		// Expose flags as checkbox for the demo
 		static ImGuiComboFlags flags = ( 0 && ImGuiComboFlags_PopupAlignLeft && ImGuiComboFlags_NoPreview && ImGuiComboFlags_NoArrowButton);
@@ -2747,7 +2707,7 @@ void ShowEntornVGIWindow(bool* p_open)
 
 	// DESPLEGABLE SHADERS
 //IMGUI_DEMO_MARKER("Help");
-	if (ImGui::CollapsingHeader("ABOUT"))
+	/*if (ImGui::CollapsingHeader("ABOUT"))
 	{
 		//IMGUI_DEMO_MARKER("Window/About");
 		ImGui::Text("VISUALITZACIO GRAFICA INTERACTIVA (Escola d'Enginyeria - UAB");
@@ -2755,12 +2715,14 @@ void ShowEntornVGIWindow(bool* p_open)
 		ImGui::Text("AUTOR: Enric Marti Godia");
 		ImGui::Text("Copyright (C) 2024");
 		ImGui::Separator();
-	}
+	}*/
 
 // End of ShowDemoWindow()
 	ImGui::PopItemWidth();
 	ImGui::End();
 }
+
+
 
 void Menu_Shaders_Opcio_CarregarVSFS()
 {

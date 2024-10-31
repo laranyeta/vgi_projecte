@@ -128,7 +128,7 @@ const int NUM_MAX_LLUMS = 8;
 #define PROG_BINARY_SHADERW 'W'
 
 const double AU_IN_METERS = 1.496e11;
-const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0;
+const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0*10.0;
 //LCR: s'afegeixen parametres lluna //
 const std::string NAMES[10] = { "Sol", "Mercuri", "Venus", "Terra", "Mart", "Júpiter", "Saturn", "Urà", "Neptú", "Lluna" };
 const std::string RUTES_TEXTURA[10] = { "sun.jpg","mercury.jpg","venus.jpg","earth.jpg","mars.jpg","jupiter.jpg","saturn.jpg","uranus.jpg","neptune.jpg", "moon.jpg" };

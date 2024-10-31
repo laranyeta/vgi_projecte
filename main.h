@@ -222,14 +222,15 @@
 
 // EntornVGI: Funcions de mostrar Finestres ImGui
 	void draw_Menu_ImGui();
-	void MostraEntornVGIWindow(bool* p_open);
+	//void MostraEntornVGIWindow(bool* p_open);
 	void ShowArxiusOptions();
-	void ShowAboutWindow(bool* p_open);
+	//void ShowAboutWindow(bool* p_open);
 	int shortCut_Camera();
 	int shortCut_Projeccio();
 	int shortCut_Objecte();
 	int shortCut_Iluminacio();
-	void ShowEntornVGIWindow(bool* p_open);
+	//void ShowEntornVGIWindow(bool* p_open);
+	void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int size_y, ImGuiWindowFlags window_flags);
 
 // EntornVGI: Funcions de les opcions de Menú Shader.
 	void Menu_Shaders_Opcio_CarregarVSFS();
@@ -273,4 +274,6 @@
 		const GLchar* message, const void* userParam);
 
 	//Funcions propies
-	void Iniciar_simulador();
+	void InicarSimulador();
+	void MostrarInterficieUsuari();
+	void MostrarMenuDebug();
