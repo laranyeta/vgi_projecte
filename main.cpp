@@ -248,6 +248,17 @@ void InitGL()
 // Entorn VGI: Objecte OBJ
 	ObOBJ = NULL;		vao_OBJ.vaoId = 0;		vao_OBJ.vboId = 0;		vao_OBJ.nVertexs = 0;
 
+// Entorn VGI: OBJECTE --> Corba B-Spline i Bezier
+	npts_T = 0;
+	for (i = 0; i < MAX_PATCH_CORBA; i = i++)
+	{	PC_t[i].x = 0.0;
+		PC_t[i].y = 0.0;
+		PC_t[i].z = 0.0;
+	}
+
+	pas_CS = PAS_BSPLINE;
+	sw_Punts_Control = false;
+
 // TRIEDRE DE FRENET / DARBOUX: VT: vector Tangent, VNP: Vector Normal Principal, VBN: vector BiNormal
 	dibuixa_TriedreFrenet = false;		dibuixa_TriedreDarboux = false;
 	VT = { 0.0, 0.0, 1.0 };		VNP = { 1.0, 0.0, 0.0 };	VBN = { 0.0, 1.0, 0.0 };
@@ -1358,10 +1369,50 @@ int shortCut_Objecte()
 	case CAP:			// Objecte CAP
 		auxObjecte = 0;
 		break;
+	case CUB:			// Objecte CUB
+		auxObjecte = 1;
+		break;
+	case CUB_RGB:		// Objecte CUB_RGB
+		auxObjecte = 2;
+		break;
+	case ESFERA:		// Objecte ESFERA
+		auxObjecte = 3;
+		break;
+	case TETERA:		// Objecte TETERA
+		auxObjecte = 4;
+		break;
+	case ARC:			// Objecte ARC
+		auxObjecte = 5;
+		break;
+	case MATRIUP:		// Objecte MATRIU PRIMITIVES
+		auxObjecte = 6;
+		break;
+	case MATRIUP_VAO:	// Objecte MATRIU PRIMITIVES VAO
+		auxObjecte = 7;
+		break;
+	case TIE:			// Objecte TIE
+		auxObjecte = 8;
+		break;
+	case C_BEZIER:		// Objecte CORBA BEZIER
+		auxObjecte = 10;
+		break;
+	case C_BSPLINE:		// Objecte CORBA B-SPLINE
+		auxObjecte = 11;
+		break;
+	case C_LEMNISCATA:	// Objecte CORBA LEMNISCATA
+		auxObjecte = 12;
+		break;
+	case C_HERMITTE:	// Objecte CORBA LEMNISCATA
+		auxObjecte = 13;
+		break;
+	case C_CATMULL_ROM:	// Objecte CORBA LEMNISCATA
+		auxObjecte = 14;
+		break;
 	case OBJOBJ:	// Objecte Arxiu OBJ
 		auxObjecte = 9;
 		break;
-/*MAV MODIFIED*/case OBJECTE_T: auxObjecte = 16; break;
+	/*MAV MODIFIED*/case CILINDRE: auxObjecte = 15; break;
+	/*MAV MODIFIED*/case OBJECTE_T: auxObjecte = 16; break;
 	/*MAV MODIFIED*/case SPUTNIK: auxObjecte = 17; break; 
 	/*MAV MODIFIED*/case DONUT_FACE: auxObjecte = 19; break;
 	/*MAV MODIFIED*/case NAU_FACE: auxObjecte = 20; break;
@@ -1821,12 +1872,29 @@ void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int siz
 		// Using the _simplified_ one-liner Combo() api here
 		// See "Combo" section for examples of how to use the more flexible BeginCombo()/EndCombo() api.
 		//IMGUI_DEMO_MARKER("Widgets/Basic/Combo");
-		// ELIMINAR TIE, S'HA DE MIRAR ISMAEL
-		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)","Arxiu OBJ", 
-			"Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)", "Donut face (n/a)", "Nau face (n/a)","SHIP (n/a)" };
+		/*MAV MODIFIED*/const char* items[] = {"Cap(<Shift>+B)", "Cub (<Shift>+C)", "Cub RGB (<Shift>+D)", "Esfera (<Shift>+E)", "Tetera (<Shift>+T)",
+			"Arc (<Shift>+R)", "Matriu Primitives (<Shift>+M)", "Matriu Primitives VAO (<Shift>+V)", "Tie (<Shift>+I)", "Arxiu OBJ", 
+			"Bezier (<Shift>+F7)", "B-spline (<Shift>+F8)", "Lemniscata (<Shift>+F9)", "Hermitte (<Shift>+F10)", "Catmull-Rom (<Shift>+F11)",
+			"Cilindre (n/a)", "Objecte T (n/a)", "Sputnik proto (n/a)", "Proves (n/a)", "Donut face (n/a)", "Nau face (n/a)","SHIP (n/a)" };
 		//static int item_current = 0;
 		ImGui::Combo(" ", &oObjecte, items, IM_ARRAYSIZE(items));
 		ImGui::Spacing();
+
+		// Mostrar fram PARAMETRES CORBES si Objectes Corbes seleccionats
+		if ((oObjecte > 9) && (oObjecte < 15)) {
+			//IMGUI_DEMO_MARKER("Widgets/Selectables/Single Selection CORBES");
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+			ImGui::SeparatorText("PARAMETRES CORBES:");
+			ImGui::PopStyleColor();
+
+			if (ImGui::BeginTable("split", 2))
+			{
+				ImGui::TableNextColumn(); ImGui::Checkbox("Triedre de Frenet?", &dibuixa_TriedreFrenet);
+				ImGui::TableNextColumn(); ImGui::Checkbox("Triedre de Darboux?", &dibuixa_TriedreDarboux);
+				ImGui::TableNextColumn(); ImGui::Checkbox("Punts de Control? (<Shift>+F12)", &sw_Punts_Control);
+				ImGui::EndTable();
+			}
+		}
 
 // EntornVGI: Variables associades a Pop Up OBJECTE
 		bool testA = false;
@@ -1846,11 +1914,297 @@ void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int siz
 				netejaVAOList();											// Neteja Llista VAO.
 			}
 			break;
+		case 1: // Opció OBJECTE Cub
+			if (objecte != CUB) {
+				objecte = CUB;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				netejaVAOList();											// Neteja Llista VAO.
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Genera EBO de cub mida 1 i el guarda a la posició GLUT_CUBE.
+			}
+			break;
+		case 2:	// Opció OBJECTE Cub RGB
+			if (objecte != CUB_RGB) {
+				objecte = CUB_RGB;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				netejaVAOList();						// Neteja Llista VAO.
+				Set_VAOList(GLUT_CUBE_RGB, loadglutSolidCubeRGB_EBO(1.0));	// Genera EBO de cub mida 1 i el guarda a la posició GLUT_CUBE_RGB.
+			}
+			break;
+		case 3: // Opció OBJECTE Esfera
+			if (objecte != ESFERA) {
+				objecte = ESFERA;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				netejaVAOList();						// Neteja Llista VAO.
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1.0, 30, 30));
+			}
+			break;
+		case 4: // Opció OBJECTE Tetera
+			if (objecte != TETERA) {
+				objecte = TETERA;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+				netejaVAOList();						// Neteja Llista VAO.
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+				//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO()); //Genera VAO tetera mida 1 i el guarda a la posició GLUT_TEAPOT.
+			}
+			break;
+		case 5: // Opció OBJECTE Arc
+			if (objecte != ARC) {
+				objecte = ARC;
+				color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+
+				// Càrrega dels VAO's per a construir objecte ARC
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				//if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Càrrega Cub de costat 1 com a EBO a la posició GLUT_CUBE.
+
+				//if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// Càrrega Esfera a la posició GLU_SPHERE.
+
+				//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
+				Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posició GLUT_TEAPOT.
+
+				//if (Get_VAOId(MAR_FRACTAL_VAO) != 0) deleteVAOList(MAR_FRACTAL_VAO);
+				Set_VAOList(MAR_FRACTAL_VAO, loadSea_VAO(color_Mar));		// Carrega Mar a la posició MAR_FRACTAL_VAO.
+			}
+			break;
+		case 6: // Opció OBJECTE MatrVAOiu Primitives
+			objecte = MATRIUP;
+			break;
+		case 7: // Opció OBJECTE Matriu Primitives VAO
+			if (objecte != MATRIUP_VAO) {
+				objecte = MATRIUP_VAO;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+
+				// Càrrega dels VAO's per a construir objecte ARC
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				//if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0f));
+
+				//if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
+				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(2.0, 3.0, 20, 20));
+
+				//if (Get_VAOId(GLUT_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1.0, 20, 20));
+			}
+			break;
+		case 8: // Opció OBJECTE Tie
+			if (objecte != TIE) {
+				objecte = TIE;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+
+				// Càrrega dels VAO's per a construir objecte TIE
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				//if (Get_VAOId(GLU_CYLINDER) != 0) deleteVAOList(GLU_CYLINDER);
+				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(5.0f, 5.0f, 0.5f, 6, 1));// Càrrega cilindre com a VAO.
+
+				//if (Get_VAOId(GLU_DISK) != 0)deleteVAOList(GLU_DISK);
+				Set_VAOList(GLU_DISK, loadgluDisk_EBO(0.0f, 5.0f, 6, 1));	// Càrrega disc com a VAO
+
+				//if (Get_VAOId(GLU_SPHERE) != 0)deleteVAOList(GLU_SPHERE);
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(10.0f, 80, 80));	// Càrrega disc com a VAO
+
+				//if (Get_VAOId(GLUT_USER1) != 0)deleteVAOList(GLUT_USER1);
+				Set_VAOList(GLUT_USER1, loadgluCylinder_EBO(5.0f, 5.0f, 2.0f, 6, 1)); // Càrrega cilindre com a VAO
+
+				//if (Get_VAOId(GLUT_CUBE) != 0)deleteVAOList(GLUT_CUBE);
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));			// Càrrega cub com a EBO
+
+				//if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
+				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(1.0, 5.0, 20, 20));
+
+				//if (Get_VAOId(GLUT_USER2) != 0)deleteVAOList(GLUT_USER2);	
+				Set_VAOList(GLUT_USER2, loadgluCylinder_EBO(1.0f, 0.5f, 5.0f, 60, 1)); // Càrrega cilindre com a VAO
+
+				//if (Get_VAOId(GLUT_USER3) != 0)deleteVAOList(GLUT_USER3);
+				Set_VAOList(GLUT_USER3, loadgluCylinder_EBO(0.35f, 0.35f, 5.0f, 80, 1)); // Càrrega cilindre com a VAO
+
+				//if (Get_VAOId(GLUT_USER4) != 0)deleteVAOList(GLUT_USER4);
+				Set_VAOList(GLUT_USER4, loadgluCylinder_EBO(4.0f, 2.0f, 10.25f, 40, 1)); // Càrrega cilindre com a VAO
+
+				//if (Get_VAOId(GLUT_USER5) != 0) deleteVAOList(GLUT_USER5);
+				Set_VAOList(GLUT_USER5, loadgluCylinder_EBO(1.5f, 4.5f, 2.0f, 8, 1)); // Càrrega cilindre com a VAO
+
+				//if (Get_VAOId(GLUT_USER6) != 0) deleteVAOList(GLUT_USER6);
+				Set_VAOList(GLUT_USER6, loadgluDisk_EBO(0.0f, 1.5f, 8, 1)); // Càrrega disk com a VAO
+			}
+			break;
 		case 9: // Opció OBJECTE Arxiu OBJ
 			objecte = OBJOBJ;
 			textura = true;
 			break;
+		case 10: // Opció OBJECTE CORBA BEZIER
+			if (objecte != C_BEZIER) {
+				nomFitxer = NULL;
+				// Entorn VGI: Obrir diàleg de lectura de fitxer (fitxers (*.CRV)
+				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
+
+				if (result == NFD_OKAY) {
+					puts("Bezier File Success!");
+					puts(nomFitxer);
+
+					objecte = C_BEZIER;		sw_material[4] = true;
+					npts_T = llegir_ptsC(nomFitxer);
+					free(nomFitxer);
+
+					// Càrrega dels VAO's per a construir la corba Bezier
+					netejaVAOList();						// Neteja Llista VAO.
+
+					// Posar color objecte (col_obj) al vector de colors del VAO.
+					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+					// Definir Esfera EBO per a indicar punts de control de la corba
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Genera esfera i la guarda a la posició GLUT_CUBE.
+
+					// Definir Corba Bezier com a VAO
+						//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+					Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+				}
+			}
+			break;
+		case 11: // Opció OBJECTE CORBA B-SPLINE
+			if (objecte != C_BSPLINE) {
+				nomFitxer = NULL;
+				// Entorn VGI: Obrir diàleg de lectura de fitxer (fitxers (*.CRV)
+				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
+
+				if (result == NFD_OKAY) {
+					puts("BSpline File Success!");
+					puts(nomFitxer);
+
+					objecte = C_BSPLINE;		sw_material[4] = true;
+					npts_T = llegir_ptsC(nomFitxer);
+					free(nomFitxer);
+
+					// Càrrega dels VAO's per a construir la corba BSpline
+					netejaVAOList();						// Neteja Llista VAO.
+
+					// Posar color objecte (col_obj) al vector de colors del VAO.
+					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+					// Definir Esfera EBO per a indicar punts de control de la corba
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+					// Definr Corba BSpline com a VAO
+						//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+					Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+					}
+				}
+			break;
+		case 12: // Opció OBJECTE CORBA LEMNISCATA
+			if (objecte != C_LEMNISCATA) {
+				objecte = C_LEMNISCATA;		sw_material[4] = true;
+
+				// Càrrega dels VAO's per a construir la corba Bezier
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				// Definr Corba Lemniscata 3D com a VAO
+					//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+				}
+			break;
+		case 13: // Opció OBJECTE CORBA HERMITTE
+			if (objecte != C_HERMITTE) {
+				nomFitxer = NULL;
+				// Entorn VGI: Obrir diàleg de lectura de fitxer (fitxers (*.CRV)
+				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
+
+				if (result == NFD_OKAY) {
+					puts("Hermitte File Success!");
+					puts(nomFitxer);
+
+					objecte = C_HERMITTE;		sw_material[4] = true;
+					npts_T = llegir_ptsC(nomFitxer);
+					free(nomFitxer);
+
+					// Càrrega dels VAO's per a construir la corba BSpline
+					netejaVAOList();						// Neteja Llista VAO.
+
+					// Posar color objecte (col_obj) al vector de colors del VAO.
+					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+					// Definir Esfera EBO per a indicar punts de control de la corba
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+					// Definr Corba Hermitte com a VAO
+					//Set_VAOList(CRV_HERMITTE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+					Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+					}
+				}
+			break;
+		case 14: // Opció OBJECTE CORBA CATMULL-ROM
+			if (objecte != C_CATMULL_ROM) {
+				nomFitxer = NULL;
+				// Entorn VGI: Obrir diàleg de lectura de fitxer (fitxers (*.CRV)
+				result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
+
+				if (result == NFD_OKAY) {
+					puts("Catmull-Rom File Success!");
+					puts(nomFitxer);
+
+					objecte = C_CATMULL_ROM;		sw_material[4] = true;
+					npts_T = llegir_ptsC(nomFitxer);
+					free(nomFitxer);
+
+					// Càrrega dels VAO's per a construir la corba BSpline
+					netejaVAOList();						// Neteja Llista VAO.
+
+					// Posar color objecte (col_obj) al vector de colors del VAO.
+					SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+					// Definir Esfera EBO per a indicar punts de control de la corba
+					Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+					// Definr Corba Catmull-Rom com a VAO
+					//Set_VAOList(CRV_CATMULL_ROM, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+					Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+					}
+				}
+			break;
 		/*MAV MODIFIED*/
+		case 15: // Cilindre
+			if (objecte != CILINDRE) {
+				objecte = CILINDRE;
+				netejaVAOList();											// Neteja Llista VAO.// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+				Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(0.5f, 0.5f, 1.0f, 20, 1));		// Genera EBO de cub mida 1 i el guarda a la posició GLUT_CUBE.
+			}
+			break;
 		case 16: // OBJECTE T
 			if (objecte != OBJECTE_T) {
 				objecte = OBJECTE_T;
@@ -2451,6 +2805,8 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 		else if (mods == 0 && key == GLFW_KEY_PRINT_SCREEN && action == GLFW_PRESS) statusB = !statusB;
 		else if ((mods == 1) && (action == GLFW_PRESS)) Teclat_Shift(key, window);	// Shorcuts Shift Key
 		else if ((mods == 2) && (action == GLFW_PRESS)) Teclat_Ctrl(key);	// Shortcuts Ctrl Key
+		else if ((objecte == C_BEZIER || objecte == C_BSPLINE || objecte == C_LEMNISCATA || objecte == C_HERMITTE
+				|| objecte == C_CATMULL_ROM) && (action == GLFW_PRESS)) Teclat_PasCorbes(key, action);
 		else if ((sw_grid) && ((grid.x) || (grid.y) || (grid.z))) Teclat_Grid(key, action);
 		else if (((key == GLFW_KEY_G) && (action == GLFW_PRESS)) && ((grid.x) || (grid.y) || (grid.z))) sw_grid = !sw_grid;
 		else if ((key == GLFW_KEY_O) && (action == GLFW_PRESS)) sw_color = true; // Activació color objecte
@@ -2787,6 +3143,242 @@ void Teclat_Shift(int key, GLFWwindow* window)
 				objecte = CAP;
 				netejaVAOList();							// Neteja Llista VAO.
 				}
+			break;
+
+		// Tecla Cub
+		case GLFW_KEY_C:
+			objecte = CUB;
+			//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+			//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			netejaVAOList();											// Neteja Llista VAO.
+
+			// Posar color objecte (col_obj) al vector de colors del VAO.
+			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Genera EBO de cub mida 1 i el guarda a la posició GLUT_CUBE.
+			break;
+
+		// Tecla Cub RGB
+		case GLFW_KEY_D:
+			objecte = CUB_RGB;
+			//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+			//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			netejaVAOList();						// Neteja Llista VAO.
+
+			Set_VAOList(GLUT_CUBE_RGB, loadglutSolidCubeRGB_EBO(1.0));	// Genera EBO de cub mida 1 i el guarda a la posició GLUT_CUBE_RGB.
+			break;
+
+		// Tecla Esfera
+		case GLFW_KEY_E:
+			objecte = ESFERA;
+			//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+			//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			netejaVAOList();						// Neteja Llista VAO.
+
+			// Posar color objecte (col_obj) al vector de colors del VAO.
+			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1.0, 30, 30));
+			break;
+
+		// Tecla Tetera
+		case GLFW_KEY_T:
+			objecte = TETERA;
+			//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+			//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			netejaVAOList();						// Neteja Llista VAO.
+
+			// Posar color objecte (col_obj) al vector de colors del VAO.
+			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+			//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
+			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO()); //Genera VAO tetera mida 1 i el guarda a la posició GLUT_TEAPOT.
+			break;
+
+		// Tecla Arc
+		case GLFW_KEY_R:
+			objecte = ARC;
+			//  Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+			//	Canviar l'escala per a centrar la vista (Ortogràfica)
+
+			color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 1.0;
+			//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+			//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+
+			// Càrrega dels VAO's per a construir objecte ARC
+			netejaVAOList();						// Neteja Llista VAO.
+
+			// Posar color objecte (col_obj) al vector de colors del VAO.
+			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+			//if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
+			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));		// Càrrega Cub de costat 1 com a EBO a la posició GLUT_CUBE.
+
+			//if (Get_VAOId(GLU_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
+			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));	// Càrrega Esfera a la posició GLU_SPHERE.
+
+			//if (Get_VAOId(GLUT_TEAPOT) != 0) deleteVAOList(GLUT_TEAPOT);
+			Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());		// Carrega Tetera a la posició GLUT_TEAPOT.
+
+			//if (Get_VAOId(MAR_FRACTAL_VAO) != 0) deleteVAOList(MAR_FRACTAL_VAO);
+			Set_VAOList(MAR_FRACTAL_VAO, loadSea_VAO(color_Mar));		// Carrega Mar a la posició MAR_FRACTAL_VAO.
+			break;
+
+		// Tecla Tie (Star Wars)
+		case GLFW_KEY_I:
+			objecte = TIE;		textura = true;
+				//	---- Entorn VGI: ATENCIÓ!!. Canviar l'escala per a centrar la vista (Ortogràfica)
+
+				//  ---- Entorn VGI: ATENCIÓ!!. Modificar R per centrar la Vista a la mida de l'objecte (Perspectiva)
+
+			// Càrrega dels VAO's per a construir objecte TIE
+			netejaVAOList();						// Neteja Llista VAO.
+
+			// Posar color objecte (col_obj) al vector de colors del VAO.
+			SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+			//if (Get_VAOId(GLU_CYLINDER) != 0) deleteVAOList(GLU_CYLINDER);
+			Set_VAOList(GLUT_CYLINDER, loadgluCylinder_EBO(5.0f, 5.0f, 0.5f, 6, 1));// Càrrega cilindre com a VAO.
+
+			//if (Get_VAOId(GLU_DISK) != 0)deleteVAOList(GLU_DISK);
+			Set_VAOList(GLU_DISK, loadgluDisk_EBO(0.0f, 5.0f, 6, 1));	// Càrrega disc com a VAO
+
+			//if (Get_VAOId(GLU_SPHERE) != 0)deleteVAOList(GLU_SPHERE);
+			Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(10.0f, 80, 80));	// Càrrega disc com a VAO
+
+			//if (Get_VAOId(GLUT_USER1) != 0)deleteVAOList(GLUT_USER1);
+			Set_VAOList(GLUT_USER1, loadgluCylinder_EBO(5.0f, 5.0f, 2.0f, 6, 1)); // Càrrega cilindre com a VAO
+
+			//if (Get_VAOId(GLUT_CUBE) != 0)deleteVAOList(GLUT_CUBE);
+			Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));			// Càrrega cub com a EBO
+
+			//if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
+			Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(1.0, 5.0, 20, 20));
+
+			//if (Get_VAOId(GLUT_USER2) != 0)deleteVAOList(GLUT_USER2);	
+			Set_VAOList(GLUT_USER2, loadgluCylinder_EBO(1.0f, 0.5f, 5.0f, 60, 1)); // Càrrega cilindre com a VAO
+
+			//if (Get_VAOId(GLUT_USER3) != 0)deleteVAOList(GLUT_USER3);
+			Set_VAOList(GLUT_USER3, loadgluCylinder_EBO(0.35f, 0.35f, 5.0f, 80, 1)); // Càrrega cilindre com a VAO
+
+			//if (Get_VAOId(GLUT_USER4) != 0)deleteVAOList(GLUT_USER4);
+			Set_VAOList(GLUT_USER4, loadgluCylinder_EBO(4.0f, 2.0f, 10.25f, 40, 1)); // Càrrega cilindre com a VAO
+
+			//if (Get_VAOId(GLUT_USER5) != 0) deleteVAOList(GLUT_USER5);
+			Set_VAOList(GLUT_USER5, loadgluCylinder_EBO(1.5f, 4.5f, 2.0f, 8, 1)); // Càrrega cilindre com a VAO
+
+			//if (Get_VAOId(GLUT_USER6) != 0) deleteVAOList(GLUT_USER6);
+			Set_VAOList(GLUT_USER6, loadgluDisk_EBO(0.0f, 1.5f, 8, 1)); // Càrrega disk com a VAO
+			break;
+
+		// Tecla Corbes Bezier
+		case GLFW_KEY_F9:
+			nomFitxer = NULL;
+			// Entorn VGI: Obrir diàleg de lectura de fitxer (fitxers (*.MNT)
+			result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
+
+			if (result == NFD_OKAY) {
+				puts("Bezier File Success!");
+				puts(nomFitxer);
+
+				nom = "";			objecte = C_BEZIER;
+				npts_T = llegir_ptsC(nomFitxer);
+				free(nomFitxer);
+
+				// Càrrega dels VAO's per a construir la corba Bezier
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				// Definir Esfera EBO per a indicar punts de control de la corba
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Genera esfera i la guarda a la posició GLUT_CUBE.
+
+				// Definir Corba Bezier com a VAO
+					//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+				}
+			break;
+
+		// Tecla Corbes B-Spline
+		case GLFW_KEY_F10:
+			nomFitxer = NULL;
+			// Entorn VGI: Obrir diàleg de lectura de fitxer (fitxers (*.MNT)
+			result = NFD_OpenDialog(NULL, NULL, &nomFitxer);
+
+			if (result == NFD_OKAY) {
+				puts("B-Spline File Success!");
+				puts(nomFitxer);
+
+				nom = "";			objecte = C_BSPLINE;
+				npts_T = llegir_ptsC(nomFitxer);
+				free(nomFitxer);
+
+				// Càrrega dels VAO's per a construir la corba BSpline
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				// Definir Esfera EBO per a indicar punts de control de la corba
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(5.0, 20, 20));	// Guarda (vaoId, vboId, nVertexs) a la posició GLUT_CUBE.
+
+				// Definr Corba BSpline com a VAO
+					//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+				}
+			break;
+
+		// Tecla Corbes Lemniscata
+		case GLFW_KEY_F11:
+			if (objecte != C_LEMNISCATA) {
+				objecte = C_LEMNISCATA;
+				// Càrrega dels VAO's per a construir la corba Bezier
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				// Definr Corba Lemniscata 3D com a VAO
+					//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+				}
+			break;
+
+		// Tecla Punts de Control?
+		case GLFW_KEY_F12:
+			sw_Punts_Control = !sw_Punts_Control;
+			break;
+
+		// Tecla Matriu Primitives
+		case GLFW_KEY_H:
+			objecte = MATRIUP;
+			break;
+
+		// Tecla Matriu Primitives VAO
+		case GLFW_KEY_V:
+			if (objecte != MATRIUP_VAO) {
+				objecte = MATRIUP_VAO;
+
+				// Càrrega dels VAO's per a construir objecte ARC
+				netejaVAOList();						// Neteja Llista VAO.
+
+				// Posar color objecte (col_obj) al vector de colors del VAO.
+				SetColor4d(col_obj.r, col_obj.g, col_obj.b, col_obj.a);
+
+				//if (Get_VAOId(GLUT_CUBE) != 0) deleteVAOList(GLUT_CUBE);
+				Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0f));
+
+				//if (Get_VAOId(GLUT_TORUS) != 0)deleteVAOList(GLUT_TORUS);
+				Set_VAOList(GLUT_TORUS, loadglutSolidTorus_EBO(2.0, 3.0, 20, 20));
+
+				//if (Get_VAOId(GLUT_SPHERE) != 0) deleteVAOList(GLU_SPHERE);
+				Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(1.0, 20, 20));
+			}
 			break;
 
 		default:
@@ -4152,6 +4744,152 @@ void Teclat_Grid(int key, int action)
 }
 
 
+// Teclat_PasCorbes: Teclat per incrementar-Decrementar el pas de dibuix de les corbes (pas_CS).
+void Teclat_PasCorbes(int key, int action)
+{
+	if (action == GLFW_PRESS)
+	{
+		switch (key)
+		{
+		// Tecla '+' (incrementar pas_CS)
+		case GLFW_KEY_KP_ADD:
+			pas_CS = pas_CS * 2.0;
+			if (pas_CS > 0.5) pas_CS = 0.5;
+			if (objecte == C_BSPLINE) {
+				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+			}
+			else if (objecte == C_BEZIER) {
+				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+			}
+			else if (objecte == C_LEMNISCATA) {
+				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+			}
+			else if (objecte == C_HERMITTE) {
+				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+			}
+			else if (objecte == C_CATMULL_ROM) {
+				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+			}
+			break;
+
+		// Tecla '-' (decrementar pas_CS)
+		case GLFW_KEY_KP_SUBTRACT:
+			pas_CS = pas_CS / 2;
+			if (pas_CS < 0.0125) pas_CS = 0.00625;
+			if (objecte == C_BSPLINE) {
+				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+			}
+			else if (objecte == C_BEZIER) {
+				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+			}
+			else if (objecte == C_LEMNISCATA) {
+				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.	
+			}
+			else if (objecte == C_HERMITTE) {
+				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+			}
+			else if (objecte == C_CATMULL_ROM) {
+				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+			}
+			break;
+
+		// Tecla PgUp ('9') (incrementar pas_CS)
+		case GLFW_KEY_KP_9:
+			pas_CS = pas_CS * 2.0;
+			if (pas_CS > 0.5) pas_CS = 0.5;
+			if (objecte == C_BSPLINE) {
+				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+			}
+			else if (objecte == C_BEZIER) {
+				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+			}
+			else if (objecte == C_LEMNISCATA) {
+				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+			}
+			else if (objecte == C_HERMITTE) {
+				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+			}
+			else if (objecte == C_CATMULL_ROM) {
+				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+			}
+			break;
+
+		// Tecla PgDown ('3') (decrementar pas_CS)
+		case GLFW_KEY_KP_3:
+			pas_CS = pas_CS / 2;
+			if (pas_CS < 0.0125) pas_CS = 0.00625;
+			if (objecte == C_BSPLINE) {
+				deleteVAOList(CRV_BSPLINE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+				Set_VAOList(CRV_BSPLINE, load_BSpline_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_BSPLINE.
+			}
+			else if (objecte == C_BEZIER) {
+				deleteVAOList(CRV_BEZIER);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_BEZIER, load_Bezier_Curve_VAO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+				Set_VAOList(CRV_BEZIER, load_Bezier_Curve_EBO(npts_T, PC_t, pas_CS, false)); // Genera corba i la guarda a la posició CRV_BEZIER.
+			}
+			else if (objecte == C_LEMNISCATA) {
+				deleteVAOList(CRV_LEMNISCATA3D);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_VAO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+				Set_VAOList(CRV_LEMNISCATA3D, load_Lemniscata3D_EBO(800, pas_CS * 20.0)); // Genera corba i la guarda a la posició CRV_LEMNISCATA3D.
+			}
+			else if (objecte == C_HERMITTE) {
+				deleteVAOList(CRV_HERMITTE);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+				Set_VAOList(CRV_HERMITTE, load_Hermitte_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_HERMITTE.
+			}
+			else if (objecte == C_CATMULL_ROM) {
+				deleteVAOList(CRV_CATMULL_ROM);		//Eliminar VAO anterior.
+				//Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_VAO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+				Set_VAOList(CRV_CATMULL_ROM, load_CatmullRom_Curve_EBO(npts_T, PC_t, pas_CS)); // Genera corba i la guarda a la posició CRV_CATMULL_ROM.
+			}
+			break;
+
+		default:
+			if (transf)
+			{
+				if (rota) Teclat_TransRota(key, action);
+				else if (trasl) Teclat_TransTraslada(key, action);
+				else if (escal) Teclat_TransEscala(key, action);
+			}
+			if (pan) Teclat_Pan(key, action);
+			else if (camera == CAM_NAVEGA) Teclat_Navega(key, action);
+			if (!sw_color) Teclat_ColorFons(key, action);
+			else Teclat_ColorObjecte(key, action);
+			break;
+		}
+	}
+}
+
 
 
 /* ------------------------------------------------------------------------- */
@@ -4559,6 +5297,50 @@ int Log2(int num)
 	return tlog;
 }
 
+
+// -------------------- FUNCIONS CORBES SPLINE i BEZIER
+
+// llegir_ptsC: Llegir punts de control de corba (spline o Bezier) d'un fitxer .crv. 
+//				Retorna el nombre de punts llegits en el fitxer.
+//int llegir_pts(CString nomf)
+int llegir_ptsC(const char* nomf)
+{
+	int i, j;
+	FILE* fd;
+
+	// Inicialitzar vector punts de control de la corba spline
+	for (i = 0; i < MAX_PATCH_CORBA; i = i++)
+	{
+		PC_t[i].x = 0.0;
+		PC_t[i].y = 0.0;
+		PC_t[i].z = 0.0;
+	}
+
+	//	ifstream f("altinicials.dat",ios::in);
+	//    f>>i; f>>j;
+	if ((fd = fopen(nomf, "rt")) == NULL)
+	{
+		//LPCWSTR texte1 = reinterpret_cast<LPCWSTR> ("ERROR:");
+		//LPCWSTR texte2 = reinterpret_cast<LPCWSTR> ("File .crv was not opened");
+		//MessageBox(texte1, texte2, MB_OK);
+		fprintf(stderr, "ERROR: File .crv was not opened");
+		return false;
+	}
+	fscanf(fd, "%d \n", &i);
+	if (i == 0) return false;
+	else {
+		for (j = 0; j < i; j = j++)
+		{	//fscanf(fd, "%f", &corbaSpline[j].x);
+			//fscanf(fd, "%f", &corbaSpline[j].y);
+			//fscanf(fd, "%f \n", &corbaSpline[j].z);
+			fscanf(fd, "%lf %lf %lf \n", &PC_t[j].x, &PC_t[j].y, &PC_t[j].z);
+
+		}
+	}
+	fclose(fd);
+
+	return i;
+}
 
 
 // Entorn VGI. OnFull_Screen: Funció per a pantalla completa
