@@ -307,8 +307,8 @@ void processaRotacions()
 		float inclinacioRadians = glm::radians(ANGLES_INCLINACIO_ROTACIO[i]);
 		glm::vec3 eixosRotacio = glm::vec3(
 			0.0f,
-			cos(inclinacioRadians),
-			sin(inclinacioRadians)
+			sin(inclinacioRadians),
+			cos(inclinacioRadians)
 		);
 
 		// Assignem eix de rotació i direcció de rotació
@@ -512,6 +512,46 @@ void updatePlanetes(float deltaTime)
 	}
 }
 
+void drawOrbitPath(Planeta& planeta) {
+	// Define the number of points for the orbit
+	const int numPoints = 100;
+	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semi-major axis
+	double e = planeta.getExcentricitat(); // Eccentricity
+	double inclinacio = planeta.getInclinacio(); // Inclination
+	double longNodeAsc = planeta.getLongitudNodeAscendent(); // Longitude of ascending node
+	double periapsis = planeta.getPeriapsis(); // Argument of periapsis
+
+	// Rotation matrices for transforming the orbit from 2D to 3D
+	glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0), (float)periapsis, glm::vec3(0.0, 0.0, 1.0)));
+	glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0), (float)inclinacio, glm::vec3(1.0, 0.0, 0.0)));
+	glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0), (float)longNodeAsc, glm::vec3(0.0, 0.0, 1.0)));
+	glm::mat3 R = R_periapsis * R_inclinacio * R_longNodeAsc;
+
+	// Start drawing the orbit (do not draw the planet itself, just the orbit)
+	glBegin(GL_LINE_STRIP);
+	for (int i = 0; i <= numPoints; ++i) {
+		// True anomaly (angle around orbit)
+		double nu = 2.0 * pi<float>() * i / numPoints;
+
+		// Radius for this point in the orbit
+		double r = a * (1 - e * e) / (1 + e * cos(nu));
+
+		// Position in the orbital plane
+		double x_plaOrbital = r * cos(nu);
+		double y_plaOrbital = r * sin(nu);
+		double z_plaOrbital = 0.0;
+
+		// Transform from orbital plane to 3D space relative to the Sun
+		glm::dvec3 posicio_plaOrbital(x_plaOrbital, y_plaOrbital, z_plaOrbital);
+		glm::dvec3 posicio_3D = R * posicio_plaOrbital;
+
+		// Draw the orbit path in OpenGL
+		glVertex3f(posicio_3D.x, posicio_3D.y, posicio_3D.z);
+	}
+	glEnd();
+}
+
+
 
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
 	GLuint texturID[NUM_MAX_TEXTURES], bool textur)
@@ -534,6 +574,7 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	updatePlanetes(deltaTime);
 	for (auto& planeta : PLANETES)
 	{
+		drawOrbitPath(planeta);
 		// Posició inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 

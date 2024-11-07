@@ -48,7 +48,7 @@ void InitGL()
 	OPV_G.R = 15.0;		OPV_G.alfa = 0.0;	OPV_G.beta = 0.0;	// Origen PV en esfèriques per a Vista_Geode
 
 // Entorn VGI: Variables de control per Menú Vista: Pantalla Completa, Pan, dibuixar eixos i grids 
-	fullscreen = false;
+	fullscreen = true;
 	pan = false;
 	eixos = false;	eixos_programID = 0;  eixos_Id = 0;
 	sw_grid = false;
@@ -4568,26 +4568,21 @@ int Log2(int num)
 // Entorn VGI. OnFull_Screen: Funció per a pantalla completa
 void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow *window)
 {   
-	//int winPosX, winPosY;
-	//winPosX = 0;	winPosY = 0;
-
 	fullscreen = !fullscreen;
 
-	if (fullscreen) {	// backup window position and window size
-						//glfwGetWindowPos(window, &winPosX, &winPosY);
-						//glfwGetWindowSize(window, &width_old, &height_old);
-
+	if (fullscreen) {
 						// Get resolution of monitor
-						const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+						//const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-						w = mode->width;	h = mode->height;
+						//w = mode->width;	h = mode->height;
 						// Switch to full screen
-						glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-					}
-	else {	// Restore last window size and position
-			glfwSetWindowMonitor(window, nullptr, 216, 239, 640, 480, mode->refreshRate);
-		}
+						//glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+						glfwSetWindowMonitor(window, monitor, 0, 0, 1920, 1080, mode->refreshRate);
 	}
+	else {	// Restore last window size and position
+			glfwSetWindowMonitor(window, nullptr, 216, 239, 1920, 1080, mode->refreshRate);
+	}
+}
 
 // -------------------- TRACTAMENT ERRORS
 // error_callback: Displaia error que es pugui produir
@@ -4707,11 +4702,15 @@ int main(void)
 // Create a windowed mode window and its OpenGL context */
 	
 	//Finestra de maxim de tamany
-	//window = glfwCreateWindow(mode->width, mode->height, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
+	//window = glfwCreateWindow(mode->width, mode->height, "NO TE NOM  - Escola Enginyeria - UAB", NULL, NULL);
 	
 	//Pantalla Completa
-	window = glfwCreateWindow(1920,1080, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", primary, NULL);
+	//window = glfwCreateWindow(1920,1080, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", primary, NULL);
 	
+
+	window = glfwCreateWindow(1920, 1080, "Solar Sprint - Escola Enginyeria - UAB", primary, NULL);
+
+
 	if (!window)
     {	fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 4.3 compatible. Try the 2.1 version of the tutorials.\n");
 		getchar();
