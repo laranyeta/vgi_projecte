@@ -132,6 +132,7 @@ const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0*10.0;
 //LCR: s'afegeixen parametres lluna //
 const std::string NAMES[10] = { "Sol", "Mercuri", "Venus", "Terra", "Mart", "Júpiter", "Saturn", "Urà", "Neptú", "Lluna" };
 const std::string RUTES_TEXTURA[10] = { "sun.jpg","mercury.jpg","venus.jpg","earth.jpg","mars.jpg","jupiter.jpg","saturn.jpg","uranus.jpg","neptune.jpg", "moon.jpg" };
+const std::string RUTES_TEXTURA_MENU[10] = { "sun.png","mercury.png","venus.png","earth.png","mars.png","jupiter.png","saturn.png","uranus.png","neptune.png", "moon.png" };
 const double DISTANCIA_DEFAULT_TERRA = 50.0;
 const double ESCALA_DISTANCIA = DISTANCIA_DEFAULT_TERRA / (1.0 * 1.496e11); //1.496e11
 const double ESCALA_MASSA = 1.0;

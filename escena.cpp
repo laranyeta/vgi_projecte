@@ -171,10 +171,10 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 		// Aplica la traslación
 		//Julia: falta moure la nau a fora del sol
+		
 		ModelMatrix = glm::translate(inverse(MatriuVista), vec3(0.0f, -0.02f, -0.1f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.005f, 0.005f, 0.005)); // Ejemplo de escala
 		ModelMatrix = glm::rotate(ModelMatrix, radians(7.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
 		// Pasar la ModelMatrix actualizada al shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 
@@ -315,7 +315,6 @@ void processaRotacions()
 		PLANETES[i].setEixosRotacioPlaneta(eixosRotacio);
 		PLANETES[i].setDireccioRotacio(DIRECCIONS_ROTACIO[i]);
 		PLANETES[i].setVelocitatRotacio(velocitatsRotacio[i]);
-		PLANETES[i].setName(NAMES[i]); // CANVIAR DE LLOC NO PINTA RES AQUI
 		PLANETES[i].setRutaTextura(RUTES_TEXTURA[i]);
 	}
 }

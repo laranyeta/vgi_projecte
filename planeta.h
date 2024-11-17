@@ -26,6 +26,7 @@ public:
 		m_long_node_asc = 0.0;
 		m_excentricitat = 0.0;
 		m_textureID = 0;
+		m_textureIDMenu = 0;
 	}
 
 	Planeta(float radi, int slices, int stacks, glm::vec3 position) {
@@ -41,6 +42,7 @@ public:
 		m_velocitat_rotacio = 5.0f;
 		m_eixos_rotacio_planeta = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_direccio_rotacio = 1;
+		m_textureIDMenu = 0;
 	}
 
 	Planeta(float radi, int slices, int stacks, double massa, glm::dvec3 velocitat, glm::vec3 position) {
@@ -75,7 +77,9 @@ public:
 	// 
 	std::string getName() const { return m_name; }
 	std::string getRutaTextura() const { return m_rutaTextura; }
-	unsigned int  getTextureID() const {return m_textureID;}
+	const char* getRutaTexturaMenu() const { return m_rutaTexturaMenu; }
+	unsigned int  getTextureID() const { return m_textureID; }
+	unsigned int  getTextureIDMenu() const { return m_textureIDMenu; }
 	double getRadi() const { return m_radi; }
 	double getRadiOrbita() const  { return m_radi_orbita; }
 	double getMassa() const  { return m_massa; }
@@ -96,8 +100,10 @@ public:
 	double getExcentricitat() { return m_excentricitat; }
 	// SETTERS
 	void setName(std::string name) { m_name = name; }
-	void setTextureID(unsigned int texID) {m_textureID = texID;}
+	void setTextureID(unsigned int texID) { m_textureID = texID; }
+	void setTextureIDMenu(unsigned int texID) { m_textureIDMenu = texID; }
 	void setRutaTextura(std::string rutaTextura) { m_rutaTextura = rutaTextura; }
+	void setRutaTexturaMenu(const char* rutaTexturaMenu) { m_rutaTexturaMenu = rutaTexturaMenu; }
 	void setRadi(float radi) { m_radi = radi; }
 	void setRadiOrbita(float radiOrbita) { m_radi_orbita = radiOrbita; }
 	void setMassa(float massa) { m_massa = massa; }
@@ -120,7 +126,9 @@ public:
 private:
 	std::string m_name;
 	unsigned int m_textureID;
+	unsigned int m_textureIDMenu;
 	std::string m_rutaTextura;
+	const char* m_rutaTexturaMenu;
 	glm::vec3 m_position;
 	glm::vec4 m_color;
 	float m_radi;
