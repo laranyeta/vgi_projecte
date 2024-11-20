@@ -299,3 +299,4 @@
 	float distanciaEuclidiana(CPunt3D& point1, const vec3& point2);
 	void CircularProgressBar(const char* label, float progress, const ImVec2& size, const ImVec4& color);
 	void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
+	void SetWindowIcon(GLFWwindow* window, const char* iconPath);

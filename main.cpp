@@ -5285,6 +5285,28 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severi
 	fprintf(stderr, "\n");
 }
 
+void SetWindowIcon(GLFWwindow* window, const char* iconPath) {
+	int width, height, channels;
+
+	// Carrega la imatge amb SOIL
+	unsigned char* image = SOIL_load_image(iconPath, &width, &height, &channels, SOIL_LOAD_RGBA);
+	if (!image) {
+		printf("Error carregant la icona: %s\n", iconPath);
+		return;
+	}
+
+	// Crea l'estructura GLFWimage
+	GLFWimage icon;
+	icon.width = width;
+	icon.height = height;
+	icon.pixels = image;
+
+	// Assigna la icona a la finestra
+	glfwSetWindowIcon(window, 1, &icon);
+
+	// Allibera la memòria de la imatge
+	SOIL_free_image_data(image);
+}
 
 int main(void)
 {
@@ -5330,6 +5352,7 @@ int main(void)
 		glfwTerminate();
         return -1;
     }
+	SetWindowIcon(window, "textures/menu/icon.png");
 
 // Make the window's context current
     glfwMakeContextCurrent(window);
@@ -5445,6 +5468,7 @@ int main(void)
 	iss = loadIMA_SOIL("textures/menu/iss.png");
 	cometa = loadIMA_SOIL("textures/menu/asteroid.png");
 	fons = loadIMA_SOIL("textures/menu/space2gran.jpeg");
+
 
 // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
