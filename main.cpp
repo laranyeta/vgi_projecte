@@ -23,8 +23,12 @@
 #include <thread> // Per sleep_for
 #include <chrono> // Per milliseconds
 #include <ImGui/imgui_internal.h>
+#include "asteroide.h"
+#include <random>
 const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
+const char* rutaArchivoTest = "./OBJFiles/asteroid/Asteroid_1e.obj";
 std::vector<Planeta> PLANETES;
+std::vector<Asteroide> ASTEROIDES;
 
 int PlanetOrigen = -1;
 int PlanetDesti = -1;
@@ -636,7 +640,7 @@ void dibuixa_Escena(float time) {
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet,
 		ObOBJ,				// Classe de l'objecte OBJ que conté els VAO's
-		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau);
+		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau, TestOBJ);
 }
 
 
@@ -1417,18 +1421,14 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); // Change padding inside frames (buttons, input fields, etc.)
 	ImVec4 colorFuel = colorVerd;
 	ImVec4 colorLife = colorVerd;
-
 	float fuel = nau.getFuel();
-
 	if (fuel < 0.50f && fuel > 0.25f) {
 		colorFuel = colorTaronja;
 	}
 	else if (fuel < 0.25f) {
 		colorFuel = colorVermell;
 	}
-
 	float life = nau.getLife();
-
 	if (life < 0.50f && life > 0.25f) {
 		colorLife = colorTaronja;
 	}
@@ -1583,6 +1583,11 @@ void InicarSimulador() {
 
 	//Planetes i nau
 	netejaVAOList();
+	for (size_t i = 0; i < NUM_ASTEROIDES; ++i) {
+		Asteroide asteroide;
+		asteroide.setName("Asteroide_" + std::to_string(i + 1));
+		ASTEROIDES.push_back(asteroide);
+	}
 	// ISMAEL CONTINUAR
 	/*for (int i = 0; i < 10; i++)
 	{
@@ -1615,6 +1620,21 @@ void InicarSimulador() {
 		ObOBJ->netejaTextures_OBJ();
 	}
 
+		// ISMAEL ASTEROIDES
+
+	
+
+	nfdchar_t* nomOBJTest = (nfdchar_t*)malloc((strlen(rutaArchivoTest) + 1) * sizeof(nfdchar_t));
+
+	strcpy(nomOBJTest, rutaArchivoTest);
+
+	if (TestOBJ == NULL)
+		TestOBJ = ::new COBJModel;
+	else {
+		TestOBJ->netejaVAOList_OBJ();
+		TestOBJ->netejaTextures_OBJ();
+	}
+	int error2 = TestOBJ->LoadModel(nomOBJTest);
 	int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
 
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
@@ -4182,6 +4202,7 @@ void Moviment_Nau()
 
 		int axesCount;
 		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+
 		// Moviment endavant/enrere (eix vertical joystick esquerre o botó 'A')
 		if (buttons[0] == GLFW_PRESS && fuel > 0) // Llindar per evitar "drift"
 		{
@@ -5491,7 +5512,6 @@ int main(void)
 		G_TIME = time += delta;
 		if ((time <= 0.0) && (satelit || anima)) OnTimer();
 
-//Disminució de la Potencia
 		nau.decPotencia();
 
 // Poll for and process events

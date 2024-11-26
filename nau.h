@@ -33,10 +33,11 @@ private:
 	//objects owned by nau
 	Camera m_cam; //camera
 	COBJModel* m_model;
-	// combustible, particulas, efectos, etc.
-	float m_fuel;  
-	float m_life; 
+
+	float m_fuel;
+	float m_life;
 	float m_potencia;
+	// combustible, particulas, efectos, etc.
 
 public:
 	// BASIQUES
@@ -143,11 +144,7 @@ public:
 		m_cam.orbX(angle, axis, m_o);
 	}
 
-	//Extra
-	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
-	void moveS(double delta) { move((float)(m_s * delta)*m_n);  }
-
-	void incPotencia(){
+	void incPotencia() {
 		if (m_potencia < 1.0f) {
 			m_potencia += 0.01f;
 		}
@@ -155,7 +152,6 @@ public:
 			m_potencia = 1.0f;
 		}
 	}
-
 	void decPotencia() {
 		if (m_potencia > 0.0f) {
 			m_potencia -= 0.005f;
@@ -164,19 +160,20 @@ public:
 			m_potencia = 0.0f;
 		}
 	}
-
 	void incFuel(float temp) {
 		m_fuel += temp;
 	}
-
 	void decFuel() {
 		m_fuel -= 0.00001f;
 	}
-
 	float getPotencia() { return m_potencia; }
 	float getFuel() { return m_fuel; }
 	float getLife() { return m_life; }
 
+
+	//Extra
+	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
+	void moveS(double delta) { move((float)(m_s * delta)*m_n);  }
 };
 
 #endif

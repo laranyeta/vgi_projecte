@@ -10,8 +10,10 @@
 
 #include <vector>
 #include "planeta.h"
+#include "asteroide.h"
 
 extern std::vector<Planeta> PLANETES;
+extern std::vector<Asteroide> ASTEROIDES;
 
 //--------------- VGI: Tipus de Càmera
 #define CAP ' '
@@ -126,7 +128,11 @@ const int NUM_MAX_LLUMS = 8;
 #define FILE_SHADER 'F'
 #define PROG_BINARY_SHADER 'p'
 #define PROG_BINARY_SHADERW 'W'
-
+// ASTEROIDES ISMAEL
+const int NUM_ASTEROIDES = 50;
+const float MAX_DISTANCIA_ASTEROIDES = 250.0f;
+// TRAJ ORBIT ISMAEL
+const size_t BASE_POINTS = 300;
 const double AU_IN_METERS = 1.496e11;
 const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0*10.0;
 //LCR: s'afegeixen parametres lluna //

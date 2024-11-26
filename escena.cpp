@@ -1,14 +1,14 @@
-//******** PRACTICA VISUALITZACIÓ GRÀFICA INTERACTIVA (Escola Enginyeria - UAB)
-//******** Entorn bàsic VS2022 MONOFINESTRA amb OpenGL 4.3, interfície GLFW, ImGui i llibreries GLM
-//******** Ferran Poveda, Marc Vivet, Carme Julià, Débora Gil, Enric Martí (Setembre 2024)
+//******** PRACTICA VISUALITZACIï¿½ GRï¿½FICA INTERACTIVA (Escola Enginyeria - UAB)
+//******** Entorn bï¿½sic VS2022 MONOFINESTRA amb OpenGL 4.3, interfï¿½cie GLFW, ImGui i llibreries GLM
+//******** Ferran Poveda, Marc Vivet, Carme Juliï¿½, Dï¿½bora Gil, Enric Martï¿½ (Setembre 2024)
 // escena.cpp : Aqui es on ha d'anar el codi de les funcions que 
 //              dibuixin les escenes.
 //
-//    Versió 2.0:	- Objectes Cub, Esfera, Tetera (primitives libreria GLUT)
+//    Versiï¿½ 2.0:	- Objectes Cub, Esfera, Tetera (primitives libreria GLUT)
 //
-//	  Versió 2.2:	- Objectes Cub, Esfera, Tetera definides en fitxer font glut_geometry amb altres primitives GLUT
+//	  Versiï¿½ 2.2:	- Objectes Cub, Esfera, Tetera definides en fitxer font glut_geometry amb altres primitives GLUT
 //
-//	  Versió 2.5:	- Objectes cubRGB i Tie (nau Star Wars fet per alumnes)
+//	  Versiï¿½ 2.5:	- Objectes cubRGB i Tie (nau Star Wars fet per alumnes)
 //
 
 #include "stdafx.h"
@@ -16,20 +16,21 @@
 #include "visualitzacio.h"
 #include "escena.h"
 #include <iostream>
+#include <random>
 
-// Dibuixa Eixos Coordenades Món i Reixes, activant un shader propi.
+// Dibuixa Eixos Coordenades Mï¿½n i Reixes, activant un shader propi.
 void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, 
 	glm::mat4 MatriuProjeccio, glm::mat4 MatriuVista)
 {
-// Visualització Eixos Coordenades Mòn
+// Visualitzaciï¿½ Eixos Coordenades Mï¿½n
 	glUseProgram(ax_programID);
 
-// Pas Matrius Projecció i Vista Vista a shader
+// Pas Matrius Projecciï¿½ i Vista Vista a shader
 	glUniformMatrix4fv(glGetUniformLocation(ax_programID, "projectionMatrix"), 1, GL_FALSE, &MatriuProjeccio[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(ax_programID, "viewMatrix"), 1, GL_FALSE, &MatriuVista[0][0]);
 
 // Attribute Locations must be setup before calling glLinkProgram()
-	glBindAttribLocation(ax_programID, 0, "in_Vertex"); // Vèrtexs
+	glBindAttribLocation(ax_programID, 0, "in_Vertex"); // Vï¿½rtexs
 	glBindAttribLocation(ax_programID, 1, "in_Color");	// Color
 
 //  Dibuix dels eixos
@@ -46,14 +47,14 @@ void dibuixa_Skybox(GLuint sk_programID, GLuint cmTexture, char eix_Polar, glm::
 
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 
-// Activació shader per a cub skybox
+// Activaciï¿½ shader per a cub skybox
 	glUseProgram(sk_programID);
 
-// Pas Matrius Projecció i Vista a shader
+// Pas Matrius Projecciï¿½ i Vista a shader
 	glUniformMatrix4fv(glGetUniformLocation(sk_programID, "projectionMatrix"), 1, GL_FALSE, &MatriuProjeccio[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(sk_programID, "viewMatrix"), 1, GL_FALSE, &MatriuVista[0][0]);
 
-// Rotar skyBox per a orientar sobre eix superior Z o X en Vista Esfèrica (POLARX, POLARY, POLARZ)
+// Rotar skyBox per a orientar sobre eix superior Z o X en Vista Esfï¿½rica (POLARX, POLARY, POLARZ)
 	if (eix_Polar == POLARZ) ModelMatrix = glm::rotate(ModelMatrix, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 	else if (eix_Polar == POLARX) ModelMatrix = glm::rotate(ModelMatrix, radians(-90.0f), vec3(0.0f, 0.0f, 1.0f));
 
@@ -66,7 +67,7 @@ void dibuixa_Skybox(GLuint sk_programID, GLuint cmTexture, char eix_Polar, glm::
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cmTexture);
 
 // Attribute Locations must be setup before calling glLinkProgram()
-	glBindAttribLocation(sk_programID, 0, "in_Vertex"); // Vèrtexs
+	glBindAttribLocation(sk_programID, 0, "in_Vertex"); // Vï¿½rtexs
 
 //  Dibuix del Skybox
 	drawCubeSkybox();
@@ -81,7 +82,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 			bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 			int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 			COBJModel* objecteOBJ,
-			glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time,bool propulsat, Nau nau)
+			glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time,bool propulsat, Nau nau, COBJModel* TestOBJ)
 {
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
@@ -90,7 +91,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	CColor color_vermell = { 0.0,0.0,0.0,1.0 }, color_Mar = { 0.0,0.0,0.0,0.0 };
 	bool sw_material[5] = { 0.0,0.0,0.0,0.0,0.0 };
 	
-// Matrius de Transformació
+// Matrius de Transformaciï¿½
 	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0), TransMatrix(1.0), ScaleMatrix(1.0), RotMatrix(1.0);
 
 // VAO
@@ -101,10 +102,10 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	color_vermell.r = 1.0;	color_vermell.g = 0.0; color_vermell.b = 0.0; color_vermell.a = 1.0;
 	sw_material[0] = false;	sw_material[1] = true; sw_material[2] = true; sw_material[3] = false;	sw_material[4] = true;
 
-// Shader Visualització Objectes
+// Shader Visualitzaciï¿½ Objectes
 	glUseProgram(sh_programID);
 
-// Parametrització i activació/desactivació de textures
+// Parametritzaciï¿½ i activaciï¿½/desactivaciï¿½ de textures
 	if (texturID[0] != -1) SetTextureParameters(texturID[0], true, true, textur_map, false);
 	if (textur) {	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
 					glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE); //glEnable(GL_MODULATE);
@@ -115,12 +116,12 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	glUniform1i(glGetUniformLocation(sh_programID, "flag_invert_y"), flagInvertY);
 
 // Attribute Locations must be setup before calling glLinkProgram()
-	glBindAttribLocation(sh_programID, 0, "in_Vertex");		// Vèrtexs
+	glBindAttribLocation(sh_programID, 0, "in_Vertex");		// Vï¿½rtexs
 	glBindAttribLocation(sh_programID, 1, "in_Color");		// Color
 	glBindAttribLocation(sh_programID, 2, "in_Normal");		// Normals
 	glBindAttribLocation(sh_programID, 3, "in_TexCoord");	// Textura
 
-// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material.
+// Definiciï¿½ propietats de reflexiï¿½ (emissiï¿½, ambient, difusa, especular) del material.
 	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 
 	switch (objecte)
@@ -128,35 +129,36 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 	/*MAV MODIFIED*/
 	case OBJECTE_T:
-		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		// Definiciï¿½ propietats de reflexiï¿½ (emissiï¿½, ambient, difusa, especular) del material pel color de l'objecte.
 		objecte_t(sh_programID, MatriuVista, MatriuTG, sw_mat);
 
 		break;
 		/*MAV MODIFIED*/
 	case SPUTNIK:
-		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		// Definiciï¿½ propietats de reflexiï¿½ (emissiï¿½, ambient, difusa, especular) del material pel color de l'objecte.
 		sputnik(sh_programID, MatriuVista, MatriuTG, sw_mat, time,propulsat);
 		break;
 	/*MAV MODIFIED*/
 	case DONUT_FACE:
-		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		// Definiciï¿½ propietats de reflexiï¿½ (emissiï¿½, ambient, difusa, especular) del material pel color de l'objecte.
 		donut_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
 		break;
 	/*MAV MODIFIED*/
 	case NAU_FACE:
-		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		// Definiciï¿½ propietats de reflexiï¿½ (emissiï¿½, ambient, difusa, especular) del material pel color de l'objecte.
 		nau_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
 		break;
 
 	case PROVA_PLANETA:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur);
-		// Activar transparència
+		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
+		// Activar transparï¿½ncia
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		// Dibuix geometria Mar
 		color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
-		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material pel color de l'objecte.
+		// Definiciï¿½ propietats de reflexiï¿½ (emissiï¿½, ambient, difusa, especular) del material pel color de l'objecte.
 		SeleccionaColorMaterial(sh_programID, color_Mar, sw_mat);
 		// Pas ModelView Matrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
@@ -164,12 +166,12 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Pas NormalMatrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 
-		// Desactivar transparència
+		// Desactivar transparï¿½ncia
 		glDisable(GL_BLEND);
 
 		////////////////////////////////////////////nau///////////////////////////////////////////////////////
 		/*
-		// Aplica la traslación
+		// Aplica la traslaciï¿½n
 		//Julia: falta moure la nau a fora del sol
 		
 		ModelMatrix = glm::translate(inverse(MatriuVista), vec3(0.0f, -0.02f, -0.1f));
@@ -182,7 +184,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 
-		// Configuración del material y dibujo del objeto
+		// Configuraciï¿½n del material y dibujo del objeto
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		objecteOBJ->draw_TriVAO_OBJ(sh_programID);
 		*/
@@ -201,7 +203,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Pas NormalMatrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 
-		// Definir característiques material de cada punt
+		// Definir caracterï¿½stiques material de cada punt
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		// Objecte OBJ: Dibuix de l'objecte OBJ amb textures amb varis VAO's, un per a cada material.
 		objecteOBJ->draw_TriVAO_OBJ(sh_programID);	// Dibuixar VAO a pantalla
@@ -209,12 +211,12 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 // Dibuix de la resta d'objectes
 	default:
-		// Definició propietats de reflexió (emissió, ambient, difusa, especular) del material.
+		// Definiciï¿½ propietats de reflexiï¿½ (emissiï¿½, ambient, difusa, especular) del material.
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		break;
 	}
 
-// Enviar les comandes gràfiques a pantalla
+// Enviar les comandes grï¿½fiques a pantalla
 //	glFlush();
 }
 
@@ -253,7 +255,7 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	draw_TriEBO_Object(GLUT_CUBE);
-// Cub balança
+// Cub balanï¿½a
 	// generar forma
 	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 2.0f, 3.0f));
 	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 5.0f, 1.0f));
@@ -295,15 +297,21 @@ void inicialitzaDades()
 		PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i - 1] * DEG_A_RAD);
 		PLANETES[i].setInclinacio(INCLINACIONS[i - 1] * DEG_A_RAD);
 		PLANETES[i].setPeriapsis(PERIAPSIS[i - 1] * DEG_A_RAD);
+		// ISMAEL TRAJ ORBITA
+
+		if (i > 4)
+			PLANETES[i].setPuntsOrbita(BASE_POINTS * i * 4);
+		else
+			PLANETES[i].setPuntsOrbita(BASE_POINTS * i);
 	}
 }
 
 
 void processaRotacions()
 {
-	// Calculem les coordenades dels eixos pels quals rotarà el planeta sobre ell mateix
+	// Calculem les coordenades dels eixos pels quals rotarï¿½ el planeta sobre ell mateix
 	// 
-	// LCR - s'ha afegit velocitat de rotació de la lluna (posicio 9)
+	// LCR - s'ha afegit velocitat de rotaciï¿½ de la lluna (posicio 9)
 	float velocitatsRotacio[10] = { 5.0f, 10.0f, 8.0f, 6.0f, 12.0f, 4.0f, 9.0f, 7.0f, 11.0f, 0.27f };
 
 	for (int i = 0; i < PLANETES.size(); ++i) {
@@ -314,7 +322,7 @@ void processaRotacions()
 			cos(inclinacioRadians)
 		);
 
-		// Assignem eix de rotació i direcció de rotació
+		// Assignem eix de rotaciï¿½ i direcciï¿½ de rotaciï¿½
 		PLANETES[i].setEixosRotacioPlaneta(eixosRotacio);
 		PLANETES[i].setDireccioRotacio(DIRECCIONS_ROTACIO[i]);
 		PLANETES[i].setVelocitatRotacio(velocitatsRotacio[i]);
@@ -340,7 +348,7 @@ void processaFisica()
 		double massa = MASSES[i] * ESCALA_MASSA;
 		PLANETES[i].setMassa(massa);
 
-		double mu = G * PLANETES[0].getMassa(); // Paràmetre gravitacional
+		double mu = G * PLANETES[0].getMassa(); // Parï¿½metre gravitacional
 		// Sol no es mou (valors per defecte del constructor, es pot eliminar)
 		if (i == 0)
 		{
@@ -380,26 +388,26 @@ void processaFisica()
 				// Distancia del planeta al sol
 				double r = a * (1 - e * e) / (1 + e * cos(nu));
 
-				// Posició en el pla orbital (2D)
+				// Posiciï¿½ en el pla orbital (2D)
 				double x_plaOrbital = r * cos(nu);
 				double y_plaOrbital = r * sin(nu);
 				double z_plaOrbital = 0.0;
 
-				// Moment angular relatiu específic
+				// Moment angular relatiu especï¿½fic
 				double h = sqrt(mu * a * (1 - e * e));
 
 				// Velocitat en el pla orbital
-				// Ens diu cap a on i que tant ràpid es mou el planeta en la seva órbita
+				// Ens diu cap a on i que tant rï¿½pid es mou el planeta en la seva ï¿½rbita
 				double vx_plaOrbital = -(mu / h) * sin(nu);
 				double vy_plaOrbital = (mu / h) * (e + cos(nu));
 				double vz_plaOrbital = 0.0;
 
-				// Vector de posició i velocitat en el pla orbital
+				// Vector de posiciï¿½ i velocitat en el pla orbital
 				glm::dvec3 posicio_plaOrbital(x_plaOrbital, y_plaOrbital, z_plaOrbital);
 				glm::dvec3 velocitat_plaOrbital(vx_plaOrbital, vy_plaOrbital, vz_plaOrbital);
 
-				// Matrius de rotació per passar del pla orbital a l'espai 3D
-				// S'inclinen i es giren les òrbites per passar del pla al 3D 
+				// Matrius de rotaciï¿½ per passar del pla orbital a l'espai 3D
+				// S'inclinen i es giren les ï¿½rbites per passar del pla al 3D 
 				glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0), (float)periapsis, glm::vec3(0.0, 0.0, 1.0)));
 				glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0), (float)inclinacio, glm::vec3(1.0, 0.0, 0.0)));
 				glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0), (float)longNodeAsc, glm::vec3(0.0, 0.0, 1.0)));
@@ -441,124 +449,283 @@ void processaPlanetes()
 	processaTextures();
 }
 
-void updatePlanetes(float deltaTime)
+void updatePlanetesAnalytical(double time)
 {
-	// Constant gravitacional
-	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
+	const double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
+	const Planeta& sol = PLANETES[0];
 
-	// Reiniciem les acceleracionss
-	for (auto& planeta : PLANETES)
-		planeta.setAcceleracio(glm::dvec3(0.0));
-
-	// Calcular forces gravitacionals y actualitzar acceleracions
-	for (int i = 0; i < PLANETES.size(); ++i)
+	for (int i = 1; i < PLANETES.size(); ++i) // Comenzamos desde 1 para omitir el Sol
 	{
 		Planeta& planeta = PLANETES[i];
 
-		// El sol no s'ha de moure
-		if (i == 0)
-			continue;
+		// Obtener parÃ¡metros orbitales
+		double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
+		double e = planeta.getExcentricitat(); // Excentricidad
+		double inclinacio = planeta.getInclinacio() * DEG_A_RAD; // InclinaciÃ³n en radianes
+		double longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del nodo ascendente en radianes
+		double periapsis = planeta.getPeriapsis() * DEG_A_RAD; // Argumento del periapsis en radianes
 
-		// LCR - ORBITA LLUNA AL VOLTANT DE LA TERRA //
-		
-		else if (i == 9) //si es lluna
+		// ParÃ¡metro gravitacional estÃ¡ndar (mu)
+		double mu = G * sol.getMassa();
+
+		// Calcular el movimiento medio n = sqrt(mu / a^3)
+		double n = sqrt(mu / (a * a * a));
+
+		// Calcular la anomalÃ­a media M = M0 + n * t
+		double M0 = 0.0; // AnomalÃ­a media en t0 (puede ser 0)
+		double M = M0 + n * time * VELOCITAT_SIMULACIO;
+
+		// Normalizar M al rango [0, 2Ï€]
+		M = fmod(M, TWOPI);
+
+		// Resolver la ecuaciÃ³n de Kepler para obtener la anomalÃ­a excÃ©ntrica E
+		double E = M; // SuposiciÃ³n inicial
+		const int maxIter = 10;
+		for (int iter = 0; iter < maxIter; ++iter)
 		{
-			Planeta& terra = PLANETES[3];
-			double distanciaTerraLluna = 3.844e11 * ESCALA_DISTANCIA; //distancia aproximada terra-lluna
-			static double angleRadLluna = 0.0;
-			double velocitatOrbitaLluna = sqrt(G * MASSES[3] / distanciaTerraLluna);
-			angleRadLluna += 2.0 * PI * deltaTime * velocitatOrbitaLluna; //orbita lluna al voltant de la terra
-
-			float lluna_X = distanciaTerraLluna * cos(angleRadLluna);
-			float lluna_Y = distanciaTerraLluna * sin(angleRadLluna);
-
-			glm::vec3 posLluna = glm::vec3(lluna_X, lluna_Y, 0.0f);
-
-			planeta.setPosition(terra.getPosition() + posLluna);
+			double deltaE = (M - E + e * sin(E)) / (1 - e * cos(E));
+			E += deltaE;
+			if (fabs(deltaE) < 1e-6) // Tolerancia
+				break;
 		}
-	
 
-		else
-		{
-			Planeta& sol = PLANETES[0];
-			glm::dvec3 direccio = sol.getPosition() - planeta.getPosition();
-			double distancia = glm::length(direccio);
-			//std::cout << "Distancia: " << distance << std::endl;
-			if (distancia > 0.0f)
-			{
-				// Força d'atracció gravitacional entre el sol i el planeta
-				// Llei universal gravitacional de Newton
-				glm::dvec3 direccioForça = glm::normalize(direccio);
-				double magnitudForça = G * (sol.getMassa() * planeta.getMassa()) / (distancia * distancia);
-				glm::dvec3 força = direccioForça * magnitudForça;
+		// Calcular la anomalÃ­a verdadera Î½ a partir de E
+		double sinV = (sqrt(1 - e * e) * sin(E)) / (1 - e * cos(E));
+		double cosV = (cos(E) - e) / (1 - e * cos(E));
+		double nu = atan2(sinV, cosV);
 
-				// F=m*a => a=F/m
-				// Segona llei de newton
-				glm::dvec3 acceleracio = força / planeta.getMassa();
-				planeta.setAcceleracio(acceleracio);
-			}
+		// Calcular la distancia radial r
+		double r = a * (1 - e * cos(E));
 
-		}
-	}
+		// PosiciÃ³n en el plano orbital
+		double x_orb = r * cos(nu);
+		double y_orb = r * sin(nu);
+		double z_orb = 0.0;
 
-	// Actualitzar velocitats i posicions dels planetes
-	for (auto& planeta : PLANETES)
-	{
-		// Actualitzar velocitat: v = v+a*dt
-		glm::dvec3 velocitat = planeta.getVelocitat() + planeta.getAcceleracio() * (double)deltaTime;
-		planeta.setVelocitat(velocitat);
+		// Matrices de rotaciÃ³n para transformar del plano orbital al espacio 3D
+		glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)periapsis, glm::vec3(0.0, 0.0, 1.0)));
+		glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)inclinacio, glm::vec3(1.0, 0.0, 0.0)));
+		glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)longNodeAsc, glm::vec3(0.0, 0.0, 1.0)));
+		glm::mat3 R = R_longNodeAsc * R_inclinacio * R_periapsis;
 
-		// Actualitzar posició: x = x+v*dt
-		glm::vec3 position = planeta.getPosition() + (glm::vec3)planeta.getVelocitat() * deltaTime;
-		planeta.setPosition(position);
+		// Transformar a coordenadas espaciales
+		glm::dvec3 posicion_orb(x_orb, y_orb, z_orb);
+		glm::dvec3 posicion_3D = R * posicion_orb;
+
+		// Establecer la posiciÃ³n del planeta
+		planeta.setPosition(glm::vec3(posicion_3D));
 	}
 }
 
+
 void drawOrbitPath(Planeta& planeta) {
-	// Define the number of points for the orbit
-	const int numPoints = 100;
-	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semi-major axis
-	double e = planeta.getExcentricitat(); // Eccentricity
-	double inclinacio = planeta.getInclinacio(); // Inclination
-	double longNodeAsc = planeta.getLongitudNodeAscendent(); // Longitude of ascending node
-	double periapsis = planeta.getPeriapsis(); // Argument of periapsis
+	// Define el nÃºmero de puntos para la Ã³rbita
+	const int numPoints = 360;
+	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
+	double e = planeta.getExcentricitat(); // Excentricidad
+	double inclinacio = planeta.getInclinacio() * DEG_A_RAD; // InclinaciÃ³n en radianes
+	double longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del nodo ascendente en radianes
+	double periapsis = planeta.getPeriapsis() * DEG_A_RAD; // Argumento del periapsis en radianes
 
-	// Rotation matrices for transforming the orbit from 2D to 3D
-	glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0), (float)periapsis, glm::vec3(0.0, 0.0, 1.0)));
-	glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0), (float)inclinacio, glm::vec3(1.0, 0.0, 0.0)));
-	glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0), (float)longNodeAsc, glm::vec3(0.0, 0.0, 1.0)));
-	glm::mat3 R = R_periapsis * R_inclinacio * R_longNodeAsc;
+	// Matrices de rotaciÃ³n para transformar la Ã³rbita del plano orbital al espacio 3D
+	glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)periapsis, glm::vec3(0.0f, 0.0f, 1.0f)));
+	glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)inclinacio, glm::vec3(1.0f, 0.0f, 0.0f)));
+	glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)longNodeAsc, glm::vec3(0.0f, 0.0f, 1.0f)));
+	glm::mat3 R = R_longNodeAsc * R_inclinacio * R_periapsis;
 
-	// Start drawing the orbit (do not draw the planet itself, just the orbit)
-	glBegin(GL_LINE_STRIP);
-	for (int i = 0; i <= numPoints; ++i) {
-		// True anomaly (angle around orbit)
-		double nu = 2.0 * pi<float>() * i / numPoints;
+	// Comenzar a dibujar la Ã³rbita
+	glBegin(GL_LINE_LOOP);
+	for (int i = 0; i < numPoints; ++i) {
+		// AnomalÃ­a verdadera (Ã¡ngulo alrededor de la Ã³rbita)
+		double nu = 2.0 * PI * i / numPoints;
 
-		// Radius for this point in the orbit
+		// Radio para este punto en la Ã³rbita
 		double r = a * (1 - e * e) / (1 + e * cos(nu));
 
-		// Position in the orbital plane
-		double x_plaOrbital = r * cos(nu);
-		double y_plaOrbital = r * sin(nu);
-		double z_plaOrbital = 0.0;
+		// PosiciÃ³n en el plano orbital
+		double x_orb = r * cos(nu);
+		double y_orb = r * sin(nu);
+		double z_orb = 0.0;
 
-		// Transform from orbital plane to 3D space relative to the Sun
-		glm::dvec3 posicio_plaOrbital(x_plaOrbital, y_plaOrbital, z_plaOrbital);
-		glm::dvec3 posicio_3D = R * posicio_plaOrbital;
+		// Transformar del plano orbital al espacio 3D
+		glm::dvec3 posicion_orb(x_orb, y_orb, z_orb);
+		glm::dvec3 posicion_3D = R * posicion_orb;
 
-		// Draw the orbit path in OpenGL
-		glVertex3f(posicio_3D.x, posicio_3D.y, posicio_3D.z);
+		// Dibujar el punto en la Ã³rbita
+		glVertex3d(posicion_3D.x, posicion_3D.y, posicion_3D.z);
 	}
 	glEnd();
 }
 
+void drawHistoricalPath(std::vector<glm::vec3> posiciones) {
+	size_t numPositions = posiciones.size();
+
+	if (numPositions < 2)
+		return;
+
+	glLineWidth(1.0f);
+	
+	glEnable(GL_BLEND);
+	glBegin(GL_LINE_STRIP);
+	for (size_t i = 0; i < numPositions; ++i) {
+		float alpha = static_cast<float>(i) / static_cast<float>(numPositions - 1);
+		alpha = 1.0f - alpha;
+		glColor4f(1.0f, 1.0f, 0.0f, alpha);
+
+		// Dibujar el vÃ©rtice
+		const glm::vec3& posicion = posiciones[i];
+		glVertex3f(posicion.x, posicion.y, posicion.z);
+	}
+	glEnd();
+}
+
+bool estaForaDelsLimits(const Asteroide& asteroide)
+{
+	glm::vec3 pos = asteroide.getPosition();
+	float distanceSquared = glm::dot(pos, pos); // Equivalent to glm::length2(pos)
+	return distanceSquared > (MAX_DISTANCIA_ASTEROIDES * MAX_DISTANCIA_ASTEROIDES);
+}
+
+void resetAsteroide(Asteroide& asteroide, std::mt19937& gen)
+{
+	std::uniform_real_distribution<float> pos_dist(-MAX_DISTANCIA_ASTEROIDES / 2.0f, MAX_DISTANCIA_ASTEROIDES / 2.0f);
+	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
+	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
+	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
+
+	float radius = radius_dist(gen);         // Radius between 1.0 and 2.0
+	double mass = mass_dist(gen);            // Mass between 1.0e12 and 1.0e13
+
+	glm::vec3 position(pos_dist(gen), pos_dist(gen), pos_dist(gen));
+	glm::dvec3 velocity(vel_dist(gen), vel_dist(gen), vel_dist(gen));
+
+	asteroide.setRadi(radius);
+	asteroide.setMassa(mass);
+	asteroide.setVelocitat(velocity);
+	asteroide.setPosition(position);
+	asteroide.posicionesHistoricas.clear();
+}
+
+void actualitzarAsteroides(double deltaTime)
+{
+	for (auto& asteroide : ASTEROIDES)
+	{
+		glm::vec3 pos = asteroide.getPosition();
+		glm::dvec3 vel = asteroide.getVelocitat();
+		pos += glm::vec3(vel * deltaTime); // Assuming velocity is in units per second
+		asteroide.setPosition(pos);
+	}
+}
+
+// ISMAEL ASTEROIDES
+void generarAsteroides()
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> pos_dist(-2000.0f, 2000.0f); 
+	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);       
+	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);     
+	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);   
+
+	for (size_t i = 0; i < NUM_ASTEROIDES; ++i) {
+		/* TESTING
+		if (i == 0) {
+			ASTEROIDES[i].setRadi(1.5f);
+			ASTEROIDES[i].setMassa(1.0e12);
+			ASTEROIDES[i].setPosition(glm::vec3(-200.0f, 50.0f, 50.0f));
+			ASTEROIDES[i].setVelocitat(glm::dvec3(-5.0, 0.0, 0.0));
+		}
+		else if (i == 1) {
+			ASTEROIDES[i].setRadi(3.5f);
+			ASTEROIDES[i].setMassa(3.0e12);
+			ASTEROIDES[i].setPosition(glm::vec3(200.0f, 50.0f, 50.0f));
+			ASTEROIDES[i].setVelocitat(glm::dvec3(10.0, 0.0, 0.0));
+		}
+		*/
+		float radius = radius_dist(gen);       
+		double mass = mass_dist(gen);        
+
+		glm::vec3 position(pos_dist(gen), pos_dist(gen), pos_dist(gen));
+		glm::dvec3 velocity(vel_dist(gen), vel_dist(gen), vel_dist(gen));
+
+		ASTEROIDES[i].setMassa(mass);
+		ASTEROIDES[i].setRadi(radius);
+		ASTEROIDES[i].setVelocitat(velocity);
+		ASTEROIDES[i].setPosition(position);
+	}
+}
+
+void processaAsteroides()
+{
+	generarAsteroides();
+}
+
+void checkCollisions()
+{
+	for (size_t i = 0; i < ASTEROIDES.size(); ++i)
+	{
+		for (size_t j = i + 1; j < ASTEROIDES.size(); ++j)
+		{
+			Asteroide& asteroidA = ASTEROIDES[i];
+			Asteroide& asteroidB = ASTEROIDES[j];
+
+			if (asteroidA.isCollidingWith(asteroidB))
+			{
+				asteroidA.resolveCollision(asteroidB);
+				std::cout << "Collision!" << std::endl;
+			}
+		}
+	}
+}
+
+void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	static bool inicialitzat = false;
+	static double lastTime = time;
+	if (!inicialitzat)
+	{
+		processaAsteroides();
+		inicialitzat = true;
+	}
+	double deltaTime = time - lastTime;
+	lastTime = time;
+	//int count = 0;
+	for (auto& asteroide : ASTEROIDES)
+	{
+		/* TESTING
+		if (count == 2) continue;
+		count++;
+		*/
+		actualitzarAsteroides(deltaTime);
+		checkCollisions();
+		if (estaForaDelsLimits(asteroide)) resetAsteroide(asteroide, gen);
+		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+		ModelMatrix = glm::translate(MatriuTG, asteroide.getPosition());
+		float radi = asteroide.getRadi();
+		ModelMatrix = glm::scale(ModelMatrix, vec3(radi, radi, radi));
+
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+	
+		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+		TestOBJ->draw_TriVAO_OBJ(sh_programID);
+
+		glm::mat4 ModelMatrixOrbit = glm::mat4(1.0f);
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrixOrbit[0][0]);
+		asteroide.agregarPosicionHistorica(asteroide.getPosition());
+		drawHistoricalPath(asteroide.getPosicionesHistoricas());
+	}
+}
 
 
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
 	GLuint texturID[NUM_MAX_TEXTURES], bool textur)
 {
-	// Inicialització de planetes
+	// Inicialitzaciï¿½ de planetes
 	static bool inicialitzat = false;
 	static double lastTime = time;
 	if (!inicialitzat)
@@ -572,18 +739,18 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	lastTime = time;
 
 	deltaTime *= VELOCITAT_SIMULACIO;
-	// Física orbites 2D de moment
-	updatePlanetes(deltaTime);
+	// Fï¿½sica orbites 2D de moment
+	updatePlanetesAnalytical(time);
 	for (auto& planeta : PLANETES)
 	{
 		//drawOrbitPath(planeta);
-		// Posició inicial
+		// Posiciï¿½ inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
 		// LCR: cas lluna //
 		ModelMatrix = glm::translate(MatriuTG, planeta.getPosition());
 
-		// Rotació sobre ell mateix
+		// Rotaciï¿½ sobre ell mateix
 		float velocitatRotacio = planeta.getVelocitatRotacio();    // Graus per segon
 		int direccioRotacio = planeta.getDireccioRotacio();
 		float angle = time * velocitatRotacio * direccioRotacio;
@@ -606,30 +773,35 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
 
 		draw_TriEBO_Object(3);
+
+		glm::mat4 ModelMatrixOrbit = glm::mat4(1.0f);
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrixOrbit[0][0]);
+		planeta.agregarPosicionHistorica(planeta.getPosition());
+		drawHistoricalPath(planeta.getPosicionesHistoricas());
 	}
 
 }
 
 
 // Variables globals
-float velocitat_satelit = 1.0f;  // Velocitat vertical del satèl·lit
-float temps_propulsio_rest = 2.0f; // Temps restant de la propulsió
+float velocitat_satelit = 1.0f;  // Velocitat vertical del satï¿½lï¿½lit
+float temps_propulsio_rest = 2.0f; // Temps restant de la propulsiï¿½
 float semi_eix_major = 25.0f;
 
 void dibuixar_orbita(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, float semi_eix_major, float excentricitat)
 {
-	// Nombre de segments per a l'òrbita (com més gran sigui, més suau serà)
+	// Nombre de segments per a l'ï¿½rbita (com mï¿½s gran sigui, mï¿½s suau serï¿½)
 	int num_segments = 100;
 	std::vector<glm::vec3> punts_orbita;
 
-	// Calcular els punts de l'òrbita utilitzant coordenades polars
+	// Calcular els punts de l'ï¿½rbita utilitzant coordenades polars
 	for (int i = 0; i < num_segments; ++i) {
 		float angle = 2.0f * glm::pi<float>() * float(i) / float(num_segments); // Angle entre punts en radians
 
-		// Calcular la distància radial r en funció de l'excentricitat i l'angle
+		// Calcular la distï¿½ncia radial r en funciï¿½ de l'excentricitat i l'angle
 		float radi_orbita = (semi_eix_major * (1.0f - excentricitat * excentricitat)) / (1.0f + excentricitat * cos(angle));
 
-		// Coordenades x i y per a l'òrbita el·líptica
+		// Coordenades x i y per a l'ï¿½rbita elï¿½lï¿½ptica
 		float x = radi_orbita * cos(angle); // Coordenada x
 		float y = radi_orbita * sin(angle); // Coordenada y
 
@@ -637,11 +809,11 @@ void dibuixar_orbita(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 Matri
 		punts_orbita.push_back(glm::vec3(x, y, 0.0f));
 	}
 
-	// Dibuixar l'òrbita amb línies
-	glUseProgram(sh_programID); // Assegurar-se que s'està usant el programa shader correcte
+	// Dibuixar l'ï¿½rbita amb lï¿½nies
+	glUseProgram(sh_programID); // Assegurar-se que s'estï¿½ usant el programa shader correcte
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &MatriuTG[0][0]);
 
-	glBegin(GL_LINE_LOOP); // Utilitzar línia tancada per a l'òrbita
+	glBegin(GL_LINE_LOOP); // Utilitzar lï¿½nia tancada per a l'ï¿½rbita
 	for (const auto& punt : punts_orbita) {
 		glVertex3f(punt.x, punt.y, punt.z); // Dibuixar cada punt
 	}
@@ -661,13 +833,13 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	draw_TriEBO_Object(GLU_SPHERE);
 
-	// Paràmetres de l'òrbita
+	// Parï¿½metres de l'ï¿½rbita
 	float forca_propulsio = 0.01f;
 	float gravetat = 0.0098f;
 	float radi_planeta = 5.0f;
 	float excentricitat = 0.2f;
 
-	// Manejar la propulsió
+	// Manejar la propulsiï¿½
 	/*if (propulsat) {
 		std::cout << "Propulsat => " << temps_propulsio_rest << std::endl;
 		velocitat_satelit += forca_propulsio;
@@ -682,21 +854,21 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	}*/
 	if (propulsat) {
 		std::cout << "Propulsat => " << temps_propulsio_rest << std::endl;
-		velocitat_satelit += forca_propulsio;  // Augmentem la velocitat amb propulsió
+		velocitat_satelit += forca_propulsio;  // Augmentem la velocitat amb propulsiï¿½
 		temps_propulsio_rest -= 0.01f;
 
 		if (temps_propulsio_rest <= 0.0f) {
-			propulsat = false;  // Desactivar propulsió
+			propulsat = false;  // Desactivar propulsiï¿½
 			//temps_propulsio_rest = 2.0f;
 		}
-		semi_eix_major += 0.001f;  // Decrementar semi-eix major per simular una òrbita més petita
+		semi_eix_major += 0.001f;  // Decrementar semi-eix major per simular una ï¿½rbita mï¿½s petita
 		if (semi_eix_major < 1.0f) { // Assegurar que no baixi massa
 			semi_eix_major = 1.0f;
 		}
 	}
 	else {
 		velocitat_satelit -= gravetat;  // Aplicar gravetat
-		semi_eix_major -= 0.001f;  // Decrementar semi-eix major per simular una òrbita més petita
+		semi_eix_major -= 0.001f;  // Decrementar semi-eix major per simular una ï¿½rbita mï¿½s petita
 		if (semi_eix_major < 1.0f) { // Assegurar que no baixi massa
 			semi_eix_major = 1.0f;
 		}
@@ -704,11 +876,11 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 
 	float dist_focal = semi_eix_major * excentricitat;
 
-	// Càlcul de la posició el·líptica del satèl·lit
+	// Cï¿½lcul de la posiciï¿½ elï¿½lï¿½ptica del satï¿½lï¿½lit
 	float anomalia = fmod((time /10)* velocitat_satelit, 360.0f);
 	float radians_anomalia = glm::radians(anomalia);
 
-	// Calcular la distància radial en funció de l'excentricitat
+	// Calcular la distï¿½ncia radial en funciï¿½ de l'excentricitat
 	float radi_orbital = (semi_eix_major * (1.0f - excentricitat * excentricitat)) /
 		(1.0f + excentricitat * cos(radians_anomalia));
 
@@ -716,26 +888,26 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	float posicio_x = radi_orbital * cos(radians_anomalia) - dist_focal;
 	float posicio_y = radi_orbital * sin(radians_anomalia);
 
-	// Dibuixar l'òrbita en el pla X-Y
+	// Dibuixar l'ï¿½rbita en el pla X-Y
 	dibuixar_orbita(sh_programID, MatriuVista, MatriuTG, semi_eix_major, excentricitat);
 
-	// Calcular l'angle d'orientació per a la nau
-	//float angle_direccio = glm::degrees(radians_anomalia) + 90.0f;  // Afegim 90 graus per ajustar la orientació
+	// Calcular l'angle d'orientaciï¿½ per a la nau
+	//float angle_direccio = glm::degrees(radians_anomalia) + 90.0f;  // Afegim 90 graus per ajustar la orientaciï¿½
 	std::cout << "Time =>" << time << std::endl;
 	std::cout << "velocitat_satelit =>" << velocitat_satelit << std::endl;
 	std::cout << "Posicio_x =>" << posicio_x << std::endl;
 	std::cout << "Posicio_y =>" << posicio_y << std::endl;
 	if (!(posicio_x * posicio_x + posicio_y * posicio_y < radi_planeta * radi_planeta)) {
-		// Dibuixar el satèl·lit amb rotació per apuntar cap a la direcció del moviment
+		// Dibuixar el satï¿½lï¿½lit amb rotaciï¿½ per apuntar cap a la direcciï¿½ del moviment
 		//ModelMatrix = glm::rotate(MatriuTG, radians(time * 15.0f), vec3(1.0f, 0.0f, 0.0f));
-		ModelMatrix = glm::translate(MatriuTG, vec3(posicio_x, posicio_y, 0.0f));  // Manté Z = 0
+		ModelMatrix = glm::translate(MatriuTG, vec3(posicio_x, posicio_y, 0.0f));  // Mantï¿½ Z = 0
 		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(180.0f), vec3(1.0f, 0.0f, 0.0f));  // Rotar al voltant de l'eix Z
 		ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 1.0f));  // Escalament
 
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-		draw_TriEBO_Object(GLUT_CYLINDER);  // Dibuixar el satèl·lit
+		draw_TriEBO_Object(GLUT_CYLINDER);  // Dibuixar el satï¿½lï¿½lit
 		std::cout << "FORA PLANETA" << std::endl;
 	}else{
 		std::cout << "DINS PLANETA" << std::endl;
@@ -821,7 +993,7 @@ void d_nau(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool 
 	NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 
-	// Configuración del material y dibujo del objeto
+	// Configuraciï¿½n del material y dibujo del objeto
 	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 	nau.getModel()->draw_TriVAO_OBJ(sh_programID);
 }
