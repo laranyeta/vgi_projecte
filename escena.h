@@ -9,6 +9,7 @@
 
 // Entorn VGI: OBJECTE OBJ. Include per la definició de l'objecte Obj_OBJ
 #include "objLoader.h"	
+#include "nau.h"
 
 /* ------------------------------------------------------------------------- */
 /*                            Funcions de les escenes                        */
@@ -22,14 +23,14 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 	COBJModel* objecteOBJ,
-	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat);
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau nau);
 
 /*MODIFIED*/
 void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5]);
 void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, bool propulsat);
 void donut_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time);
 void nau_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time);
-
+void d_nau(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], const Nau nau);
 
 
 /* MODIFIED*/

@@ -81,7 +81,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 			bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 			int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 			COBJModel* objecteOBJ,
-			glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time,bool propulsat)
+			glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time,bool propulsat, Nau nau)
 {
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
@@ -168,7 +168,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		glDisable(GL_BLEND);
 
 		////////////////////////////////////////////nau///////////////////////////////////////////////////////
-
+		/*
 		// Aplica la traslación
 		//Julia: falta moure la nau a fora del sol
 		ModelMatrix = glm::translate(inverse(MatriuVista), vec3(0.0f, -0.02f, -0.1f));
@@ -185,6 +185,9 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Configuración del material y dibujo del objeto
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		objecteOBJ->draw_TriVAO_OBJ(sh_programID);
+		*/
+		d_nau(sh_programID, MatriuVista, MatriuTG, sw_mat, nau);
+
 		break;
 
 		
@@ -751,4 +754,34 @@ void nau_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 
 	draw_TriEBO_Object(GLUT_TETRAHEDRON);
+}
+
+void d_nau(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], const Nau nau)
+{
+	// SPACESHIP
+	CColor col_object = { 0.0,1.0,1.0,1.0 };
+	//SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+
+	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+
+	
+	ModelMatrix = glm::translate(MatriuTG, nau.getO());
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.05f, 0.05f, 0.05)); // Ejemplo de escala
+
+
+	ModelMatrix = ModelMatrix * nau.getR();
+
+	ModelMatrix = glm::rotate(ModelMatrix, radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(90.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+
+	// Pasar la ModelMatrix actualizada al shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+
+	// Calcular y pasar la NormalMatrix al shader
+	NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+	// Configuración del material y dibujo del objeto
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+	nau.getModel()->draw_TriVAO_OBJ(sh_programID);
 }

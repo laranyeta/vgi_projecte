@@ -10,6 +10,8 @@
 #include "stdafx.h"
 // Entorn VGI: OBJECTE OBJ. Include per la definició de l'objecte Obj_OBJ
 #include "objLoader.h"	
+#include "camera.h"
+#include "nau.h"
 
 
 //-------------- Entorn VGI: Variables globals de main
@@ -201,10 +203,24 @@
 	static const double vdir_ini[3] = { -1, 0, 0 }, vright_ini[3] = { 0, 1, 0 }, vup_ini[3] = { 0, 0, 1 };
 	double v[3]; //direccio vertical
 	double u[3]; //direccio derecha
-	bool pressW, pressS, pressA, pressD, pressUP, pressDOWN, pressLEFT, pressRIGHT, pressQ, pressE;
+	bool pressW, pressS, pressA, pressD, pressZ, pressX, pressUP, pressDOWN, pressLEFT, pressRIGHT, pressQ, pressE, pressR;
+	bool mouseControl;
+
+
+	int moveN, moveV, moveU, moveCount;
+	int rotateN, rotateV, rotateU, rotateCount;
+
+	//bool moveControl[6]; int moveCount;
+	//bool angleControl[6]; int angleCount;
+	Nau nau;
+	Camera camProva;
+
 //-------------- Entorn VGI: Fi De Variables globals de main
 
 //-------------- Entorn VGI: Declaració funcions main
+	void Moviment_Nau();
+	void Moviment_Nau2();
+
 
 // Inicialització variables de control
 	void InitGL();	
@@ -247,7 +263,6 @@
 	void Teclat_ColorFons(int key, int action);
 	void Teclat_Navega(int key, int action);
 	void Teclat_Nau(int key, int action);
-	void Moviment_Nau();
 	void Teclat_Pan(int key, int action);
 	void Teclat_TransEscala(int key, int action);
 	void Teclat_TransRota(int key, int action);
@@ -257,7 +272,9 @@
 
 // Entorn VGI: Control de l'EVENT MOUSE
 	void OnMouseButton(GLFWwindow* window, int button, int action, int mods);
+	void RatoliPress_Nau();
 	void OnMouseMove(GLFWwindow* window, double xpos, double ypos);
+	void Ratoli_Nau();
 	void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset);
 
 // Entorn VGI: Control de l'EVENT TIMER

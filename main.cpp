@@ -522,7 +522,9 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 					eixos, grid, hgrid);
 				}
 		else if (camera == CAM_NAU) {
-			Moviment_Nau();
+			//Moviment_Nau();
+			Moviment_Nau2();
+
 			if (Vis_Polar == POLARZ) {
 				vpv[0] = 0.0;	vpv[1] = 0.0;	vpv[2] = 1.0;
 			}
@@ -532,11 +534,24 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 			else if (Vis_Polar == POLARX) {
 				vpv[0] = 1.0;	vpv[1] = 0.0;	vpv[2] = 0.0;
 			}
-			ViewMatrix = Vista_Navega(shader_programID, opvN, //false, 
-				n, v, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, true, pas,
+
+			CPunt3D Oprova;
+			
+			Oprova.x = nau.getCam().getO().x;
+			Oprova.y = nau.getCam().getO().y;
+			Oprova.z = nau.getCam().getO().z;
+
+			double vprova[3] = { nau.getCam().getV().x, nau.getCam().getV().y, nau.getCam().getV().z };
+			double nprova[3] = { nau.getCam().getP().x, nau.getCam().getP().y, nau.getCam().getP().z };
+
+			ViewMatrix = Vista_Navega(shader_programID, Oprova, //false, 
+				nprova, vprova, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, true, pas,
 				front_faces, oculta, test_vis, back_line,
 				ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
 				eixos, grid, hgrid);
+
+			nau.setModel(ObOBJ);
+			
 		}
 		else if (camera == CAM_GEODE) {
 				ViewMatrix = Vista_Geode(shader_programID, OPV_G, Vis_Polar, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, mida, pas,
@@ -603,8 +618,10 @@ void dibuixa_Escena(float time) {
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet,
 		ObOBJ,				// Classe de l'objecte OBJ que conté els VAO's
-		ViewMatrix, GTMatrix, time, PROPULSIO_NAU);
+		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau);
 }
+
+
 
 // Barra_Estat: Actualitza la barra d'estat (Status Bar) de l'aplicació amb els
 //      valors R,A,B,PVx,PVy,PVz en Visualització Interactiva.
@@ -2470,6 +2487,7 @@ void OnKeyDown(GLFWwindow* window, int key, int scancode, int action, int mods)
 		else if (!sw_color) Teclat_ColorFons(key, action);
 		else Teclat_ColorObjecte(key, action);
 	}
+	
 // Crida a OnPaint() per redibuixar l'escena
 	//OnPaint(window);
 
@@ -3421,56 +3439,82 @@ void Teclat_Navega(int key, int action)
 // MAV ----------------
 void Teclat_Nau(int key, int action)
 {
-	if (action == GLFW_PRESS)
+	bool press, release, status;
+	press = status = (action == GLFW_PRESS);
+	release = (action == GLFW_RELEASE);
+
+
+	if (press && key == GLFW_KEY_R)
 	{
+		Nau newNau;
+		newNau.setModel(nau.getModel());
+		nau = newNau;
+	}
+
+	if (press || release)
+	{
+		
 		switch (key)
 		{
 			// Tecla cursor amunt
 		case GLFW_KEY_W:
-			pressW = true;
+			pressW = status;
 			break;
 
 			// Tecla cursor avall
 		case GLFW_KEY_S:
-			pressS = true;
+			pressS = status;
 			break;
 			// Tecla cursor amunt
 
 		case GLFW_KEY_A:
-			pressA = true;
+			pressA = status;
 			break;
 
 			// Tecla cursor avall
 		case GLFW_KEY_D:
-			pressD = true;
+			pressD = status;
+			break;
+
+		case GLFW_KEY_Z:
+			pressZ = status;
+			break;
+
+			// Tecla cursor avall
+		case GLFW_KEY_X:
+			pressX = status;
 			break;
 
 			// Tecla cursor esquerra
 		case GLFW_KEY_LEFT:
-			pressLEFT = true;
+			pressLEFT = status;
 			break;
 
 			// Tecla cursor dret
 		case GLFW_KEY_RIGHT:
-			pressRIGHT = true;
+			pressRIGHT = status;
 			break;
 
 		case GLFW_KEY_UP:
-			pressUP = true;
+			pressUP = status;
 			break;
 
 			// Tecla cursor dret
 		case GLFW_KEY_DOWN:
-			pressDOWN = true;
+			pressDOWN = status;
 			break;
 
 		case GLFW_KEY_Q:
-			pressQ = true;
+			pressQ = status;
 			break;
 
 			// Tecla cursor dret
 		case GLFW_KEY_E:
-			pressE = true;
+			pressE = status;
+			break;
+
+		case GLFW_KEY_R:
+
 			break;
 
 		default:
@@ -3480,213 +3524,150 @@ void Teclat_Nau(int key, int action)
 
 }
 
-void rotate_vector(double vec1[3], double axis[3], double angle) {
-	double cos_theta = cos(angle);
-	double sin_theta = sin(angle);
 
-	double vec2[3] = { 0,0,0 };
-	vec2[0] = axis[1] * vec1[2] - axis[2] * vec1[1];
-	vec2[1] = axis[2] * vec1[0] - axis[0] * vec1[2];
-	vec2[2] = axis[0] * vec1[1] - axis[1] * vec1[0];
-	double modul2 = sqrt(vec2[0] * vec2[0] + vec2[1] * vec2[1] + vec2[2] * vec2[2]);
-	vec2[0] /= modul2;
-	vec2[1] /= modul2;
-	vec2[2] /= modul2;
+const float RAD_RATOLI = 10.0;
+void Click_Nau(int button, int action)
+{
+	if (action == GLFW_PRESS)
+	{
+		switch (button)
+		{
+		case GLFW_MOUSE_BUTTON_LEFT:
+			if (mouseControl)
+				pressW = true;
+			break;
 
-	//Producto escalar del vector con el eje
-	double dot_product1 = axis[0] * vec1[0] + axis[1] * vec1[1] + axis[2] * vec1[2];
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			mouseControl = !mouseControl;
+			break;
 
-	// Copiem vec1
-	//double cvec1[3] = {vec1[0], vec1[1], vec1[2]};
-
-	// Aplicar la fórmula de Rodríguez
-	vec1[0] = vec1[0] * cos_theta + vec2[0] * sin_theta + axis[0] * dot_product1 * (1 - cos_theta);
-	vec1[1] = vec1[1] * cos_theta + vec2[1] * sin_theta + axis[1] * dot_product1 * (1 - cos_theta);
-	vec1[2] = vec1[2] * cos_theta + vec2[2] * sin_theta + axis[2] * dot_product1 * (1 - cos_theta);
+		default:
+			break;
+		}
+	}
+	else
+		if (action == GLFW_RELEASE && mouseControl && button == GLFW_MOUSE_BUTTON_LEFT)
+			pressW = false;
 }
 
-void normal_vector(double* vector)
+void Ratoli_Nau(double xpos, double ypos)
 {
-	double module = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-	vector[0] /= module;
-	vector[1] /= module;
-	vector[2] /= module;
+	if (mouseControl)
+	{
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		w = mode->width;	h = mode->height;
+		glfwSetCursorPos(window, w/2, h/2);
+
+		double xmove = (xpos - w/2)*w, ymove = (ypos - h/2)*h;
+		if (abs(xmove/ymove) > 0.5 || abs(ymove/xmove) > 0.5)
+		{
+			pressUP		= (ymove < 0);
+			pressDOWN	= (ymove > 0);
+			pressLEFT	= (xmove < 0);
+			pressRIGHT	= (xmove > 0);
+		}
+		else
+		{
+			if (abs(ymove) > abs(xmove))
+			{
+				pressUP = (ymove < 0);
+				pressDOWN = (ymove > 0);
+			}
+			else
+			{
+				pressLEFT = (xmove < 0);
+				pressRIGHT = (xmove > 0);
+			}
+		}
+
+	}
 }
 
 void Moviment_Nau()
 {
-	double vdir[3] = { 0, 0, 0 };
-	double vup[3] = { 0, 0, 0 };
-	double vright[3] = { 0, 0, 0 };
-	double modulN = 0;
-	double modulV = 0;
-	double modulU = 0;
-
-	// Entorn VGI: Controls de moviment de navegació
-
-	//vector normalitzat n: vdir
-	vdir[0] = n[0] - opvN.x;
-	vdir[1] = n[1] - opvN.y;
-	vdir[2] = n[2] - opvN.z;
-	modulN = sqrt(vdir[0] * vdir[0] + vdir[1] * vdir[1] + vdir[2] * vdir[2]);
-	vdir[0] /= modulN;
-	vdir[1] /= modulN;
-	vdir[2] /= modulN;
-
-	// vector normalitzat v: vup (v ha d'estar noormalitzat)
-	vup[0] = v[0];
-	vup[1] = v[1];
-	vup[2] = v[2];
-	modulV = sqrt(vup[0] * vup[0] + vup[1] * vup[1] + vup[2] * vup[2]);
-	vup[0] /= modulV;
-	vup[1] /= modulV;
-	vup[2] /= modulV;
-
-	// vector normalitzat u: vright
-	vright[0] = u[0];
-	vright[1] = u[1];
-	vright[2] = u[2];
-	modulU = sqrt(vright[0] * vright[0] + vright[1] * vright[1] + vright[2] * vright[2]);
-	vright[0] /= modulU;
-	vright[1] /= modulU;
-	vright[2] /= modulU;
-
 	double fact_nau = 10.0 * G_DELTA;
 	double fact_ang_nau = 45.0 * G_DELTA;
+	float zoom = 10.0f * G_DELTA;
 
+	if (pressW)
+		nau.move(nau.getN() * (float)fact_nau);
 
-	if (Vis_Polar == POLARZ) {}
-	if (Vis_Polar == POLARY) { return; }
-	if (Vis_Polar == POLARX) { return; }
+	if (pressS)
+		nau.move(nau.getN() * -(float)fact_nau);
 
-	glfwGetKey(window, GLFW_KEY_W);
-	if (pressW && glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		opvN.x += fact_nau * vdir[0];
-		opvN.y += fact_nau * vdir[1];
-		opvN.z += fact_nau * vdir[2];
-		n[0] += fact_nau * vdir[0];
-		n[1] += fact_nau * vdir[1];
-		n[2] += fact_nau * vdir[2];
-	}
-	else
-		pressW = false;
+	if (pressA)
+		nau.move(nau.getU() * -(float)fact_nau);
 
-	glfwGetKey(window, GLFW_KEY_S);
-	if (pressS && glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		opvN.x -= fact_nau * vdir[0];
-		opvN.y -= fact_nau * vdir[1];
-		opvN.z -= fact_nau * vdir[2];
-		n[0] -= fact_nau * vdir[0];
-		n[1] -= fact_nau * vdir[1];
-		n[2] -= fact_nau * vdir[2];
-	}
-	else
-		pressS = false;
+	if (pressD)
+		nau.move(nau.getU() * (float)fact_nau);
 
-	glfwGetKey(window, GLFW_KEY_A);
-	if (pressA && glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		opvN.x += fact_nau * vright[0];
-		opvN.y += fact_nau * vright[1];
-		opvN.z += fact_nau * vright[2];
-		n[0] += fact_nau * vright[0];
-		n[1] += fact_nau * vright[1];
-		n[2] += fact_nau * vright[2];
-	}
-	else
-		pressA = false;
+	if (pressZ)
+		nau.move(nau.getV() * (float)fact_nau);
 
-	glfwGetKey(window, GLFW_KEY_D);
-	if (pressD && glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		opvN.x -= fact_nau * vright[0];
-		opvN.y -= fact_nau * vright[1];
-		opvN.z -= fact_nau * vright[2];
-		n[0] -= fact_nau * vright[0];
-		n[1] -= fact_nau * vright[1];
-		n[2] -= fact_nau * vright[2];
-	}
-	else
-		pressD = false;
+	if (pressX)
+		nau.move(nau.getV() * -(float)fact_nau);
 
-	glfwGetKey(window, GLFW_KEY_LEFT);
-	if (pressLEFT && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-	{
-		angleA -= fact_ang_nau;
-		if (angleA < 0) angleA += 360;
-		rotate_vector(vdir, vup, fact_ang_nau * PI / 180);
-		rotate_vector(vright, vup, fact_ang_nau * PI / 180);
-	}
-	else
-		pressLEFT = false;
+	if (pressLEFT)
+		nau.rotV((float)fact_ang_nau);
 
-	glfwGetKey(window, GLFW_KEY_RIGHT);
-	if (pressRIGHT && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-	{
-		angleA += fact_ang_nau;
-		if (angleA >= 360) angleA -= 360;
-		rotate_vector(vdir, vup, -fact_ang_nau * PI / 180);
-		rotate_vector(vright, vup, -fact_ang_nau * PI / 180);
-	}
-	else
-		pressRIGHT = false;
+	if (pressRIGHT)
+		nau.rotV(-(float)fact_ang_nau);
 
-	glfwGetKey(window, GLFW_KEY_UP);
-	if (pressUP && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-	{
+	if (pressUP)
+		nau.rotU((float)fact_ang_nau);
 
-		angleB += fact_ang_nau;
-		if (angleB >= 360) angleB -= 360;
+	if (pressDOWN)
+		nau.rotU(-(float)fact_ang_nau);
 
-		rotate_vector(vdir, vright, -fact_ang_nau * PI / 180);
-		rotate_vector(vup, vright, -fact_ang_nau * PI / 180);
-	}
-	else
-		pressUP = false;
+	if (pressQ)
+		nau.rotN(-(float)fact_ang_nau);
 
-	glfwGetKey(window, GLFW_KEY_DOWN);
-	if (pressDOWN && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-	{
-		angleB -= fact_ang_nau;
-		if (angleB < 0) angleB += 360;
+	if (pressE)
+		nau.rotN((float)fact_ang_nau);
+}
+void Moviment_Nau2()
+{
+	double fact_nau = 10.0 * G_DELTA;
+	double fact_ang_nau = 45.0 * G_DELTA;
+	float zoom = 10.0f * G_DELTA;
 
-		rotate_vector(vdir, vright, +fact_ang_nau * PI / 180);
-		rotate_vector(vup, vright, +fact_ang_nau * PI / 180);
-	}
-	else
-		pressDOWN = false;
+	nau.moveS(G_DELTA);
 
-	glfwGetKey(window, GLFW_KEY_Q);
-	if (pressQ && glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-	{
-		rotate_vector(vright, vdir, -fact_ang_nau * PI / 180);
-		rotate_vector(vup, vdir, -fact_ang_nau * PI / 180);
-	}
-	else
-		pressQ = false;
+	if (pressW)
+		nau.increaseSpeed(fact_nau/4);
 
-	glfwGetKey(window, GLFW_KEY_E);
-	if (pressE && glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-	{
-		rotate_vector(vright, vdir, fact_ang_nau * PI / 180);
-		rotate_vector(vup, vdir, fact_ang_nau * PI / 180);
-	}
-	else
-		pressE = false;
+	if (pressS)
+		nau.increaseSpeed(-fact_nau/4);
 
-	n[0] = vdir[0] + opvN.x;
-	n[1] = vdir[1] + opvN.y;
-	n[2] = vdir[2] + opvN.z;
+	if (pressA)
+		nau.move(nau.getU() * -(float)fact_nau);
 
-	v[0] = vup[0];
-	v[1] = vup[1];
-	v[2] = vup[2];
+	if (pressD)
+		nau.move(nau.getU() * (float)fact_nau);
 
-	u[0] = vright[0];
-	u[1] = vright[1];
-	u[2] = vright[2];
+	if (pressZ)
+		nau.move(nau.getV() * (float)fact_nau);
+
+	if (pressX)
+		nau.move(nau.getV() * -(float)fact_nau);
+
+	if (pressLEFT)
+		nau.rotV((float)fact_ang_nau);
+
+	if (pressRIGHT)
+		nau.rotV(-(float)fact_ang_nau);
+
+	if (pressUP)
+		nau.rotU((float)fact_ang_nau);
+
+	if (pressDOWN)
+		nau.rotU(-(float)fact_ang_nau);
+
+	if (pressQ)
+		nau.rotN(-(float)fact_ang_nau);
+
+	if (pressE)
+		nau.rotN((float)fact_ang_nau);
 }
 // END MAV ----------------
 
@@ -4181,6 +4162,7 @@ void OnMouseButton(GLFWwindow* window, int button, int action, int mods)
 // (2) ONLY forward mouse data to your underlying app/game.
 	if (!io.WantCaptureMouse) { //<Tractament mouse de l'aplicació>}
 		// OnLButtonDown
+		Click_Nau(button, action);
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		{
 			// Entorn VGI: Detectem en quina posició s'ha apretat el botó esquerra del
@@ -4239,6 +4221,7 @@ void OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 	CSize gir = { 0,0 }, girn = { 0,0 }, girT = { 0,0 }, zoomincr = { 0,0 };
 
 	// TODO: Add your message handler code here and/or call default
+	Ratoli_Nau(xpos, ypos);
 	if (m_ButoEAvall && mobil && projeccio != CAP)
 	{
 // Entorn VGI: Determinació dels angles (en graus) segons l'increment
@@ -4710,7 +4693,7 @@ int main(void)
 	//window = glfwCreateWindow(mode->width, mode->height, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
 	
 	//Pantalla Completa
-	window = glfwCreateWindow(1920,1080, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", primary, NULL);
+	window = glfwCreateWindow(1920,1080, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
 	
 	if (!window)
     {	fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 4.3 compatible. Try the 2.1 version of the tutorials.\n");
@@ -4817,7 +4800,7 @@ int main(void)
 		previous = now;
 
 // Entorn VGI. Timer: for each timer do this
-		G_TIME = time -= delta;
+		G_TIME = time += delta;
 		if ((time <= 0.0) && (satelit || anima)) OnTimer();
 
 // Poll for and process events
