@@ -40,10 +40,6 @@ ImVec4 colorVerd = ImVec4(0.0f, 0.749f, 0.388f, 1.0f);
 ImVec4 colorVermell = ImVec4(1.0f, 0.192f, 0.192f, 1.0f);
 ImVec4 colorTaronja = ImVec4(1.0f, 0.569f, 0.302f, 1.0f);
 
-float fuel = 0.75f;  // Exemples: 75% de combustible
-float life = 0.49;  // Exemples: 50% de vida
-float potencia = 0.50f;  // Exemples: 50% de vida
-
 void InitGL()
 {
 // TODO: agregar aquí el código de construcción
@@ -1422,12 +1418,16 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	ImVec4 colorFuel = colorVerd;
 	ImVec4 colorLife = colorVerd;
 
+	float fuel = nau.getFuel();
+
 	if (fuel < 0.50f && fuel > 0.25f) {
 		colorFuel = colorTaronja;
 	}
 	else if (fuel < 0.25f) {
 		colorFuel = colorVermell;
 	}
+
+	float life = nau.getLife();
 
 	if (life < 0.50f && life > 0.25f) {
 		colorLife = colorTaronja;
@@ -1460,7 +1460,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(50, 50, 50, 255));
 
 	// Dibuixem la part de la barra de progrés
-	float filledHeight = size.y * potencia; // La quantitat de la barra de progrés que està "omplerta"
+	float filledHeight = size.y * nau.getPotencia(); // La quantitat de la barra de progrés que està "omplerta"
 	ImGui::GetWindowDrawList()->AddRectFilled(
 		ImVec2(pos.x, pos.y + size.y - filledHeight),
 		ImVec2(pos.x + size.x, pos.y + size.y),
@@ -4091,13 +4091,18 @@ void Moviment_Nau()
 	double fact_nau = 10.0 * G_DELTA;
 	double fact_ang_nau = 45.0 * G_DELTA;
 	float zoom = 10.0f * G_DELTA;
+	float fuel = nau.getFuel();
 
-	if (pressW)
+	if (pressW && fuel > 0) {
 		nau.move(nau.getN() * (float)fact_nau);
-
-	if (pressS)
+		nau.incPotencia();
+		nau.decFuel();
+	}
+	if (pressS && fuel > 0) {
 		nau.move(nau.getN() * -(float)fact_nau);
-
+		nau.incPotencia();
+		nau.decFuel();
+	}
 	if (pressA)
 		nau.move(nau.getU() * -(float)fact_nau);
 
@@ -4164,7 +4169,7 @@ void Moviment_Nau()
 	vright[1] /= modulU;
 	vright[2] /= modulU;
 
-	fact_nau = 10.0 * potencia * G_DELTA;
+	fact_nau = 10.0 * nau.getPotencia() * G_DELTA;
 	fact_ang_nau = 180.0 * G_DELTA;
 
 	//GAMEPAD
@@ -4177,18 +4182,12 @@ void Moviment_Nau()
 
 		int axesCount;
 		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-
 		// Moviment endavant/enrere (eix vertical joystick esquerre o botó 'A')
 		if (buttons[0] == GLFW_PRESS && fuel > 0) // Llindar per evitar "drift"
 		{
 			nau.move(nau.getN() * (float)fact_nau);
-			if (potencia < 1.0f) {
-				potencia += 0.01f;
-			}
-			else {
-				potencia = 1.0f;
-			}
-			fuel -= 0.00001f;
+			nau.incPotencia();
+			nau.decFuel();
 		}
 
 
@@ -4197,13 +4196,8 @@ void Moviment_Nau()
 		if (buttons[1] == GLFW_PRESS && fuel > 0)
 		{
 			nau.move(nau.getN() * (float)-fact_nau);
-			if (potencia < 1.0f) {
-				potencia += 0.01f;
-			}
-			else {
-				potencia = 1.0f;
-			}
-			fuel -= 0.00001f;
+			nau.incPotencia();
+			nau.decFuel();
 		}
 
 
@@ -5497,13 +5491,8 @@ int main(void)
 		G_TIME = time += delta;
 		if ((time <= 0.0) && (satelit || anima)) OnTimer();
 
-		//velocitat
-		if (potencia > 0.0f) {
-			potencia -= 0.005f;
-		}
-		else {
-			potencia = 0.0f;
-		}
+//Disminució de la Potencia
+		nau.decPotencia();
 
 // Poll for and process events
 		glfwPollEvents();

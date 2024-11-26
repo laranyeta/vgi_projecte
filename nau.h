@@ -34,6 +34,9 @@ private:
 	Camera m_cam; //camera
 	COBJModel* m_model;
 	// combustible, particulas, efectos, etc.
+	float m_fuel;  
+	float m_life; 
+	float m_potencia;
 
 public:
 	// BASIQUES
@@ -56,6 +59,10 @@ public:
 
 		m_cam = Camera();
 		m_model = nullptr;
+
+		m_fuel = 1.00f;
+		m_life = 1.00;
+		m_potencia = 0.00f;
 	}
 
 	Nau operator=(Nau n) {
@@ -139,6 +146,37 @@ public:
 	//Extra
 	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
 	void moveS(double delta) { move((float)(m_s * delta)*m_n);  }
+
+	void incPotencia(){
+		if (m_potencia < 1.0f) {
+			m_potencia += 0.01f;
+		}
+		else {
+			m_potencia = 1.0f;
+		}
+	}
+
+	void decPotencia() {
+		if (m_potencia > 0.0f) {
+			m_potencia -= 0.005f;
+		}
+		else {
+			m_potencia = 0.0f;
+		}
+	}
+
+	void incFuel(float temp) {
+		m_fuel += temp;
+	}
+
+	void decFuel() {
+		m_fuel -= 0.00001f;
+	}
+
+	float getPotencia() { return m_potencia; }
+	float getFuel() { return m_fuel; }
+	float getLife() { return m_life; }
+
 };
 
 #endif
