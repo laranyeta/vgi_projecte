@@ -573,7 +573,7 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	updatePlanetes(deltaTime);
 	for (auto& planeta : PLANETES)
 	{
-		drawOrbitPath(planeta);
+		//drawOrbitPath(planeta);
 		// Posició inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 

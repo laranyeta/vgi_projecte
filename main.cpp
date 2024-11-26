@@ -1313,21 +1313,36 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	//std::cout << " x :" << opvN.x << "  y :" << opvN.y << "  z :" << opvN.z << std::endl;
 	//bool isNearAnyPlanet = false;
 	float llindar = DISTANCIA_DEFAULT_TERRA * 0.4;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
+	float llindarAlertaPerill = DISTANCIA_DEFAULT_TERRA * 0.1;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
 	float minim = 99999999999;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
 	int planetaAprop = -1;
+	int planetaMoltAprop = -1;
 
 	// Iterar per cada planeta
 	for (int i = 0; i < PLANETES.size(); ++i) {
-		float dist = distanciaEuclidiana(opvN, PLANETES[i].getPosition());
-		//std::cout << "Distancia al planeta " << PLANETES[i].getName() << ": " << dist << std::endl;
+		//std::cout << std::endl;
+
+		float distPrevia = distanciaEuclidiana(opvN, PLANETES[i].getPosition());
+		//std::cout << "Distancia al planeta " << PLANETES[i].getName() << ": " << distPrevia << std::endl;
+		//std::cout << "Radi planeta " << PLANETES[i].getName() << ": " << PLANETES[i].getRadi() << std::endl;
+
+		float dist = distPrevia - PLANETES[i].getRadi();
+		//std::cout << "Distancia Definitiva " << PLANETES[i].getName() << ": " << dist << std::endl;
 
 		// Comprovar si el punt està a prop del planeta
 		if (dist < llindar && minim > dist) {
 			minim = dist;
 			planetaAprop = i;
+			// Comprovar si el punt està MOLT a prop del planeta
+			if (dist < llindarAlertaPerill) {
+				planetaMoltAprop = i;
+				//isNearAnyPlanet = true;
+			}
 			//std::cout << "Estàs a prop del planeta " << PLANETES[i].getName() << "!" << std::endl;
+			//std::cout << std::endl;
 			//isNearAnyPlanet = true;
 		}
+
 	}
 
 	/*if (!isNearAnyPlanet) {
@@ -1370,7 +1385,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PopStyleColor();
 	ImGui::PopStyleVar();
 
-	if (planetaAprop >= 0) {
+	if (planetaMoltAprop >= 0) {
 		Alerta(screenSize, &colorVermell, "Alerta !!! Orbita Baixa Perill");
 	}
 
@@ -1378,7 +1393,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	// Dades de progrés
 
 	ImVec2 windowSize(300, 200);
-	ImVec2 windowPos = ImVec2(10, screenSize->y - windowSize.y);
+	ImVec2 windowPos = ImVec2(20, screenSize->y - windowSize.y);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(windowSize);
 
@@ -1403,11 +1418,11 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	else if (life < 0.25f) {
 		colorLife = colorVermell;
 	}
-
 	CircularProgressBar("Combustible", fuel, ImVec2(100, 100), colorFuel);
 	ImGui::SameLine();
 	CircularProgressBar("Danys", life, ImVec2(100, 100), colorLife);
 
+	//mGui::PopStyleVar();
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor();
 	ImGui::End();
@@ -4039,7 +4054,7 @@ void Moviment_Nau()
 	vright[2] /= modulU;
 
 	double fact_nau = 10.0 * potencia * G_DELTA;
-	double fact_ang_nau = 45.0 * G_DELTA;
+	double fact_ang_nau = 180.0 * G_DELTA;
 
 	//GAMEPAD
 	// Comprovem si el gamepad està connectat
@@ -4079,7 +4094,7 @@ void Moviment_Nau()
 			else {
 				potencia = 1.0f;
 			}
-			fuel -= 0.0001f;
+			fuel -= 0.00001f;
 		}
 		// Moviment esquerra/dreta (eix horitzontal joystick esquerre o botó 'B')
 		if (buttons[1] == GLFW_PRESS && fuel > 0)
@@ -4096,7 +4111,7 @@ void Moviment_Nau()
 			else {
 				potencia = 1.0f;
 			}
-			fuel -= 0.0001f;
+			fuel -= 0.00001f;
 		}
 		// Comprovació per rotacions (joystick dret)
 		float rotateX = axes[0]; // Eix horitzontal dret
@@ -4180,7 +4195,7 @@ void Moviment_Nau()
 		else {
 			potencia = 1.0f;
 		}
-		fuel -= 0.0001f;
+		fuel -= 0.00001f;
 
 	}
 	else
@@ -4201,7 +4216,7 @@ void Moviment_Nau()
 		else {
 			potencia = 1.0f;
 		}
-		fuel -= 0.0001f;
+		fuel -= 0.00001f;
 	}
 	else
 		pressS = false;
