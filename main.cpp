@@ -11,6 +11,7 @@
 #include "ImGui\imgui_impl_glfw.h"
 #include "ImGui\imgui_impl_opengl3.h"
 #include "ImGui\nfd.h" // Native File Dialog
+//#include "CircularProgressBar.h"
 
 #include "stdafx.h"
 #include "shader.h"
@@ -19,9 +20,30 @@
 #include "main.h"
 #include <ctime>
 #include <iostream>
-
+#include <thread> // Per sleep_for
+#include <chrono> // Per milliseconds
+#include <ImGui/imgui_internal.h>
 const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
 std::vector<Planeta> PLANETES;
+
+int PlanetOrigen = -1;
+int PlanetDesti = -1;
+//static int selectedIndex = 0;  // Índex del botó seleccionat
+
+GLuint mars;
+GLuint soyut;
+GLuint iss;
+GLuint cometa;
+GLuint fons;
+
+ImVec4 colorVerd = ImVec4(0.0f, 0.749f, 0.388f, 1.0f);
+ImVec4 colorVermell = ImVec4(1.0f, 0.192f, 0.192f, 1.0f);
+ImVec4 colorTaronja = ImVec4(1.0f, 0.569f, 0.302f, 1.0f);
+
+float fuel = 0.75f;  // Exemples: 75% de combustible
+float life = 0.49;  // Exemples: 50% de vida
+float potencia = 0.50f;  // Exemples: 50% de vida
+
 void InitGL()
 {
 // TODO: agregar aquí el código de construcción
@@ -48,7 +70,7 @@ void InitGL()
 	OPV_G.R = 15.0;		OPV_G.alfa = 0.0;	OPV_G.beta = 0.0;	// Origen PV en esfèriques per a Vista_Geode
 
 // Entorn VGI: Variables de control per Menú Vista: Pantalla Completa, Pan, dibuixar eixos i grids 
-	fullscreen = false;
+	fullscreen = true;
 	pan = false;
 	eixos = false;	eixos_programID = 0;  eixos_Id = 0;
 	sw_grid = false;
@@ -522,8 +544,8 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 					eixos, grid, hgrid);
 				}
 		else if (camera == CAM_NAU) {
-			//Moviment_Nau();
-			Moviment_Nau2();
+			Moviment_Nau();
+			//Moviment_Nau2();
 
 			if (Vis_Polar == POLARZ) {
 				vpv[0] = 0.0;	vpv[1] = 0.0;	vpv[2] = 1.0;
@@ -822,49 +844,109 @@ void Barra_Estat()
 		}
 }
 
+void PosicionsInicialsSistemaSolar()
+{
+	double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
+
+	// 1. Inicialitza dades bàsiques (òrbites, eixos, etc.)
+	for (int i = 1; i < PLANETES.size(); i++)
+	{
+		PLANETES[i].setSemieixMajor(SEMIEIXOS_MAJORS[i - 1]);
+		PLANETES[i].setExcentricitat(EXCENTRICITATS[i - 1]);
+		PLANETES[i].setLongitudNodeAscendent(LONG_NODES_ASC[i - 1] * DEG_A_RAD);
+		PLANETES[i].setInclinacio(INCLINACIONS[i - 1] * DEG_A_RAD);
+		PLANETES[i].setPeriapsis(PERIAPSIS[i - 1] * DEG_A_RAD);
+
+		double a = PLANETES[i].getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA;
+		double e = PLANETES[i].getExcentricitat();
+		double inclinacio = PLANETES[i].getInclinacio();
+		double longNodeAsc = PLANETES[i].getLongitudNodeAscendent();
+		double periapsis = PLANETES[i].getPeriapsis();
+
+		double nu = 0.0; // True anomaly inicial
+		double r = a * (1 - e * e) / (1 + e * cos(nu));
+		glm::dvec3 posicio_plaOrbital(r * cos(nu), r * sin(nu), 0.0);
+
+		PLANETES[i].setPosition(posicio_plaOrbital);
+		PLANETES[i].setRadi(RADIS[i] * (1.0 / 1.496e11) * 2.1);
+	}
+}
+
+
 void draw_Menu_ImGui()
 {
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
+
 	ImGui::NewFrame();
+	ImGuiIO& io = ImGui::GetIO();
+	ImVec2* screenSize = &io.DisplaySize;
+	//io.KeyMap[ImGuiKey_Escape] = -1; // Desactiva la tecla ESC
 
-	//ImGuiIO& io = ImGui::GetIO();
-	//ImFont* font = io.Fonts->AddFontFromFileTTF("textures/Silkscreen-Regular.ttf", 28.0f); // Canvia 18.0f a la mida que desitgis
-	//io.FontDefault = font;
 
-	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+	if (show_fons) {
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoInputs;
+
+		//GLuint my_image_texture = loadIMA_SOIL("textures/menu/space2.jpg");
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+		// Estableix el color de fons d'ImGui a negre
+		ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons de la finestra
+		ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del frame
+		ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del child
+		ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons dels popups
+
+		//Imatges de la pantalla inicial
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(*screenSize);
+		ImGui::Begin("Imatge", &show_fons, window_flags);
+		ImGui::Image((ImTextureID)(intptr_t)fons, *screenSize); // Adjust size as needed
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+
+	if (show_pantalla_carrega) {
+		MostrarPantallaCarrega(screenSize);
+	}
+
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
-	// 2. Show another simple window.
-	/*if (show_another_window)
-	{
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
-		ImGui::End();
-	}*/
-
-	// 1. Show the EntornVGI window. Finestra amb totes les opcions de l'aplicació.
-	/*if (show_EntornVGI_window)
-		ShowEntornVGIWindow(&show_EntornVGI_window); //ShowEntornVGIWindow(&show_EntornVGI_window);
-	*/
 	if (show_user_windows) {
-		MostrarInterficieUsuari();
+		MostrarPantallaInicial(screenSize);
 	}
-
-	// 3. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+	
 	if(show_debug_windows){
-		MostrarMenuDebug();
+		MostrarMenuDebug(screenSize);
+	}
+	
+	if (show_menu_game) {
+		MostrarPantallaMenu(screenSize);
 	}
 
-	// Rendering ImGui Menus
+	if (show_game_settings) {
+		MostrarPantallaConfiguracio(screenSize);
+	}
+
+	if (show_selector_planeta_origen && !show_selector_planeta_desti) {
+		MostrarPantallaSelector(screenSize, "Selecciona Planeta on començar");
+	}
+
+	if (show_selector_planeta_desti && !show_selector_planeta_origen) {
+		MostrarPantallaSelector(screenSize, "Selecciona Destinació");
+	}
+
+	if (show_game_window) {
+		MostrarPantallaJoc(screenSize);
+	}
+
+
 	ImGui::Render();
-	//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-void MostrarInterficieUsuari() {
+
+void MostrarPantallaInicial(ImVec2* screenSize) {
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
@@ -880,54 +962,73 @@ void MostrarInterficieUsuari() {
 	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
 	*/
 
+	
+	ImGui::SetNextWindowPos(ImVec2(-250, screenSize->y - 450));
+	ImGui::SetNextWindowSize(ImVec2(700, 700));
+	ImGui::Begin("Imatge MARS", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::Image((ImTextureID)(intptr_t)mars, ImVec2(700, 700)); // Adjust size as needed
+	ImGui::End();
 
-	//GLuint backgroundTextureID = loadIMA_SOIL("textures/fons.png");
-	/*ImGui::Text("pointer = %x", my_image_texture);
-	ImGui::Text("size = %d x %d", my_image_width, my_image_height);
-	ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));*/
-	//ImGui::Image((void*)(intptr_t)backgroundTextureID, screenSize);
-	// Estableix el color de fons d'ImGui a negre
-	ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons de la finestra
-	ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del frame
-	ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons del child
-	ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); // Fons dels popups
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.075, screenSize->y * 0.4));
+	ImGui::SetNextWindowSize(ImVec2(150, 100));
+	ImGui::Begin("Imatge iss", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::Image((ImTextureID)(intptr_t)iss, ImVec2(110, 100)); // Adjust size as needed
+	ImGui::End();
 
-	ImVec2 screenSize = ImGui::GetIO().DisplaySize;
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::SetNextWindowSize(screenSize);
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5, screenSize->y * 0.5));
+	ImGui::SetNextWindowSize(ImVec2(110, 110));
+	ImGui::Begin("Imatge soyut", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::Image((ImTextureID)(intptr_t)soyut, ImVec2(60, 60)); // Adjust size as needed
+	ImGui::End();
 
-	ImGui::Begin("Opcions", &show_user_windows, window_flags + ImGuiWindowFlags_NoBringToFrontOnFocus);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.85, screenSize->y * 0.4));
+	ImGui::SetNextWindowSize(ImVec2(270, 220));
+	ImGui::Begin("Imatge cometa", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::Image((ImTextureID)(intptr_t)cometa, ImVec2(250, 200)); // Adjust size as needed
+	ImGui::End();
+	
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5-325, screenSize->y * 0.2));
+	ImGui::SetNextWindowSize(ImVec2(700, 150));
+	ImGui::Begin("Titol", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(silkscreentitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Solar Sprint");
+	ImGui::PopStyleColor(); 
+	ImGui::PopFont();
+	ImGui::End();
 
+
+	ImGui::SetNextWindowPos(ImVec2(10, 10));
+	ImGui::SetNextWindowSize(ImVec2(250, 100));
+
+	ImGui::Begin("Opcions", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 	// Configura els colors i l'estil
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
 
 	// Arrodoniment
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
-
-
-
-	if (ImGui::Button("Debug", ImVec2(50, 20))) {
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f);
+	if (ImGui::Button("Developer", ImVec2(200, 35))) {
 		show_debug_windows = true;
 		show_user_windows = false;
-		show_user_windows_button_inici = false;
+		show_fons = false;
 	}
-
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor(3);
 	ImGui::End();
 
 	// Calcula les dimensions de la finestra principal
-	ImVec2 windowSize(200, 100); // Canvia aquestes dimensions segons el tamany de la finestra desitjada
+	ImVec2 windowSize(400, 100);
 	// Calcula la posició per centrar la finestra a la pantalla
 	ImVec2 windowPos = ImVec2(
-		(screenSize.x - windowSize.x) * 0.5f,
-		(screenSize.y - windowSize.y) - 50
+		(screenSize->x - windowSize.x) * 0.5f,
+		(screenSize->y - windowSize.y) - 50
 	);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(440, 150));
 
-	ImGui::Begin("Finestra Usuari", &show_user_windows_button_inici, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+	ImGui::Begin("Finestra Usuari", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground); 
 
 
 	// Configura els colors i l'estil
@@ -936,35 +1037,512 @@ void MostrarInterficieUsuari() {
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
 
 	// Arrodoniment
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
-
-
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Blanc
-
-	// Afegeix el text amb mida augmentada
-	//ImGui::PushFont(font); 
-	//ImGui::Text("Text amb mida augmentada"); // El text utilitzarà la font carregada
-	//ImGui::PopFont();
-	// Restaura l'estil de color del text
-	ImGui::PopStyleColor();
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); 
 	// Mida del botó
-	if (ImGui::Button("Iniciar Simulador", ImVec2(200, 55))) {
+	//ImGui::SetKeyboardFocusHere();
+	if (ImGui::Button("Iniciar Simulador", ImVec2(400, 55))) {
 		show_user_windows = false;
-		show_user_windows_button_inici = false;
-		InicarSimulador();
+		show_menu_game = true;
 	}
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor(3);
 	ImGui::End();
+
 }
+
+void MostrarPantallaMenu(ImVec2* screenSize) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	// Calcula les dimensions de la finestra principal
+	ImVec2 tamany_buttons(400, 55);
+	ImVec2 windowSize(tamany_buttons.x, tamany_buttons.y*5);
+	ImVec2 espai(0.0f, 30.0f);
+
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5 -250, screenSize->y * 0.2));
+	ImGui::SetNextWindowSize(ImVec2(600, 150));
+	ImGui::Begin("Titol", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);
+	ImGui::PushFont(silkscreensubtitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Menu Principal");
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::End();
+
+	// Calcula la posició per centrar la finestra a la pantalla
+	ImVec2 windowPos = ImVec2(
+		(screenSize->x - windowSize.x) * 0.5f,
+		(screenSize->y - windowSize.y) * 0.5f
+	);
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(windowSize);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	ImGui::Begin("Menus", &show_menu_game, window_flags | ImGuiWindowFlags_NoBackground);
+	// Configura els colors i l'estil
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+
+	// Arrodoniment
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
+	if (ImGui::Button("Iniciar Partida", tamany_buttons)) {
+		show_menu_game = false;
+		show_selector_planeta_origen = true;
+	}
+
+	ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+	if (ImGui::Button("Exploració lliure", tamany_buttons)) {
+		show_menu_game = false;
+		InicarSimulador();
+	}
+
+	ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+	if (ImGui::Button("Configuració", tamany_buttons)) {
+		show_menu_game = false;
+		show_game_settings = true;
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+	ImGui::PopStyleVar();
+}
+
+void MostrarPantallaConfiguracio(ImVec2* screenSize) {
+
+}
+
+void MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5 - 550, screenSize->y * 0.2));
+	ImGui::SetNextWindowSize(ImVec2(1200, 150));
+	ImGui::Begin("Titol", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);
+	ImGui::PushFont(silkscreensubtitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text(descripcio);
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::End();
+	int padding = 15;
+	ImVec2 buttonSize(150, 150);
+	ImVec2 windowSize((buttonSize.x + padding) * PLANETES.size(), buttonSize.y + 50);
+	ImVec2 windowPos = ImVec2(
+		(screenSize->x - windowSize.x) * 0.5f,
+		(screenSize->y - windowSize.y) * 0.5f
+	);
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(windowSize);
+	ImGui::Begin(descripcio, &show_selector_planeta_origen, window_flags | ImGuiWindowFlags_NoBackground);
+
+	for (int i = 0; i < PLANETES.size(); i++) {
+		// Calcula la posició del botó basant-te en l'índex
+		ImVec2 buttonPos = ImVec2(
+			i * (buttonSize.x + padding),
+			0  // Tots els botons estan en la mateixa fila
+		);
+		ImGui::SetCursorPos(buttonPos);  // Ajusta la posició del botó
+
+		// Aplica els estils
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));  // Fons transparent
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0, 0, 0, 0));  // Fons transparent en hover
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));  // Fons transparent actiu
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));  // Text blanc
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f);  // Arrodoniment
+
+		// Crea el botó d'imatge
+		if (ImGui::ImageButton((void*)(intptr_t)PLANETES[i].getTextureIDMenu(), buttonSize)) {
+			if (show_selector_planeta_origen) {
+				show_selector_planeta_origen = false;
+				show_selector_planeta_desti = true;
+				PlanetOrigen = i;
+				/*std::cout << "show_selector_planeta_origen ->" << show_selector_planeta_origen << std::endl;
+				std::cout << "show_selector_planeta_desti ->" << show_selector_planeta_desti << std::endl;*/
+			}
+			else if (show_selector_planeta_desti && PlanetOrigen != -1 && PlanetDesti == -1) {
+				show_selector_planeta_desti = false;
+				show_pantalla_carrega = true;
+				PlanetDesti = i;
+				/*std::cout << "---------------------------------------------------------------" << std::endl;
+				std::cout << "show_selector_planeta_origen ->" << show_selector_planeta_origen << std::endl;
+				std::cout << "show_selector_planeta_desti ->" << show_selector_planeta_desti << std::endl;
+				std::cout << "..............................................................................................." << std::endl;*/
+
+			}
+		}
+
+		// Calcula la posició del text
+		ImVec2 textSize = ImGui::CalcTextSize(PLANETES[i].getName().c_str());
+		ImVec2 textPos = ImVec2(
+			buttonPos.x + (buttonSize.x - textSize.x) * 0.5f,  // Centrat horitzontalment respecte al botó
+			buttonSize.y + 10  // Per sota del botó
+		);
+		ImGui::SetCursorPos(textPos);
+		ImGui::Text(PLANETES[i].getName().c_str());
+
+		// Finalitza l'estil
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(4);
+	}
+
+	ImGui::End();
+
+}
+
+
+void MostrarPantallaCarrega(ImVec2* screenSize) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5 - 550, screenSize->y * 0.5));
+	ImGui::SetNextWindowSize(ImVec2(1200, 150));
+	ImGui::Begin("Pantalla Carrega", &show_pantalla_carrega, window_flags + ImGuiWindowFlags_NoBackground);
+	ImGui::PushFont(silkscreentitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Carregant .......");
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::End();
+	InicarSimulador();
+}
+
+// Funció per calcular la distància euclidiana entre dos punts
+float distanciaEuclidiana(CPunt3D& point1, const vec3& point2) {
+	return std::sqrt(std::pow(point2.x - point1.x, 2) +
+		std::pow(point2.y - point1.y, 2) +
+		std::pow(point2.z - point1.z, 2));
+}
+
+void CircularProgressBar(const char* label, float progress, const ImVec2& size, const ImVec4& color) {
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return;
+
+	ImGui::BeginGroup();
+	ImGui::PushID(label);
+	ImGui::Text(label);
+	ImGui::Spacing();
+	ImVec2 pos = ImGui::GetCursorScreenPos();
+	float circleRadius = ImMin(size.x, size.y) * 0.5f;
+	ImVec2 center = ImVec2(pos.x + circleRadius, pos.y + circleRadius);
+
+	float arcAngle = 2.0f * IM_PI * progress;
+
+	const ImU32 bgColor = ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	window->DrawList->AddCircleFilled(center, circleRadius + 5, bgColor, 32);
+
+	if (progress > 0.0f) {
+		ImVec2 innerPos(center.x - circleRadius, center.y - circleRadius);
+		ImVec2 outerPos(center.x + circleRadius, center.y + circleRadius);
+		//window->DrawList->PathArcTo(center, circleRadius, -IM_PI * 0.5f, -IM_PI * 0.5f - arcAngle, 32);
+		window->DrawList->PathArcTo(center, circleRadius, -IM_PI * 0.5f, -IM_PI * 0.5f + arcAngle, 32);
+		window->DrawList->PathStroke(ImGui::GetColorU32(color), false, 10.0f);
+	}
+
+	char textBuffer[32];
+	snprintf(textBuffer, sizeof(textBuffer), "%.0f%%", progress * 100.0f);
+	ImVec2 textSize = ImGui::CalcTextSize(textBuffer);
+	ImVec2 textPos = ImVec2(center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f);
+	window->DrawList->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), textBuffer);
+
+	ImGui::PopID();
+	ImGui::EndGroup();
+}
+
+
+void MostrarPantallaJoc(ImVec2* screenSize) {
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	/*
+	
+	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(250, 100));
+
+	ImGui::Begin("Opcions", &show_user_windows, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+	// Configura els colors i l'estil
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+
+	// Arrodoniment
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f);
+	if (ImGui::Button("Planetes", ImVec2(200, 35))) {
+		std::cout << "Clicat" << "!" << std::endl;
+	}
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+	*/
+
+	//std::cout << " x :" << opvN.x << "  y :" << opvN.y << "  z :" << opvN.z << std::endl;
+	//bool isNearAnyPlanet = false;
+	float llindar = DISTANCIA_DEFAULT_TERRA * 0.4;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
+	float llindarAlertaPerill = DISTANCIA_DEFAULT_TERRA * 0.1;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
+	float minim = 99999999999;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
+	int planetaAprop = -1;
+	int planetaMoltAprop = -1;
+
+	// Iterar per cada planeta
+	for (int i = 0; i < PLANETES.size(); ++i) {
+		//std::cout << std::endl;
+
+		float distPrevia = distanciaEuclidiana(opvN, PLANETES[i].getPosition());
+		//std::cout << "Distancia al planeta " << PLANETES[i].getName() << ": " << distPrevia << std::endl;
+		//std::cout << "Radi planeta " << PLANETES[i].getName() << ": " << PLANETES[i].getRadi() << std::endl;
+
+		float dist = distPrevia - PLANETES[i].getRadi();
+		//std::cout << "Distancia Definitiva " << PLANETES[i].getName() << ": " << dist << std::endl;
+
+		// Comprovar si el punt està a prop del planeta
+		if (dist < llindar && minim > dist) {
+			minim = dist;
+			planetaAprop = i;
+			// Comprovar si el punt està MOLT a prop del planeta
+			if (dist < llindarAlertaPerill) {
+				planetaMoltAprop = i;
+				//isNearAnyPlanet = true;
+			}
+			//std::cout << "Estàs a prop del planeta " << PLANETES[i].getName() << "!" << std::endl;
+			//std::cout << std::endl;
+			//isNearAnyPlanet = true;
+		}
+
+	}
+
+	/*if (!isNearAnyPlanet) {
+		std::cout << "Estàs massa lluny de tots els planetes." << std::endl;
+	}*/
+	//std::cout << PLANETES[PlanetOrigen].getPosition().x << std::endl;
+	ImVec2 winsize(200, 35);
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x -winsize.x-10, 10.0f), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(winsize);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, colorVerd); // Fons verd brillant (#00bf63)
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 15.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	ImGui::Begin("Opcions", &show_user_windows, window_flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+
+	if (planetaAprop >= 0) {
+		ImVec2 textSize = ImGui::CalcTextSize(PLANETES[planetaAprop].getName().c_str());
+		ImVec2 textPos = ImVec2(
+			(winsize.x - textSize.x) * 0.5f, // Centrat horitzontalment dins de la finestra
+			(winsize.y - textSize.y) * 0.5f  // Centrat verticalment dins de la finestra
+		);
+		ImGui::SetCursorPos(textPos);
+		ImGui::Text(PLANETES[planetaAprop].getName().c_str());
+	}
+	else {
+		ImVec2 textSize = ImGui::CalcTextSize("Espai Exterior");
+		ImVec2 textPos = ImVec2(
+			(winsize.x - textSize.x) * 0.5f, // Centrat horitzontalment dins de la finestra
+			(winsize.y - textSize.y) * 0.5f  // Centrat verticalment dins de la finestra
+		);
+		ImGui::SetCursorPos(textPos);
+		ImGui::Text("Espai Exterior");
+	}
+
+	ImGui::PopStyleColor();
+	ImGui::End();
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor();
+	ImGui::PopStyleVar();
+
+	if (planetaMoltAprop >= 0) {
+		Alerta(screenSize, &colorVermell, "Alerta !!! Orbita Baixa Perill");
+	}
+
+	ImVec2 espai(0.0f, 30.0f);
+	// Dades de progrés
+
+	ImVec2 windowSize(300, 200);
+	ImVec2 windowPos = ImVec2(20, screenSize->y - windowSize.y);
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(windowSize);
+
+	ImGui::Begin("Dades en quesitos", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
+
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(40,10)); // Change padding (spacing between items)
+	//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); // Change padding inside frames (buttons, input fields, etc.)
+	ImVec4 colorFuel = colorVerd;
+	ImVec4 colorLife = colorVerd;
+
+	if (fuel < 0.50f && fuel > 0.25f) {
+		colorFuel = colorTaronja;
+	}
+	else if (fuel < 0.25f) {
+		colorFuel = colorVermell;
+	}
+
+	if (life < 0.50f && life > 0.25f) {
+		colorLife = colorTaronja;
+	}
+	else if (life < 0.25f) {
+		colorLife = colorVermell;
+	}
+	CircularProgressBar("Combustible", fuel, ImVec2(100, 100), colorFuel);
+	ImGui::SameLine();
+	CircularProgressBar("Danys", life, ImVec2(100, 100), colorLife);
+
+	//mGui::PopStyleVar();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor();
+	ImGui::End();
+
+
+
+	ImVec2 ColumnaSize(120, 240); // Augmentem l'altura per donar espai al text
+	ImVec2 ColumnaPos = ImVec2(screenSize->x - ColumnaSize.x, screenSize->y - ColumnaSize.y);
+	ImGui::SetNextWindowPos(ColumnaPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ColumnaSize);
+	ImGui::Begin("Potencia", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
+
+	// Configuració de les dimensions de la barra de progrés
+	ImVec2 size(40, 200); // amplada 40, alçada 200
+	ImVec2 pos = ImGui::GetCursorScreenPos(); // Posició de la barra dins de la finestra
+
+	// Dibuixem el fons de la barra (gris clar)
+	ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(50, 50, 50, 255));
+
+	// Dibuixem la part de la barra de progrés
+	float filledHeight = size.y * potencia; // La quantitat de la barra de progrés que està "omplerta"
+	ImGui::GetWindowDrawList()->AddRectFilled(
+		ImVec2(pos.x, pos.y + size.y - filledHeight),
+		ImVec2(pos.x + size.x, pos.y + size.y),
+		IM_COL32(
+			(int)(colorVerd.x * 255),  // R component
+			(int)(colorVerd.y * 255),  // G component
+			(int)(colorVerd.z * 255),  // B component
+			(int)(colorVerd.w * 255)   // A component
+		)
+	);
+
+	// Dibuixem la línia de contorn (opcional)
+	ImGui::GetWindowDrawList()->AddRect(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(0, 0, 0, 255));
+
+	// Ajustem la posició per al text sota la barra
+	ImVec2 textSize = ImGui::CalcTextSize("Empenta");
+	ImVec2 textPos = ImVec2(
+		pos.x + (size.x - textSize.x * 0.5f)+10,  // Centrat horitzontalment respecte a la barra
+		pos.y + size.y + 5                     // Una mica més avall del final de la barra
+	);
+	ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), "Empenta");
+
+	ImGui::End();
+
+
+}
+
+void Alerta(ImVec2* screenSize, ImVec4* color, const char * text) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+	ImVec2 winsize(600, 60);
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5f-winsize.x*0.5f, 10.0f), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(winsize);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, *color); // Fons verd brillant (#00bf63)
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	ImGui::Begin("Alerta", &show_user_windows, window_flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+
+	ImVec2 textSize = ImGui::CalcTextSize(text);
+	ImVec2 textPos = ImVec2(
+		(winsize.x - textSize.x) * 0.5f, // Centrat horitzontalment dins de la finestra
+		(winsize.y - textSize.y) * 0.5f  // Centrat verticalment dins de la finestra
+	);
+	ImGui::SetCursorPos(textPos);
+	ImGui::Text(text);
+	
+	ImGui::PopStyleColor();
+	ImGui::End();
+}
+
 
 void InicarSimulador() {
 	//Varibales Importants
 	// Acció del botó
+	//std::this_thread::sleep_for(std::chrono::seconds(4));
+	show_pantalla_carrega = false;
+	show_game_window = true;
+	show_fons = false;
+
+	std::cout << PlanetOrigen << std::endl;
+
+	opvN.x = PLANETES[PlanetOrigen].getPosition().x + 20.0f;
+	opvN.y = PLANETES[PlanetOrigen].getPosition().y + 20.0f;
+	//std::cout << opvN.x << std::endl;
+	//std::cout << PLANETES[PlanetOrigen].getPosition().x << std::endl;
+	//std::cout << "HJOLA" << std::endl;
 	oCamera = 3;
 	SkyBoxCube = true;
-	oObjecte = 18;
+	//oObjecte = 18;
 	test_vis = false;
 	oculta = true;
 	eixos = true;
@@ -975,6 +1553,7 @@ void InicarSimulador() {
 	// Activació de zoom, mobil
 	mobil = true;	zzoom = true;
 
+	//opvN.y = PLANETES[PlanetOrigen].getPosition().y;
 
 	// Càrrega Shader Skybox
 	if (!skC_programID) skC_programID = shader_SkyBoxC.loadFileShaders(".\\shaders\\skybox.VERT", ".\\shaders\\skybox.FRAG");
@@ -1005,11 +1584,11 @@ void InicarSimulador() {
 	//Planetes i nau
 	netejaVAOList();
 	// ISMAEL CONTINUAR
-	for (int i = 0; i < 10; i++)
+	/*for (int i = 0; i < 10; i++)
 	{
 		Planeta planeta;
 		PLANETES.push_back(planeta);
-	}
+	}*/
 	auto planeta = PLANETES[0];
 	vec4 color = planeta.getColor();
 	SetColor4d(color.r, color.g, color.b, color.a);
@@ -1041,13 +1620,19 @@ void InicarSimulador() {
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
 	free(nomOBJ);
+	//std::this_thread::sleep_for(std::chrono::seconds(4));
 
 }
 
-void MostrarMenuDebug() {
+void MostrarMenuDebug(ImVec2* screenSize) {
+	ImGuiStyle& style = ImGui::GetStyle(); 
+	style.WindowBorderSize = 0.0f;
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));  // Aplica padding de 20 píxels en totes les direccions
+
 	static float f = 0.0f;
 	static int counter = 0;
 	static float PV[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	ImGui::PushFont(droidsans);
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
 	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
@@ -1064,14 +1649,9 @@ void MostrarMenuDebug() {
 	*/
 
 	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(400, 400));
+	ImGui::SetNextWindowSize(ImVec2(200, 600));
 	ImGui::Begin("Menu Estat", &show_debug_windows, window_flags);                          // Create a window called "Status Menu" and append into it.
-
-	/*ImGui::Text("FInestres EntornVGI:");               // Display some text (you can use a format strings too)
-	ImGui::SameLine();
-	ImGui::Checkbox("EntornVGI Window", &show_EntornVGI_window);
-	ImGui::Separator();
-	ImGui::Spacing();*/
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
 
 	// Transformació PV de Coord. esfèriques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
 	if (camera == CAM_NAVEGA) { PV[0] = opvN.x; PV[1] = opvN.y; PV[2] = opvN.z; }
@@ -1100,15 +1680,18 @@ void MostrarMenuDebug() {
 	ImGui::SeparatorText("CAMERA:");
 	ImGui::PopStyleColor();
 
-	ImGui::InputFloat3("Esferiques (R,alfa,beta)", cam_Esferica);
-	ImGui::InputFloat3("Cartesianes (PVx,PVy,PVz)", PV);
-	//ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+	ImGui::Text("Traslacio (Tx, Ty, Tz):");
+	ImGui::InputFloat3("", cam_Esferica);
+	ImGui::Text("Cartesianes (PVx,PVy,PVz)");
+	ImGui::InputFloat3("", PV);
 
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 	ImGui::SeparatorText("COLORS:");
 	ImGui::PopStyleColor();
-	ImGui::ColorEdit3("Color de Fons", (float*)&clear_colorB); // Edit 3 floats representing a background color
-	ImGui::ColorEdit3("Color d'Objecte", (float*)&clear_colorO); // Edit 3 floats representing a object color
+	ImGui::Text("Color de Fons");
+	ImGui::ColorEdit3("", (float*)&clear_colorB); // Edit 3 floats representing a background color
+	ImGui::Text("Color d'Objecte");
+	ImGui::ColorEdit3("", (float*)&clear_colorO); // Edit 3 floats representing a object color
 	c_fons.r = clear_colorB.x;	c_fons.g = clear_colorB.y;	c_fons.b = clear_colorB.z;	c_fons.a = clear_colorB.w;
 	col_obj.r = clear_colorO.x;	col_obj.g = clear_colorO.y;	col_obj.b = clear_colorO.z;		col_obj.a = clear_colorO.w;
 	ImGui::Separator();
@@ -1118,11 +1701,15 @@ void MostrarMenuDebug() {
 	ImGui::SeparatorText("TRANSFORMA:");
 	ImGui::PopStyleColor();
 	float tras_ImGui[3] = { (float)TG.VTras.x,(float)TG.VTras.y,(float)TG.VTras.z };
-	ImGui::InputFloat3("Traslacio (Tx,Ty,Tz)", tras_ImGui);
+	ImGui::Text("Traslacio (Tx, Ty, Tz):");
+	ImGui::InputFloat3("", tras_ImGui);
 	float rota_ImGui[3] = { (float)TG.VRota.x,(float)TG.VRota.y,(float)TG.VRota.z };
-	ImGui::InputFloat3("Rotacio (Rx,Ry,Rz)", rota_ImGui);
+	ImGui::Text("Rotacio (Rx,Ry,Rz)");
+	ImGui::InputFloat3("", rota_ImGui);
 	float scal_ImGui[3] = { (float)TG.VScal.x,(float)TG.VScal.y,(float)TG.VScal.z };
-	ImGui::InputFloat3("Escala (Sx, Sy, Sz)", scal_ImGui);
+	ImGui::Text("Escala (Sx, Sy, Sz)");
+	ImGui::InputFloat3("", scal_ImGui);
+
 
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 	ImGui::SeparatorText("ImGui:");               // Display some text (you can use a format strings too)
@@ -1133,90 +1720,23 @@ void MostrarMenuDebug() {
 	ImGui::Text("imgui versions: (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
 	ImGui::Spacing();
 
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	//if (ImGui::Button("Reset time")) G_TIME = 0.0;
-	//if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
+	ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	ImGui::PopItemWidth();
 	ImGui::End();
-	//MostrarMenuDebug();
 
-
-
-
-	ImGui::SetNextWindowPos(ImVec2(400, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(1020, 50));
-	ImGui::Begin("Bottons", &show_user_windows_button_inici, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+	ImGui::SetNextWindowPos(ImVec2(200, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1220, 50));
+	ImGui::Begin("Bottons", &show_debug_windows, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 
 	if (ImGui::Button("Reset time")) G_TIME = 0.0;
 	ImGui::SameLine();
-	//ImGui::Separator();
-	//ImGui::Spacing();
 	if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
-	ImGui::End();
 
+	ShowEntornVGIWindow(&show_debug_windows, 1420, 0, 500, 1080, window_flags);//550, 680
+	ImGui::PopFont();
+	ImGui::PopStyleVar();
 
-	/*ImGui::SetNextWindowPos(ImVec2(1120, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(400, 1080));
-	ImGui::Begin("Bottons", &show_user_windows_button_inici, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-	ImGui::End();*/
-	ShowEntornVGIWindow(&show_user_windows_button_inici, 1420, 0, 500, 1080, window_flags);//550, 680
 }
-
-/*
-void MostraEntornVGIWindow(bool* p_open)
-{
-// Exceptionally add an extra assert here for people confused about initial Dear ImGui setup
-// Most functions would normally just crash if the context is missing.
-	IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
-
-	// Examples Apps (accessible from the "Examples" menu)
-	//static bool show_window_about = false;
-
-	if (show_window_about)       ShowAboutWindow(&show_window_about);
-
-// We specify a default position/size in case there's no data in the .ini file.
-// We only do it to make the demo applications a little more welcoming, but typically this isn't required.
-	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
-
-	ImGuiWindowFlags window_flags = 0;
-	// Main body of the Demo window starts here.
-	if (!ImGui::Begin("EntornVGI Menu", p_open, window_flags))
-	{
-		// Early out if the window is collapsed, as an optimization.
-		ImGui::End();
-		return;
-	}
-
-// Most "big" widgets share a common width settings by default. See 'Demo->Layout->Widgets Width' for details.
-// e.g. Use 2/3 of the space for widgets and 1/3 for labels (right align)
-//ImGui::PushItemWidth(-ImGui::GetWindowWidth() * 0.35f);
-// e.g. Leave a fixed amount of width for labels (by passing a negative value), the rest goes to widgets.
-	ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
-
-	// Menu Bar
-	if (ImGui::BeginMenuBar())
-	{
-		if (ImGui::BeginMenu("Arxius"))
-		{
-			//IMGUI_DEMO_MARKER("Menu/File");
-			ShowArxiusOptions();
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Sobre EntornVGI"))
-		{
-			//IMGUI_DEMO_MARKER("Menu/Examples");
-			//ShowAboutOptions(&show_window_about);
-			ImGui::EndMenu();
-		}
-		
-		ImGui::EndMenuBar();
-	}
-
-// End of ShowEntornVGIWindow()
-	ImGui::PopItemWidth();
-	ImGui::End();
-}*/
 
 void ShowArxiusOptions()
 {
@@ -1292,24 +1812,6 @@ void ShowArxiusOptions()
 	ImGui::Separator();
 	if (ImGui::MenuItem("Quit", "Alt+F4")) {}
 }
-
-
-/*void ShowAboutWindow(bool* p_open)
-{
-	// For the demo: add a debug button _BEFORE_ the normal log window contents
-// We take advantage of a rarely used feature: multiple calls to Begin()/End() are appending to the _same_ window.
-// Most of the contents of the window will be added by the log.Draw() call.
-	ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-	ImGui::Begin("About", p_open);
-	//IMGUI_DEMO_MARKER("Window/About");
-	ImGui::Text("VISUALITZACIO GRAFICA INTERACTIVA (Escola d'Enginyeria - UAB");
-	ImGui::Text("Entorn Grafic VS2022 amb interficie GLFW, ImGui i OpenGL 4.3+ per a practiques i ABP");
-	ImGui::Text("AUTOR: Enric Marti Godia");
-	ImGui::Text("Copyright (C) 2024");
-	if (ImGui::Button("Acceptar"))
-		show_window_about = false;
-	ImGui::End();
-}*/
 
 // Entorn VGI: Funció que retorna opció de menú TIPUS CAMERA segons variable camera (si modificada per teclat)
 int shortCut_Camera()
@@ -1929,11 +2431,11 @@ void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int siz
 				objecte = PROVA_PLANETA;
 				netejaVAOList();
 				// ISMAEL CONTINUAR
-				for (int i = 0; i < 10; i++)
+				/*for (int i = 0; i < 10; i++)
 				{
 					Planeta planeta;
 					PLANETES.push_back(planeta);
-				}
+				}*/
 				auto planeta = PLANETES[0];
 				vec4 color = planeta.getColor();
 				SetColor4d(color.r, color.g, color.b, color.a);
@@ -3585,6 +4087,7 @@ void Ratoli_Nau(double xpos, double ypos)
 
 void Moviment_Nau()
 {
+
 	double fact_nau = 10.0 * G_DELTA;
 	double fact_ang_nau = 45.0 * G_DELTA;
 	float zoom = 10.0f * G_DELTA;
@@ -3624,6 +4127,151 @@ void Moviment_Nau()
 
 	if (pressE)
 		nau.rotN((float)fact_ang_nau);
+
+	double vdir[3] = { 0, 0, 0 };
+	double vup[3] = { 0, 0, 0 };
+	double vright[3] = { 0, 0, 0 };
+	double modulN = 0;
+	double modulV = 0;
+	double modulU = 0;
+
+	// Entorn VGI: Controls de moviment de navegació
+
+	//vector normalitzat n: vdir
+	vdir[0] = n[0] - opvN.x;
+	vdir[1] = n[1] - opvN.y;
+	vdir[2] = n[2] - opvN.z;
+	modulN = sqrt(vdir[0] * vdir[0] + vdir[1] * vdir[1] + vdir[2] * vdir[2]);
+	vdir[0] /= modulN;
+	vdir[1] /= modulN;
+	vdir[2] /= modulN;
+
+	// vector normalitzat v: vup (v ha d'estar noormalitzat)
+	vup[0] = v[0];
+	vup[1] = v[1];
+	vup[2] = v[2];
+	modulV = sqrt(vup[0] * vup[0] + vup[1] * vup[1] + vup[2] * vup[2]);
+	vup[0] /= modulV;
+	vup[1] /= modulV;
+	vup[2] /= modulV;
+
+	// vector normalitzat u: vright
+	vright[0] = u[0];
+	vright[1] = u[1];
+	vright[2] = u[2];
+	modulU = sqrt(vright[0] * vright[0] + vright[1] * vright[1] + vright[2] * vright[2]);
+	vright[0] /= modulU;
+	vright[1] /= modulU;
+	vright[2] /= modulU;
+
+	fact_nau = 10.0 * potencia * G_DELTA;
+	fact_ang_nau = 180.0 * G_DELTA;
+
+	//GAMEPAD
+	// Comprovem si el gamepad està connectat
+	if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+	{
+		int buttonCount;
+		const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+		//buttons[0] == GLFW_PRESS
+
+		int axesCount;
+		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+
+		// Moviment endavant/enrere (eix vertical joystick esquerre o botó 'A')
+		if (buttons[0] == GLFW_PRESS && fuel > 0) // Llindar per evitar "drift"
+		{
+			nau.move(nau.getN() * (float)fact_nau);
+			if (potencia < 1.0f) {
+				potencia += 0.01f;
+			}
+			else {
+				potencia = 1.0f;
+			}
+			fuel -= 0.00001f;
+		}
+
+
+
+		// Moviment esquerra/dreta (eix horitzontal joystick esquerre o botó 'B')
+		if (buttons[1] == GLFW_PRESS && fuel > 0)
+		{
+			nau.move(nau.getN() * (float)-fact_nau);
+			if (potencia < 1.0f) {
+				potencia += 0.01f;
+			}
+			else {
+				potencia = 1.0f;
+			}
+			fuel -= 0.00001f;
+		}
+
+
+
+		// Comprovació per rotacions (joystick dret)
+		float rotateX = axes[0]; // Eix horitzontal dret
+		float rotateY = axes[1]; // Eix vertical dret
+
+		if (fabs(rotateX) > 0.1f || fabs(rotateY) > 0.1f) { // Només quan els joystick estan en moviment
+
+			// Rotació horitzontal esquerra/dreta (joystick dret eix horitzontal)
+			if (fabs(rotateX) > 0.1f) {
+				// Ajust de la rotació horitzontal amb un factor d'escala
+				angleA = rotateX * fact_ang_nau * 0.4 * -1;
+
+				// Limitar l'angle entre 0 i 360 graus
+				if (angleA >= 360) angleA -= 360;
+				if (angleA < 0) angleA += 360;
+
+				// Realitzar la rotació en l'eix horitzontal
+				/*
+				rotate_vector(vdir, vup, angleA * PI / 180);
+				rotate_vector(vright, vup, angleA * PI / 180);*/
+				nau.rotV((float)fact_ang_nau);
+			}
+
+			// Rotació vertical amunt/avall (joystick dret eix vertical)
+			if (fabs(rotateY) > 0.1f) {
+				// Ajust de la rotació vertical amb un factor d'escala
+				angleB = rotateY * fact_ang_nau * 0.4;
+
+				// Limitar l'angle entre 0 i 360 graus
+				if (angleB >= 360) angleB -= 360;
+				if (angleB < 0) angleB += 360;
+
+				// Realitzar la rotació en l'eix vertical
+				/*
+				rotate_vector(vdir, vright, angleB * PI / 180);
+				rotate_vector(vup, vright, angleB * PI / 180);*/
+				nau.rotU((float)fact_ang_nau);
+			}
+		}
+
+
+
+		// Rotació roll esquerra/dreta (triggers LT i RT)
+		float rollLeft = axes[4];  // Trigger esquerre
+		float rollRight = axes[5]; // Trigger dret
+		if (rollLeft > 0.1f || rollRight > 0.1f)  // Només quan els triggers estan pressionats
+		{
+			if (rollLeft > 0.1f)
+			{
+				nau.rotN((float)fact_ang_nau);
+			}
+			if (rollRight > 0.1f)
+			{
+				nau.rotN((float)-fact_ang_nau);
+			}
+		}
+
+		GLFWgamepadstate state;
+		if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state)) {
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_START] == GLFW_PRESS) {
+				glfwSetWindowShouldClose(window, GL_TRUE);  // Marca la finestra per tancar
+			}
+		}
+	}
+	//FI  GAMEPAD
 }
 void Moviment_Nau2()
 {
@@ -4551,26 +5199,21 @@ int Log2(int num)
 // Entorn VGI. OnFull_Screen: Funció per a pantalla completa
 void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow *window)
 {   
-	//int winPosX, winPosY;
-	//winPosX = 0;	winPosY = 0;
-
 	fullscreen = !fullscreen;
 
-	if (fullscreen) {	// backup window position and window size
-						//glfwGetWindowPos(window, &winPosX, &winPosY);
-						//glfwGetWindowSize(window, &width_old, &height_old);
+	if (fullscreen) {
+		// Get resolution of monitor
+		//const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-						// Get resolution of monitor
-						const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-						w = mode->width;	h = mode->height;
-						// Switch to full screen
-						glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-					}
-	else {	// Restore last window size and position
-			glfwSetWindowMonitor(window, nullptr, 216, 239, 640, 480, mode->refreshRate);
-		}
+		//w = mode->width;	h = mode->height;
+		// Switch to full screen
+		//glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+		glfwSetWindowMonitor(window, monitor, 0, 0, 1920, 1080, mode->refreshRate);
 	}
+	else {	// Restore last window size and position
+			glfwSetWindowMonitor(window, nullptr, 216, 239, 1920, 1080, mode->refreshRate);
+	}
+}
 
 // -------------------- TRACTAMENT ERRORS
 // error_callback: Displaia error que es pugui produir
@@ -4652,6 +5295,28 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severi
 	fprintf(stderr, "\n");
 }
 
+void SetWindowIcon(GLFWwindow* window, const char* iconPath) {
+	int width, height, channels;
+
+	// Carrega la imatge amb SOIL
+	unsigned char* image = SOIL_load_image(iconPath, &width, &height, &channels, SOIL_LOAD_RGBA);
+	if (!image) {
+		printf("Error carregant la icona: %s\n", iconPath);
+		return;
+	}
+
+	// Crea l'estructura GLFWimage
+	GLFWimage icon;
+	icon.width = width;
+	icon.height = height;
+	icon.pixels = image;
+
+	// Assigna la icona a la finestra
+	glfwSetWindowIcon(window, 1, &icon);
+
+	// Allibera la memòria de la imatge
+	SOIL_free_image_data(image);
+}
 
 int main(void)
 {
@@ -4688,19 +5353,18 @@ int main(void)
 #endif
 
 // Create a windowed mode window and its OpenGL context */
-	
-	//Finestra de maxim de tamany
-	//window = glfwCreateWindow(mode->width, mode->height, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
-	
-	//Pantalla Completa
-	window = glfwCreateWindow(1920,1080, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
-	
+// 
+	//window = glfwCreateWindow(1920,1080, "Entorn Grafic VS2022 amb GLFW i OpenGL 4.3 (Visualitzacio Grafica Interactiva - Grau en Enginyeria Informatica - Escola Enginyeria - UAB)", NULL, NULL);
+
+	window = glfwCreateWindow(1920, 1080, "Solar Sprint - Escola Enginyeria - UAB", NULL, NULL);
+
 	if (!window)
     {	fprintf(stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 4.3 compatible. Try the 2.1 version of the tutorials.\n");
 		getchar();
 		glfwTerminate();
         return -1;
     }
+	SetWindowIcon(window, "textures/menu/icon.png");
 
 // Make the window's context current
     glfwMakeContextCurrent(window);
@@ -4769,6 +5433,10 @@ int main(void)
 	glfwSetErrorCallback(error_callback);											// Error callback
 	glfwSetWindowRefreshCallback(window, (GLFWwindowrefreshfun)OnPaint);			// - Callback to refresh the screen
 
+	if (glfwJoystickPresent(GLFW_JOYSTICK_1)) {
+		std::cout << "Gamepad connectat!" << std::endl;
+	}
+
 // Entorn VGI; Timer: Lectura temps
 	float previous = glfwGetTime();
 
@@ -4776,8 +5444,8 @@ int main(void)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
 // Entorn VGI.ImGui: Setup Dear ImGui style
 	//ImGui::StyleColorsDark();
@@ -4787,6 +5455,32 @@ int main(void)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 // Entorn VGI.ImGui: End Setup Dear ImGui context
+	droidsans = io.Fonts->AddFontFromFileTTF("textures/menu/DroidSans.ttf", 18.0f); 
+	silkscreen = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Regular.ttf", 24.0f); 
+	silkscreentitle = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 88.0f); 
+	silkscreensubtitle = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 58.0f); 
+	rainyhearts = io.Fonts->AddFontFromFileTTF("textures/menu/rainyhearts.ttf", 18.0f);
+	io.FontDefault = silkscreen; // Assignar la font per defecte
+
+	for (int i = 0; i < 10; i++)
+	{
+		Planeta planeta;
+		planeta.setName(NAMES[i]);
+		planeta.setRutaTexturaMenu(RUTES_TEXTURA_MENU[i].c_str());
+		std::string buf("textures/menu/");
+		buf.append(planeta.getRutaTexturaMenu());
+		GLuint img = loadIMA_SOIL(buf.c_str());
+		planeta.setTextureIDMenu(img);
+		PLANETES.push_back(planeta);
+	}
+
+	PosicionsInicialsSistemaSolar();
+	mars = loadIMA_SOIL("textures/menu/mars.png");
+	soyut = loadIMA_SOIL("textures/menu/soyut.png");
+	iss = loadIMA_SOIL("textures/menu/iss.png");
+	cometa = loadIMA_SOIL("textures/menu/asteroid.png");
+	fons = loadIMA_SOIL("textures/menu/space2gran.jpeg");
+
 
 // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
@@ -4802,6 +5496,14 @@ int main(void)
 // Entorn VGI. Timer: for each timer do this
 		G_TIME = time += delta;
 		if ((time <= 0.0) && (satelit || anima)) OnTimer();
+
+		//velocitat
+		if (potencia > 0.0f) {
+			potencia -= 0.005f;
+		}
+		else {
+			potencia = 0.0f;
+		}
 
 // Poll for and process events
 		glfwPollEvents();

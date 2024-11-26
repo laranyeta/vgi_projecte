@@ -31,6 +31,7 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 void donut_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time);
 void nau_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time);
 void d_nau(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], const Nau nau);
+void drawOrbitPath(Planeta& planeta);
 
 
 /* MODIFIED*/

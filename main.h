@@ -36,7 +36,20 @@
 
 	bool show_debug_windows = false;
 	bool show_user_windows = true;
-	bool show_user_windows_button_inici = true;
+	bool show_menu_game = false;
+	bool show_selector_planeta_origen = false;
+	bool show_selector_planeta_desti = false;
+	bool show_game_window = false;
+	bool show_game_settings = false;
+	bool show_fons = true;
+	bool show_pantalla_carrega = false;
+
+	ImFont* rainyhearts;
+	ImFont* silkscreen;
+	ImFont* droidsans;
+	ImFont* silkscreentitle;
+	ImFont* silkscreensubtitle;
+
 
 // Entorn V3D: Variables de control per Menú Càmera: Esfèrica, Navega, Mòbil, Zoom, Satelit, Polars... 
 	char camera;	// Variable que controla el tipus de càmera segons valors definits en constants.h
@@ -292,5 +305,15 @@
 
 	//Funcions propies
 	void InicarSimulador();
-	void MostrarInterficieUsuari();
-	void MostrarMenuDebug();
+	void MostrarPantallaInicial(ImVec2* screenSize);
+	void MostrarMenuDebug(ImVec2* screenSize);
+	void MostrarPantallaMenu(ImVec2* screenSize);
+	void MostrarPantallaConfiguracio(ImVec2* screenSize);
+	void MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio);	
+	void MostrarPantallaJoc(ImVec2* screenSize); 
+	void MostrarPantallaCarrega(ImVec2* screenSize);
+	void PosicionsInicialsSistemaSolar();
+	float distanciaEuclidiana(CPunt3D& point1, const vec3& point2);
+	void CircularProgressBar(const char* label, float progress, const ImVec2& size, const ImVec4& color);
+	void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
+	void SetWindowIcon(GLFWwindow* window, const char* iconPath);
