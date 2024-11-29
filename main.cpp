@@ -1244,7 +1244,7 @@ void MostrarPantallaCarrega(ImVec2* screenSize) {
 }
 
 // Funció per calcular la distància euclidiana entre dos punts
-float distanciaEuclidiana(CPunt3D& point1, const vec3& point2) {
+float distanciaEuclidiana(const vec3& point1, const vec3& point2) {
 	return std::sqrt(std::pow(point2.x - point1.x, 2) +
 		std::pow(point2.y - point1.y, 2) +
 		std::pow(point2.z - point1.z, 2));
@@ -1326,8 +1326,10 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PopStyleColor(3);
 	ImGui::End();
 	*/
+	//std::cout << std::endl;
+	vec3 posnau = nau.getCam().getO();
 
-	//std::cout << " x :" << opvN.x << "  y :" << opvN.y << "  z :" << opvN.z << std::endl;
+	//std::cout << " x :" << posnau.x << "  y :" << posnau.y << "  z :" << posnau.z << std::endl;
 	//bool isNearAnyPlanet = false;
 	float llindar = DISTANCIA_DEFAULT_TERRA * 0.4;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
 	float llindarAlertaPerill = DISTANCIA_DEFAULT_TERRA * 0.1;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
@@ -1338,8 +1340,9 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	// Iterar per cada planeta
 	for (int i = 0; i < PLANETES.size(); ++i) {
 		//std::cout << std::endl;
-
-		float distPrevia = distanciaEuclidiana(opvN, PLANETES[i].getPosition());
+		vec3 temp = PLANETES[i].getPosition();
+		float distPrevia = distanciaEuclidiana(posnau, PLANETES[i].getPosition());
+		//std::cout << "Vector Planeta " << PLANETES[i].getName() << ": " << " x :" << temp.x << "  y :" << temp.y << "  z :" << temp.z << std::endl;
 		//std::cout << "Distancia al planeta " << PLANETES[i].getName() << ": " << distPrevia << std::endl;
 		//std::cout << "Radi planeta " << PLANETES[i].getName() << ": " << PLANETES[i].getRadi() << std::endl;
 
@@ -1354,6 +1357,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 			if (dist < llindarAlertaPerill) {
 				planetaMoltAprop = i;
 				//isNearAnyPlanet = true;
+				//std::cout << "Estàs MOLT APROP " << PLANETES[i].getName() << "!" << std::endl;
 			}
 			//std::cout << "Estàs a prop del planeta " << PLANETES[i].getName() << "!" << std::endl;
 			//std::cout << std::endl;
@@ -1533,10 +1537,11 @@ void InicarSimulador() {
 	show_game_window = true;
 	show_fons = false;
 
-	std::cout << PlanetOrigen << std::endl;
+	//std::cout << PlanetOrigen << std::endl;
+	//nau.setPosition(vec3(PLANETES[PlanetOrigen].getPosition().x + 20.0f, PLANETES[PlanetOrigen].getPosition().y + 20.0f,0));
 
-	opvN.x = PLANETES[PlanetOrigen].getPosition().x + 20.0f;
-	opvN.y = PLANETES[PlanetOrigen].getPosition().y + 20.0f;
+	//opvN.x = PLANETES[PlanetOrigen].getPosition().x + 20.0f;
+	//opvN.y = PLANETES[PlanetOrigen].getPosition().y + 20.0f;
 	//std::cout << opvN.x << std::endl;
 	//std::cout << PLANETES[PlanetOrigen].getPosition().x << std::endl;
 	//std::cout << "HJOLA" << std::endl;
@@ -4101,7 +4106,6 @@ void Ratoli_Nau(double xpos, double ypos)
 				pressRIGHT = (xmove > 0);
 			}
 		}
-
 	}
 }
 
@@ -4190,7 +4194,7 @@ void Moviment_Nau()
 	vright[2] /= modulU;
 
 	fact_nau = 10.0 * nau.getPotencia() * G_DELTA;
-	fact_ang_nau = 180.0 * G_DELTA;
+	fact_ang_nau = 90.0 * G_DELTA;
 
 	//GAMEPAD
 	// Comprovem si el gamepad està connectat
@@ -4242,7 +4246,7 @@ void Moviment_Nau()
 				/*
 				rotate_vector(vdir, vup, angleA * PI / 180);
 				rotate_vector(vright, vup, angleA * PI / 180);*/
-				nau.rotV((float)fact_ang_nau);
+				nau.rotV((float)angleA);
 			}
 
 			// Rotació vertical amunt/avall (joystick dret eix vertical)
@@ -4258,7 +4262,7 @@ void Moviment_Nau()
 				/*
 				rotate_vector(vdir, vright, angleB * PI / 180);
 				rotate_vector(vup, vright, angleB * PI / 180);*/
-				nau.rotU((float)fact_ang_nau);
+				nau.rotU((float)angleB);
 			}
 		}
 

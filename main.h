@@ -313,7 +313,7 @@
 	void MostrarPantallaJoc(ImVec2* screenSize); 
 	void MostrarPantallaCarrega(ImVec2* screenSize);
 	void PosicionsInicialsSistemaSolar();
-	float distanciaEuclidiana(CPunt3D& point1, const vec3& point2);
+	float distanciaEuclidiana(const vec3& point1, const vec3& point2);
 	void CircularProgressBar(const char* label, float progress, const ImVec2& size, const ImVec4& color);
 	void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
 	void SetWindowIcon(GLFWwindow* window, const char* iconPath);

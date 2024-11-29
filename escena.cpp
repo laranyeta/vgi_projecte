@@ -435,9 +435,9 @@ void processaTextures()
 		char* cstr = new char[rutaTextura.length() + 1];
 		std::strcpy(cstr, rutaTextura.c_str());
 		GLint id = loadIMA_SOIL(cstr);
-		std::cout << id << std::endl;
+		//std::cout << id << std::endl;
 		planeta.setTextureID(id);
-		std::cout << planeta.getTextureID() << std::endl;
+		//std::cout << planeta.getTextureID() << std::endl;
 	}
 }
 
@@ -672,7 +672,7 @@ void checkCollisions()
 			if (asteroidA.isCollidingWith(asteroidB))
 			{
 				asteroidA.resolveCollision(asteroidB);
-				std::cout << "Collision!" << std::endl;
+				//std::cout << "Collision!" << std::endl;
 			}
 		}
 	}

@@ -104,6 +104,10 @@ public:
 		return m_cam;
 	}
 
+	void setPosition(vec3 temp) {
+		m_cam.setO(temp);
+	}
+
 	mat4 getR() const { return m_q; }
 
 	//MOVIMENT
