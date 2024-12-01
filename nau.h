@@ -41,7 +41,7 @@ private:
 
 public:
 	// BASIQUES
-	Nau(){
+	Nau() {
 		m_o = vec3(0, 0, 0);
 
 		m_n = vec3(-1, 0, 0);
@@ -177,7 +177,7 @@ public:
 
 	//Extra
 	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
-	void moveS(double delta) { move((float)(m_s * delta)*m_n);  }
+	void moveS(double delta) { move((float)(m_s * delta) * m_n); }
 };
 
 #endif

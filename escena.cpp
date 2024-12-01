@@ -19,24 +19,24 @@
 #include <random>
 
 // Dibuixa Eixos Coordenades M�n i Reixes, activant un shader propi.
-void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, 
+void dibuixa_Eixos(GLuint ax_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa,
 	glm::mat4 MatriuProjeccio, glm::mat4 MatriuVista)
 {
-// Visualitzaci� Eixos Coordenades M�n
+	// Visualitzaci� Eixos Coordenades M�n
 	glUseProgram(ax_programID);
 
-// Pas Matrius Projecci� i Vista Vista a shader
+	// Pas Matrius Projecci� i Vista Vista a shader
 	glUniformMatrix4fv(glGetUniformLocation(ax_programID, "projectionMatrix"), 1, GL_FALSE, &MatriuProjeccio[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(ax_programID, "viewMatrix"), 1, GL_FALSE, &MatriuVista[0][0]);
 
-// Attribute Locations must be setup before calling glLinkProgram()
+	// Attribute Locations must be setup before calling glLinkProgram()
 	glBindAttribLocation(ax_programID, 0, "in_Vertex"); // V�rtexs
 	glBindAttribLocation(ax_programID, 1, "in_Color");	// Color
 
-//  Dibuix dels eixos
+	//  Dibuix dels eixos
 	if (eix) draw_Eixos(axis_Id);
 
-// Dibuixa el grid actiu
+	// Dibuixa el grid actiu
 	if ((reixa.x) || (reixa.y) || (reixa.z) || (reixa.w)) draw_Grid(reixa, hreixa);
 }
 
@@ -47,29 +47,29 @@ void dibuixa_Skybox(GLuint sk_programID, GLuint cmTexture, char eix_Polar, glm::
 
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 
-// Activaci� shader per a cub skybox
+	// Activaci� shader per a cub skybox
 	glUseProgram(sk_programID);
 
-// Pas Matrius Projecci� i Vista a shader
+	// Pas Matrius Projecci� i Vista a shader
 	glUniformMatrix4fv(glGetUniformLocation(sk_programID, "projectionMatrix"), 1, GL_FALSE, &MatriuProjeccio[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(sk_programID, "viewMatrix"), 1, GL_FALSE, &MatriuVista[0][0]);
 
-// Rotar skyBox per a orientar sobre eix superior Z o X en Vista Esf�rica (POLARX, POLARY, POLARZ)
+	// Rotar skyBox per a orientar sobre eix superior Z o X en Vista Esf�rica (POLARX, POLARY, POLARZ)
 	if (eix_Polar == POLARZ) ModelMatrix = glm::rotate(ModelMatrix, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
 	else if (eix_Polar == POLARX) ModelMatrix = glm::rotate(ModelMatrix, radians(-90.0f), vec3(0.0f, 0.0f, 1.0f));
 
-// Escalar Cub Skybox a 5000 per encabir objectes escena a l'interior
+	// Escalar Cub Skybox a 5000 per encabir objectes escena a l'interior
 	ModelMatrix = glm::scale(ModelMatrix, vec3(5000.0f, 5000.0f, 5000.0f));		//glScaled(5000.0, 5000.0, 5000.0);
 	glUniformMatrix4fv(glGetUniformLocation(sk_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 
-// Activar textura cubemaps del Skybox per encabir objectes escena
+	// Activar textura cubemaps del Skybox per encabir objectes escena
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cmTexture);
 
-// Attribute Locations must be setup before calling glLinkProgram()
+	// Attribute Locations must be setup before calling glLinkProgram()
 	glBindAttribLocation(sk_programID, 0, "in_Vertex"); // V�rtexs
 
-//  Dibuix del Skybox
+	//  Dibuix del Skybox
 	drawCubeSkybox();
 
 	glDepthFunc(GL_LESS); // set depth function back to default
@@ -77,12 +77,12 @@ void dibuixa_Skybox(GLuint sk_programID, GLuint cmTexture, char eix_Polar, glm::
 
 
 // dibuixa_EscenaGL: Dibuix de l'escena amb comandes GL
-void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, char objecte, 
-			CColor col_object, bool sw_mat[5],
-			bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
-			int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
-			COBJModel* objecteOBJ,
-			glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time,bool propulsat, Nau nau, COBJModel* TestOBJ)
+void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D reixa, CPunt3D hreixa, char objecte,
+	CColor col_object, bool sw_mat[5],
+	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
+	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
+	COBJModel* objecteOBJ,
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau nau, COBJModel* TestOBJ)
 {
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
@@ -90,11 +90,11 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	GLdouble tras[3] = { 0.0,0.0,0.0 }; //Sierpinski Sponge
 	CColor color_vermell = { 0.0,0.0,0.0,1.0 }, color_Mar = { 0.0,0.0,0.0,0.0 };
 	bool sw_material[5] = { 0.0,0.0,0.0,0.0,0.0 };
-	
-// Matrius de Transformaci�
+
+	// Matrius de Transformaci�
 	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0), TransMatrix(1.0), ScaleMatrix(1.0), RotMatrix(1.0);
 
-// VAO
+	// VAO
 	CVAO objectVAO = { 0,0,0,0,0 };
 	objectVAO.vaoId = 0;	objectVAO.vboId = 0;	objectVAO.eboId = 0;	 objectVAO.nVertexs = 0; objectVAO.nIndices = 0;
 
@@ -102,32 +102,33 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	color_vermell.r = 1.0;	color_vermell.g = 0.0; color_vermell.b = 0.0; color_vermell.a = 1.0;
 	sw_material[0] = false;	sw_material[1] = true; sw_material[2] = true; sw_material[3] = false;	sw_material[4] = true;
 
-// Shader Visualitzaci� Objectes
+	// Shader Visualitzaci� Objectes
 	glUseProgram(sh_programID);
 
-// Parametritzaci� i activaci�/desactivaci� de textures
+	// Parametritzaci� i activaci�/desactivaci� de textures
 	if (texturID[0] != -1) SetTextureParameters(texturID[0], true, true, textur_map, false);
-	if (textur) {	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
-					glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE); //glEnable(GL_MODULATE);
-				}
-		else {	//glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_FALSE); //glDisable(GL_TEXTURE_2D);
-				//glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_FALSE); //glDisable(GL_MODULATE);
-			}
+	if (textur) {
+		glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
+		glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE); //glEnable(GL_MODULATE);
+	}
+	else {	//glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_FALSE); //glDisable(GL_TEXTURE_2D);
+		//glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_FALSE); //glDisable(GL_MODULATE);
+	}
 	glUniform1i(glGetUniformLocation(sh_programID, "flag_invert_y"), flagInvertY);
 
-// Attribute Locations must be setup before calling glLinkProgram()
+	// Attribute Locations must be setup before calling glLinkProgram()
 	glBindAttribLocation(sh_programID, 0, "in_Vertex");		// V�rtexs
 	glBindAttribLocation(sh_programID, 1, "in_Color");		// Color
 	glBindAttribLocation(sh_programID, 2, "in_Normal");		// Normals
 	glBindAttribLocation(sh_programID, 3, "in_TexCoord");	// Textura
 
-// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material.
+	// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material.
 	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 
 	switch (objecte)
 	{
 
-	/*MAV MODIFIED*/
+		/*MAV MODIFIED*/
 	case OBJECTE_T:
 		// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material pel color de l'objecte.
 		objecte_t(sh_programID, MatriuVista, MatriuTG, sw_mat);
@@ -136,14 +137,14 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		/*MAV MODIFIED*/
 	case SPUTNIK:
 		// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material pel color de l'objecte.
-		sputnik(sh_programID, MatriuVista, MatriuTG, sw_mat, time,propulsat);
+		sputnik(sh_programID, MatriuVista, MatriuTG, sw_mat, time, propulsat);
 		break;
-	/*MAV MODIFIED*/
+		/*MAV MODIFIED*/
 	case DONUT_FACE:
 		// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material pel color de l'objecte.
 		donut_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
 		break;
-	/*MAV MODIFIED*/
+		/*MAV MODIFIED*/
 	case NAU_FACE:
 		// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material pel color de l'objecte.
 		nau_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
@@ -173,7 +174,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		/*
 		// Aplica la traslaci�n
 		//Julia: falta moure la nau a fora del sol
-		
+
 		ModelMatrix = glm::translate(inverse(MatriuVista), vec3(0.0f, -0.02f, -0.1f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.005f, 0.005f, 0.005)); // Ejemplo de escala
 		ModelMatrix = glm::rotate(ModelMatrix, radians(7.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -192,9 +193,9 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 		break;
 
-		
 
-// Dibuix de l'objecte OBJ
+
+		// Dibuix de l'objecte OBJ
 	case OBJOBJ:
 		ModelMatrix = MatriuTG;
 		// Pas ModelView Matrix a shader
@@ -209,15 +210,15 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		objecteOBJ->draw_TriVAO_OBJ(sh_programID);	// Dibuixar VAO a pantalla
 		break;
 
-// Dibuix de la resta d'objectes
+		// Dibuix de la resta d'objectes
 	default:
 		// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material.
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		break;
 	}
 
-// Enviar les comandes gr�fiques a pantalla
-//	glFlush();
+	// Enviar les comandes gr�fiques a pantalla
+	//	glFlush();
 }
 
 void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5])
@@ -225,8 +226,8 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	CColor col_object = { 0.0,0.0,0.0,1.0 };
 	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
-// Pota central
-	// generar forma
+	// Pota central
+		// generar forma
 	ModelMatrix = glm::scale(MatriuTG, vec3(1.0f, 5.0f, 1.0f));
 	// Pas a shaders Model
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
@@ -235,8 +236,8 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	draw_TriEBO_Object(GLUT_CUBE);
 
-// Cub esquerra
-	// generar forma
+	// Cub esquerra
+		// generar forma
 	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 2.0f, 1.5f));
 	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 2.0f));
 	// Pas a shaders Model
@@ -245,8 +246,8 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	draw_TriEBO_Object(GLUT_CUBE);
-// Cub dreta
-	// generar forma
+	// Cub dreta
+		// generar forma
 	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, -2.0f, 1.5f));
 	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 2.0f));
 	// Pas a shaders Model
@@ -255,8 +256,8 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	draw_TriEBO_Object(GLUT_CUBE);
-// Cub balan�a
-	// generar forma
+	// Cub balan�a
+		// generar forma
 	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 2.0f, 3.0f));
 	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 5.0f, 1.0f));
 	// Pas a shaders Model
@@ -265,8 +266,8 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	draw_TriEBO_Object(GLUT_CUBE);
-// Esfera
-	// generar forma
+	// Esfera
+		// generar forma
 	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 4.0f, 4.0f));
 	// Pas a shaders Model
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
@@ -274,8 +275,8 @@ void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 	draw_TriEBO_Object(GLU_SPHERE); //gluSphere(0.5, 20, 20);
-// Tetera
-	// generar forma
+	// Tetera
+		// generar forma
 	ModelMatrix = glm::translate(MatriuTG, vec3(0.0f, 0.0f, 3.5f));
 	ModelMatrix = glm::rotate(ModelMatrix, radians(-90.f), vec3(0.0f, 0.0f, 1.0f));
 	ModelMatrix = glm::rotate(ModelMatrix, radians(90.f), vec3(1.0f, 0.0f, 0.0f));
@@ -564,7 +565,7 @@ void drawHistoricalPath(std::vector<glm::vec3> posiciones) {
 		return;
 
 	glLineWidth(1.0f);
-	
+
 	glEnable(GL_BLEND);
 	glBegin(GL_LINE_STRIP);
 	for (size_t i = 0; i < numPositions; ++i) {
@@ -622,10 +623,10 @@ void generarAsteroides()
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> pos_dist(-2000.0f, 2000.0f); 
-	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);       
-	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);     
-	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);   
+	std::uniform_real_distribution<float> pos_dist(-2000.0f, 2000.0f);
+	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
+	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
+	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
 	for (size_t i = 0; i < NUM_ASTEROIDES; ++i) {
 		/* TESTING
@@ -642,8 +643,8 @@ void generarAsteroides()
 			ASTEROIDES[i].setVelocitat(glm::dvec3(10.0, 0.0, 0.0));
 		}
 		*/
-		float radius = radius_dist(gen);       
-		double mass = mass_dist(gen);        
+		float radius = radius_dist(gen);
+		double mass = mass_dist(gen);
 
 		glm::vec3 position(pos_dist(gen), pos_dist(gen), pos_dist(gen));
 		glm::dvec3 velocity(vel_dist(gen), vel_dist(gen), vel_dist(gen));
@@ -710,7 +711,7 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	
+
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		TestOBJ->draw_TriVAO_OBJ(sh_programID);
 
@@ -877,7 +878,7 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	float dist_focal = semi_eix_major * excentricitat;
 
 	// C�lcul de la posici� el�l�ptica del sat�l�lit
-	float anomalia = fmod((time /10)* velocitat_satelit, 360.0f);
+	float anomalia = fmod((time / 10) * velocitat_satelit, 360.0f);
 	float radians_anomalia = glm::radians(anomalia);
 
 	// Calcular la dist�ncia radial en funci� de l'excentricitat
@@ -909,7 +910,8 @@ void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
 		draw_TriEBO_Object(GLUT_CYLINDER);  // Dibuixar el sat�l�lit
 		std::cout << "FORA PLANETA" << std::endl;
-	}else{
+	}
+	else {
 		std::cout << "DINS PLANETA" << std::endl;
 	}
 
@@ -930,7 +932,7 @@ void donut_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, 
 	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 	// generar forma
 	ModelMatrix = glm::translate(inverse(MatriuVista), vec3(0.0f, 0.0f, -0.1f));
-	ModelMatrix = glm::rotate(ModelMatrix, radians(time*90.0f), vec3(0.0f, 0.0f, 1.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(time * 90.0f), vec3(0.0f, 0.0f, 1.0f));
 	ModelMatrix = glm::scale(ModelMatrix, vec3(0.001f, 0.001f, 0.001f));
 
 	// Pas a shaders Model
@@ -955,7 +957,7 @@ void nau_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 
 	// generar forma
 	ModelMatrix = glm::translate(MatriuTG, vec3(3.0f, 0.0f, 3.0f));
-	ModelMatrix = glm::rotate(ModelMatrix, radians(time*15.0f), vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(time * 15.0f), vec3(1.0f, 0.0f, 0.0f));
 	ModelMatrix = glm::scale(ModelMatrix, vec3(1.0f, 1.0f, 1.0f));
 
 	// Pas a shaders Model
@@ -976,7 +978,7 @@ void d_nau(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool 
 
 	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
-	
+
 	ModelMatrix = glm::translate(MatriuTG, nau.getO());
 	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.05f, 0.05f, 0.05)); // Ejemplo de escala
 
