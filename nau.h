@@ -105,7 +105,8 @@ public:
 	}
 
 	void setPosition(vec3 temp) {
-		m_cam.setO(temp);
+		m_cam = Camera(temp);
+		m_o = temp;
 	}
 
 	mat4 getR() const { return m_q; }

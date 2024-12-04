@@ -1,5 +1,7 @@
 #include "Planeta.h"
 
+bool paintorbit = false;
+
 // Constructors
 Planeta::Planeta() {
     m_radi = 1.0f;

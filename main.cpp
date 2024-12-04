@@ -41,6 +41,8 @@ GLuint soyut;
 GLuint iss;
 GLuint cometa;
 GLuint fons;
+GLuint menu;
+GLuint endarrera;
 
 ImVec4 colorVerd = ImVec4(0.0f, 0.749f, 0.388f, 1.0f);
 ImVec4 colorVermell = ImVec4(1.0f, 0.192f, 0.192f, 1.0f);
@@ -75,6 +77,8 @@ void cambiarVolumenSuavemente(ISound* sonido, float volumenInicial, float volume
 
 void InitGL()
 {
+	pause = false;
+
 	if (so_nau)
 		so_nau->setVolume(0.0);
 
@@ -985,6 +989,10 @@ void draw_Menu_ImGui()
 		MostrarPantallaConfiguracio(screenSize);
 	}
 
+	if (show_menu_jugador_config) {
+		MostrarPantallaMenuJugador(screenSize);
+	}
+
 	if (show_selector_planeta_origen && !show_selector_planeta_desti) {
 		MostrarPantallaSelector(screenSize, "Selecciona Planeta on començar");
 	}
@@ -1190,7 +1198,7 @@ void MostrarPantallaMenu(ImVec2* screenSize) {
 	ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
 	if (ImGui::Button("Configuració", tamany_buttons)) {
 		engine->play2D("./media/altres/seleccio_menu.wav", false, false, false);
-		show_menu_game = false;
+		//show_menu_game = false;
 		show_game_settings = true;
 	}
 
@@ -1222,6 +1230,7 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
 	*/
 
+	//Variables de config 
 	int posY = 100;
 	int marge = 60;
 
@@ -1230,6 +1239,31 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	ImVec2 espai(0.0f, 20.0f);
 
 
+	ImVec2 windowPos = ImVec2(screenSize->x - marge*2, marge); // Ajusta el -250 segons la mida de la finestra
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(marge+10, marge+10)); // Mida de la finestra
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+
+	ImGui::Begin("Endarrera", &show_user_windows, window_flags + ImGuiWindowFlags_NoBackground);
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));      // Color del botó (blanc)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 20.0f);
+
+	if (ImGui::ImageButton((void*)(intptr_t)endarrera, ImVec2(40, 40))) {
+		show_game_settings = false;
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+	ImGui::PopStyleVar();
+
+
+
+	//Titol
 	ImGui::SetNextWindowPos(ImVec2(marge, marge));
 	ImGui::SetNextWindowSize(ImVec2(600, 70));
 	ImGui::Begin("Titol", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);
@@ -1281,6 +1315,7 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	ImGui::PopStyleVar();
 
 
+	ImVec2 tamany_buttons_dins_config(300, 45);
 
 	ImVec2 subwindowSize(screenSize->x - tamany_buttons.x - marge*3, screenSize->y - marge * 5);
 
@@ -1302,31 +1337,33 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
 
 	if (show_config_grafics) {
-		if (ImGui::Button("PROVA", tamany_buttons));
+		if (ImGui::Button("Dibuixa Orbita Completa", tamany_buttons_dins_config)) {
+			paintorbit = !paintorbit;
+		}
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("PROVA2", tamany_buttons));
+		if (ImGui::Button("PROVA2", tamany_buttons_dins_config));
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("PROVA3", tamany_buttons));
+		if (ImGui::Button("PROVA3", tamany_buttons_dins_config));
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("PROVA4", tamany_buttons));
+		if (ImGui::Button("PROVA4", tamany_buttons_dins_config));
 
 
 
 	}
 	else if (show_config_so) {
-		if (ImGui::Button("SO_PROVA", tamany_buttons));
+		if (ImGui::Button("SO_PROVA", tamany_buttons_dins_config));
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("SO_PROVA2", tamany_buttons));
+		if (ImGui::Button("SO_PROVA2", tamany_buttons_dins_config));
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("SO_PROVA3", tamany_buttons));
+		if (ImGui::Button("SO_PROVA3", tamany_buttons_dins_config));
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("SO_PROVA4", tamany_buttons));
+		if (ImGui::Button("SO_PROVA4", tamany_buttons_dins_config));
 
 
 
 	}
 	else if (show_config_controladors) {
-		if (ImGui::Button("Controladors", tamany_buttons));
+		if (ImGui::Button("Controladors", tamany_buttons_dins_config));
 
 
 	}
@@ -1512,6 +1549,109 @@ void CircularProgressBar(const char* label, float progress, const ImVec2& size, 
 	ImGui::EndGroup();
 }
 
+void MostrarPantallaMenuJugador(ImVec2* screenSize) {
+
+	if (musica_menu) {
+		musica_menu->setIsPaused(false); // Pausa el sonido
+		musica_menu->setVolume(1.0f);  // Cambia el volumen (0.0 a 1.0)
+		//musica->setPlaybackSpeed(1.5f); // Cambia la velocidad de reproducción
+	}
+
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+	// Calcula les dimensions de la finestra principal
+	ImVec2 tamany_buttons(400, 55);
+	ImVec2 windowSize(tamany_buttons.x+40, tamany_buttons.y * 8);
+	ImVec2 espai(0.0f, 30.0f);
+
+	// Calcula la posició per centrar la finestra a la pantalla
+	ImVec2 windowPos = ImVec2(
+		(screenSize->x - windowSize.x) * 0.5f,
+		(screenSize->y - windowSize.y) * 0.4f
+	);
+
+	// Configura el padding de la finestra
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(windowSize);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20)); // Marge de 20 píxels
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 20.0f); // Cantonades rodones de 15 píxels
+
+	// Configura el color de fons blanc
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); // Blanc opac
+	//ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Blanc opac
+
+	ImGui::Begin("Menus", &show_menu_game, window_flags);
+
+	// Configura els colors i l'estil dels botons
+	/*ImVec4 pastelGreen(0.7f, 0.9f, 0.7f, 1.0f);         // Verd pastel
+	ImVec4 hoverGreen(0.6f, 0.85f, 0.6f, 1.0f);        // Verd més intens quan es passa el ratolí
+	ImVec4 activeGreen(0.5f, 0.8f, 0.5f, 1.0f);        // Verd més fosc quan es fa clic
+
+	ImGui::PushStyleColor(ImGuiCol_Button, pastelGreen);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverGreen);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeGreen);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f); // Arrodoniment de 12 píxels per als botons*/
+	ImVec4 buttonWhite(1.0f, 1.0f, 1.0f, 1.0f);         // Color blanc
+	ImVec4 hoverGray(0.9f, 0.9f, 0.9f, 1.0f);          // Gris clar quan es passa el ratolí
+	ImVec4 activeGray(0.8f, 0.8f, 0.8f, 1.0f);         // Gris més fosc quan es fa clic
+
+	ImGui::PushStyleColor(ImGuiCol_Button, buttonWhite);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverGray);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeGray);
+
+	// Centra el text "Menu"
+	//ImVec4 textColor(0.2f, 0.2f, 0.2f, 1.0f); // Gris fosc
+	ImVec4 textColor(1.0f, 1.0f, 1.0f, 1.0f); // Gris fosc
+	ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+	ImGui::PushFont(silkscreensubtitle);
+
+	ImVec2 textSize = ImGui::CalcTextSize("Menu"); // Mida del text
+	float textPosX = (windowSize.x - textSize.x) * 0.5f; // Calcula la posició X centrada
+	ImGui::SetCursorPosX(textPosX); // Situa el cursor al punt centrat
+	ImGui::Text("Menu");
+
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+
+	// Dibuixa espais i botons
+	ImGui::Dummy(espai);
+
+	if (ImGui::Button("Continuar", tamany_buttons)) {
+		show_menu_jugador_config = !show_menu_jugador_config;
+		pause = !pause;
+	}
+
+	ImGui::Dummy(espai);
+	if (ImGui::Button("Configuració", tamany_buttons)) {
+		show_game_settings = true;
+	}
+
+	ImGui::Dummy(espai);
+	if (ImGui::Button("Sortir del Joc", tamany_buttons)) {
+		glfwSetWindowShouldClose(window, GL_TRUE);  // Marca la finestra per tancar
+	}
+
+	ImGui::PopStyleVar(); // Padding
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+
+	// Recupera els estils generals
+	ImGui::PopStyleVar(2); // Padding
+	ImGui::PopStyleColor(); // Background
+
+
+}
 
 void MostrarPantallaJoc(ImVec2* screenSize) {
 
@@ -1555,10 +1695,11 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
 	*/
 
-	/*
+	
 
-	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(250, 100));
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(60, 60));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
 
 	ImGui::Begin("Opcions", &show_user_windows, window_flags + ImGuiWindowFlags_NoBackground);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 	// Configura els colors i l'estil
@@ -1567,14 +1708,18 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
 
 	// Arrodoniment
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f);
-	if (ImGui::Button("Planetes", ImVec2(200, 35))) {
-		std::cout << "Clicat" << "!" << std::endl;
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 20.0f);
+	//if (ImGui::Button("Planetes", ImVec2(200, 35))) {
+	if (ImGui::ImageButton((void*)(intptr_t)menu, ImVec2(30,30))) {
+		show_menu_jugador_config = !show_menu_jugador_config;
+		pause = !pause;
 	}
+
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor(3);
 	ImGui::End();
-	*/
+	ImGui::PopStyleVar();
+
 	//std::cout << std::endl;
 	vec3 posnau = nau.getCam().getO();
 
@@ -1582,7 +1727,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	//bool isNearAnyPlanet = false;
 	float llindar = DISTANCIA_DEFAULT_TERRA * 0.4;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
 	float llindarAlertaPerill = DISTANCIA_DEFAULT_TERRA * 0.1;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
-	float minim = 99999999999;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
+	float minim = std::numeric_limits<float>::max();  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
 	int planetaAprop = -1;
 	int planetaMoltAprop = -1;
 
@@ -1718,7 +1863,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 
 
 
-	ImVec2 ColumnaSize(120, 240); // Augmentem l'altura per donar espai al text
+	ImVec2 ColumnaSize(70, 240); // Augmentem l'altura per donar espai al text
 	ImVec2 ColumnaPos = ImVec2(screenSize->x - ColumnaSize.x, screenSize->y - ColumnaSize.y-300);
 	ImGui::SetNextWindowPos(ColumnaPos, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ColumnaSize);
@@ -1748,13 +1893,13 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::GetWindowDrawList()->AddRect(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(0, 0, 0, 255));
 
 	// Ajustem la posició per al text sota la barra
-	ImVec2 textSize = ImGui::CalcTextSize("Empenta");
+	ImVec2 textSize = ImGui::CalcTextSize("Gas");
 	ImVec2 textPos = ImVec2(
-		pos.x + (size.x - textSize.x * 0.5f) + 10,  // Centrat horitzontalment respecte a la barra
+		pos.x + (size.x - textSize.x * 0.5f)-20,  // Centrat horitzontalment respecte a la barra
 		pos.y + size.y + 5                     // Una mica més avall del final de la barra
 	);
-	ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), "Empenta");
-
+	ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), "Gas");
+	
 	ImGui::End();
 
 
@@ -1784,6 +1929,8 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	ImVec2 minimapPosition = ImVec2(screenSize->x - minimapSize.x, screenSize->y - minimapSize.y);
 	ImGui::SetNextWindowSize(ImVec2(minimapSize.x, minimapSize.y));
 	ImGui::SetNextWindowPos(minimapPosition);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
 	if (ImGui::Begin("MiniMapa", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize)) {
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		ImVec2 p = ImGui::GetCursorScreenPos();
@@ -1812,13 +1959,19 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 			ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 			//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 			if (planeta.getName() == "Sol") {
-				drawList->AddCircleFilled(planetaPos, 10.0f, colorSol);
+				drawList->AddCircleFilled(planetaPos, 12.0f, colorSol);
 
-			}else if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
-				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
+			}else if (PlanetOrigen != -1 && PlanetDesti != -1) {
+				if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
+					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
 
-			}else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
-				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
+				}
+				else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
+					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
+				}
+				else {
+					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
+				}
 			}
 			else {
 				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
@@ -1829,12 +1982,37 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 		// Dibuixar els asteroides
 		for (const auto& asteroide : ASTEROIDES) {
 			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
-			drawList->AddCircleFilled(asteroidePos, 5.0f, colorAsteroides);  // Vermell
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);  // Vermell
 		}
 
 		// Dibuixa el jugador
+		//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
+		//drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
+
+		// Centre del jugador en el mapa
 		ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
-		drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
+
+		// Radi del triangle i orientació
+		float triangleSize = 5.0f; // Longitud del triangle
+		float orientacio = nau.getCam().getAngle(); // Orientació en radians
+		std::cout << orientacio << std::endl;
+		// Calcular els vèrtexs del triangle
+		ImVec2 p1 = ImVec2(
+			jugadorPos.x + cos(orientacio) * triangleSize,
+			jugadorPos.y + sin(orientacio) * triangleSize
+		);
+		ImVec2 p2 = ImVec2(
+			jugadorPos.x + cos(orientacio + IM_PI * 2.0f / 3.0f) * triangleSize,
+			jugadorPos.y + sin(orientacio + IM_PI * 2.0f / 3.0f) * triangleSize
+		);
+		ImVec2 p3 = ImVec2(
+			jugadorPos.x + cos(orientacio - IM_PI * 2.0f / 3.0f) * triangleSize,
+			jugadorPos.y + sin(orientacio - IM_PI * 2.0f / 3.0f) * triangleSize
+		);
+
+		// Dibuixar el triangle
+		drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
+		
 
 		// Dibuixa els planetes
 		/*for (const auto& planeta : PLANETES) {
@@ -1869,7 +2047,11 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 		*/
 	}
 	ImGui::End();
+	ImGui::PopStyleVar();
+
 }
+
+
 ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon,
 	const glm::vec3& worldSize,
 	const ImVec2& minimapSize,
@@ -1962,7 +2144,7 @@ void IniciarSimulador() {
 	show_fons = false;
 
 	//std::cout << PlanetOrigen << std::endl;
-	//nau.setPosition(vec3(PLANETES[PlanetOrigen].getPosition().x + 20.0f, PLANETES[PlanetOrigen].getPosition().y + 20.0f,0));
+	nau.setPosition(vec3(PLANETES[PlanetOrigen].getPosition().x + 20.0f, PLANETES[PlanetOrigen].getPosition().y + 20.0f,0));
 	//nau.getCam().getO().x
 	
 	//opvN.x = PLANETES[PlanetOrigen].getPosition().x + 20.0f;
@@ -6012,12 +6194,13 @@ int main(void)
 	}
 
 	PosicionsInicialsSistemaSolar();
+	menu = loadIMA_SOIL("textures/menu/menu.png");
 	mars = loadIMA_SOIL("textures/menu/mars.png");
 	soyut = loadIMA_SOIL("textures/menu/soyut.png");
 	iss = loadIMA_SOIL("textures/menu/iss.png");
 	cometa = loadIMA_SOIL("textures/menu/asteroid.png");
 	fons = loadIMA_SOIL("textures/menu/space2gran.jpeg");
-
+	endarrera = loadIMA_SOIL("textures/menu/atras.png");
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -6028,6 +6211,7 @@ int main(void)
 		// Entorn VGI. Timer: common part, do this only once
 		now = glfwGetTime();
 		G_DELTA = delta = now - previous;
+		if (pause) delta = 0;
 		previous = now;
 
 		// Entorn VGI. Timer: for each timer do this

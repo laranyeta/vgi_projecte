@@ -94,6 +94,8 @@ private:
 	double m_inclinacio;      // i (radians)
 	double m_long_node_asc;    // Ω (radians)
 	double m_periapsis;    // ω (radians)
-};	
+};
+
+extern bool paintorbit;
 
 #endif

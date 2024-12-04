@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef CAMERA_H
 #define CAMERA_H
@@ -32,15 +32,16 @@ public:
 	m_u = vec3( 0, 1, 0);
 	m_v = cross(m_u, m_n);
 	}
-	Camera(vec3 o, vec3 p, vec3 v)
+	Camera(vec3 o)
 	{
-		m_o = o;
-		m_p = p;
+		m_o = o + RAD * vec3(cos(ANG), 0, sin(ANG));
+		m_p = o + vec3(0, 0, sin(ANG));
 
-		m_n = normalize(p - o);
-		m_v = v;
-		m_u = cross(m_n, m_v);
+		m_n = -m_o / RAD;
+		m_u = vec3(0, 1, 0);
+		m_v = cross(m_u, m_n);
 	}
+
 	~Camera() {}
 
 	void setN(vec3 n) { m_n = n; }
@@ -54,11 +55,27 @@ public:
 	vec3 getU() { return m_u; }
 	vec3 getO() { return m_o; }
 	vec3 getP() { return m_p; }
+	float getAngle() {
+		vec2 n = vec2(m_n.x, m_n.y); // Vector normal
+		vec2 u = vec2(m_u.x, m_u.y); // Vector de referència
+
+		// Angle entre els vectors
+		float angle = acos(dot(normalize(n), normalize(u)));
+
+		float cross = n.x * u.y - n.y * u.x;
+
+		if (cross < 0) {
+			angle = 2.0f * PI - angle;
+		}
+
+		return angle; // Retorna l’angle entre 0 i 2π
+	}
+
 
 	// MOVIMENT
 	void move(vec3 move) { m_o += move; m_p += move; }
 
-	// ROTACI� SOBRE SI MATEIX
+	// ROTACIÓ SOBRE SI MATEIX
 	void rotN(float angle) {
 		rotation_axis(m_v, angle, m_n);
 		rotation_axis(m_u, angle, m_n);
@@ -81,7 +98,7 @@ public:
 		rotation_axis(m_u, angle, axis);
 	}
 
-	// ROTACI� AL VOLTANT OBJECTE
+	// ROTACIÓ AL VOLTANT OBJECTE
 	void orbX(float angle, vec3 axis, vec3 x) {
 		rotation_axis(m_o, angle, axis, x);
 		rotation_axis(m_p, angle, axis, x);

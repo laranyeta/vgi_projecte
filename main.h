@@ -43,10 +43,13 @@ bool show_game_window = false;
 bool show_game_settings = false;
 bool show_fons = true;
 bool show_pantalla_carrega = false;
+bool show_menu_jugador_config = false;
 
 bool show_config_grafics = true;
 bool show_config_so = false;
 bool show_config_controladors = false;
+
+
 
 ImFont* rainyhearts;
 ImFont* silkscreen;
@@ -231,6 +234,7 @@ int rotateN, rotateV, rotateU, rotateCount;
 //bool angleControl[6]; int angleCount;
 Nau nau;
 Camera camProva;
+bool pause;
 
 //-------------- Entorn VGI: Fi De Variables globals de main
 
@@ -328,3 +332,4 @@ ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,
 	const glm::vec3& worldSize,
 	const ImVec2& minimapSize,
 	const glm::vec3& posicioJugador);
+void MostrarPantallaMenuJugador(ImVec2* screenSize);

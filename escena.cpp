@@ -590,7 +590,7 @@ bool estaForaDelsLimits(const Asteroide& asteroide)
 void resetAsteroide(Asteroide& asteroide, std::mt19937& gen)
 {
 	std::uniform_real_distribution<float> pos_dist(-MAX_DISTANCIA_ASTEROIDES / 2.0f, MAX_DISTANCIA_ASTEROIDES / 2.0f);
-	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
+	std::uniform_real_distribution<double> vel_dist(-0.2, 0.2);
 	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
@@ -624,7 +624,7 @@ void generarAsteroides()
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> pos_dist(-2000.0f, 2000.0f);
-	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
+	std::uniform_real_distribution<double> vel_dist(-0.2, 0.2);
 	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
@@ -744,7 +744,6 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	updatePlanetesAnalytical(time);
 	for (auto& planeta : PLANETES)
 	{
-		//drawOrbitPath(planeta);
 		// Posici� inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
@@ -778,7 +777,13 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		glm::mat4 ModelMatrixOrbit = glm::mat4(1.0f);
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrixOrbit[0][0]);
 		planeta.agregarPosicionHistorica(planeta.getPosition());
-		drawHistoricalPath(planeta.getPosicionesHistoricas());
+		if (paintorbit){
+			drawOrbitPath(planeta);
+		}
+		else {
+			drawHistoricalPath(planeta.getPosicionesHistoricas());
+		}
+
 	}
 
 }
