@@ -57,12 +57,12 @@ public:
 	vec3 getP() { return m_p; }
 	float getAngle() {
 		vec2 n = vec2(m_n.x, m_n.y); // Vector normal
-		vec2 u = vec2(m_u.x, m_u.y); // Vector de referència
+		vec2 v = vec2(m_v.x, m_v.y); // Vector de referència
 
 		// Angle entre els vectors
-		float angle = acos(dot(normalize(n), normalize(u)));
+		float angle = acos(dot(normalize(n), normalize(v)));
 
-		float cross = n.x * u.y - n.y * u.x;
+		float cross = n.x * v.y - n.y * v.x;
 
 		if (cross < 0) {
 			angle = 2.0f * PI - angle;

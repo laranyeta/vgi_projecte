@@ -1993,26 +1993,30 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 		ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
 
 		// Radi del triangle i orientació
-		float triangleSize = 5.0f; // Longitud del triangle
+		float puntaLlargada = 8.0f; // Longitud de la punta
+		float baseAmple = 5.0f;    // Ample de la base del triangle
 		float orientacio = nau.getCam().getAngle(); // Orientació en radians
 		std::cout << orientacio << std::endl;
+
 		// Calcular els vèrtexs del triangle
 		ImVec2 p1 = ImVec2(
-			jugadorPos.x + cos(orientacio) * triangleSize,
-			jugadorPos.y + sin(orientacio) * triangleSize
+			jugadorPos.x + cos(orientacio) * puntaLlargada,
+			jugadorPos.y + sin(orientacio) * puntaLlargada
 		);
+
 		ImVec2 p2 = ImVec2(
-			jugadorPos.x + cos(orientacio + IM_PI * 2.0f / 3.0f) * triangleSize,
-			jugadorPos.y + sin(orientacio + IM_PI * 2.0f / 3.0f) * triangleSize
+			jugadorPos.x + cos(orientacio + IM_PI * 0.75f) * baseAmple,
+			jugadorPos.y + sin(orientacio + IM_PI * 0.75f) * baseAmple
 		);
+
 		ImVec2 p3 = ImVec2(
-			jugadorPos.x + cos(orientacio - IM_PI * 2.0f / 3.0f) * triangleSize,
-			jugadorPos.y + sin(orientacio - IM_PI * 2.0f / 3.0f) * triangleSize
+			jugadorPos.x + cos(orientacio - IM_PI * 0.75f) * baseAmple,
+			jugadorPos.y + sin(orientacio - IM_PI * 0.75f) * baseAmple
 		);
 
 		// Dibuixar el triangle
 		drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
-		
+
 
 		// Dibuixa els planetes
 		/*for (const auto& planeta : PLANETES) {
