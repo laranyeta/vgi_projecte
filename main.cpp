@@ -2016,7 +2016,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 
 		// Dibuixar el triangle
 		drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
-
+		
 
 		// Dibuixa els planetes
 		/*for (const auto& planeta : PLANETES) {
@@ -4906,7 +4906,7 @@ void Moviment_Nau()
 
 
 		// Moviment endavant/enrere (eix vertical joystick esquerre o botó 'A')
-		if (buttons[0] == GLFW_PRESS && fuel > 0) // Llindar per evitar "drift"
+		if (buttons[0] == GLFW_PRESS && fuel > 0) 
 		{
 			nau.move(nau.getN() * (float)fact_nau);
 			nau.incPotencia();
