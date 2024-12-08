@@ -226,6 +226,7 @@ double u[3]; //direccio derecha
 bool pressW, pressS, pressA, pressD, pressZ, pressX, pressUP, pressDOWN, pressLEFT, pressRIGHT, pressQ, pressE, pressR;
 bool mouseControl;
 COBJModel* TestOBJ;
+COBJModel* CombustibleOBJ;
 
 int moveN, moveV, moveU, moveCount;
 int rotateN, rotateV, rotateU, rotateCount;
@@ -326,6 +327,7 @@ void CircularProgressBar(const char* label, float progress, const ImVec2& size, 
 void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
 void SetWindowIcon(GLFWwindow* window, const char* iconPath);
 void generarAsteroides();
+void generarAsteroidesCinturo();
 ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition);
 
 ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,

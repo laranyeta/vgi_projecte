@@ -82,7 +82,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 	COBJModel* objecteOBJ,
-	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau nau, COBJModel* TestOBJ)
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ)
 {
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
@@ -154,6 +154,8 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur);
 		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
+		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
+		//objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object);
 		// Activar transpar�ncia
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -656,6 +658,52 @@ void generarAsteroides()
 	}
 }
 
+void generarAsteroidesCinturo() {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * glm::pi<float>()); // Angle al voltant del cercle
+	std::uniform_real_distribution<float> radius_dist(160.0f, 180.0f);               // Radi del cercle (cinturó 1)
+	std::uniform_real_distribution<float> radius_dist2(1560.0f, 1580.0f);               // Radi del cercle (cinturó 2)
+	std::uniform_real_distribution<float> height_dist(-8.0f, 8.0f);                // Alçada limitada en l'eix Y
+	std::uniform_real_distribution<float> scale_dist(0.2f, 1.0f);                    // Escala dels asteroides
+	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);                // Massa dels asteroides
+
+	//ASTEROIDESCINTURO.clear(); // Esborra els asteroides existents si n'hi ha
+
+	for (size_t i = 0; i < NUM_ASTEROIDES_CINTURO; ++i) {
+		float angle = angle_dist(gen);    // Angle en radians al voltant del cercle
+		float radius = 0.0; // Distància radial des del centre
+		std::cout << NUM_ASTEROIDES_CINTURO / 2 << std::endl;
+		std::cout << i << std::endl;
+		std::cout << "  " << std::endl;
+		if (i >= NUM_ASTEROIDES_CINTURO/2) {
+			radius = radius_dist2(gen);
+		}else{
+			radius = radius_dist(gen);
+		}
+		float height = height_dist(gen); // Posició en l'eix vertical (Y)
+
+		// Calcula la posició en coordenades cartesianes
+		float x = radius * cos(angle);
+		float y = radius * sin(angle);
+		float z = height; // Limitat a un rang estret (-10 a 10)
+
+		// Propietats de l'asteroide
+		float scale = scale_dist(gen);
+		double mass = mass_dist(gen);
+
+		// Crear l'asteroide
+		//Asteroide asteroide;
+		ASTEROIDESCINTURO[i].setMassa(mass);
+		ASTEROIDESCINTURO[i].setRadi(scale);
+		ASTEROIDESCINTURO[i].setPosition(glm::vec3(x, y,z)); // Assignar posició
+		ASTEROIDESCINTURO[i].setVelocitat(glm::dvec3(0.0, 0.0, 0.0)); // Velocitat inicial nul·la (per girar després)
+
+		//ASTEROIDESCINTURO.push_back(asteroide); // Afegir a la llista
+	}
+}
+
+
 void processaAsteroides()
 {
 	generarAsteroides();
@@ -721,6 +769,126 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 		drawHistoricalPath(asteroide.getPosicionesHistoricas());
 	}
 }
+
+void actualitzarAsteroidesCinturo(double deltaTime)
+{
+	float velocitatAngulartemp = 0.005f; // Velocitat angular (rad/s). Ajusta segons el que sembli més natural.
+	int i = 0;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> vel_rand(0.0001f, 0.001f);
+	float velocitatAngular = velocitatAngulartemp + vel_rand(gen);
+
+	for (auto& asteroide : ASTEROIDESCINTURO)
+	{
+		if (i >= NUM_ASTEROIDES_CINTURO / 2) {
+			velocitatAngular = velocitatAngulartemp / 10 + vel_rand(gen);
+		}
+
+		glm::vec3 pos = asteroide.getPosition();
+		float radiOrbita = glm::length(glm::vec2(pos.x, pos.y)); // Distància al centre en el pla XZ.
+
+		// Calcular l'angle actual i el nou angle d'òrbita
+		float angleActual = atan2(pos.y, pos.x); // Angle polar en el pla XZ
+		float angleNou = angleActual + velocitatAngular * deltaTime; // Nou angle actualitzat
+
+		// Calcula la nova posició orbital al pla XZ
+		pos.x = radiOrbita * cos(angleNou);
+		pos.y = radiOrbita * sin(angleNou);
+
+		// Moviment oscil·latori opcional en Y per fer que sembli més natural
+		//float amplitudOscilY = 5.0f; // Amplitud del moviment en Y
+		//float freqOscilY = 0.1f;    // Freqüència d'oscil·lació en Y
+		//pos.y = amplitudOscilY * sin(angleNou * freqOscilY);
+
+		// Actualitza la posició de l'asteroide
+		asteroide.setPosition(pos);
+		i++;
+	}
+}
+void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* CombustibleOBJ, CColor col_object) {
+
+	/*static bool inicialitzat = false;
+	static double lastTime = time;
+
+	double deltaTime = time - lastTime; // Calcula el temps entre frames
+	lastTime = time;
+
+
+	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+	ModelMatrix = glm::translate(MatriuTG, glm::vec3(20.0, 20.0, 20.0));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.0, 0.0, 0.0));
+
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+	NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+	CombustibleOBJ->draw_TriVAO_OBJ(sh_programID);
+	*/
+	// SPACESHIP
+	//CColor col_object = { 0.0,1.0,1.0,1.0 };
+	//SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+
+	glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+
+
+	ModelMatrix = glm::translate(MatriuTG, glm::vec3(20.0, 20.0, 20.0));
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.05f, 0.05f, 0.05)); // Ejemplo de escala
+
+
+	//ModelMatrix = ModelMatrix * nau.getR();
+
+	ModelMatrix = glm::rotate(ModelMatrix, radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix = glm::rotate(ModelMatrix, radians(90.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+
+	// Pasar la ModelMatrix actualizada al shader
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+
+	// Calcular y pasar la NormalMatrix al shader
+	NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+	// Configuraci�n del material y dibujo del objeto
+	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+	CombustibleOBJ->draw_TriVAO_OBJ(sh_programID);
+}
+
+void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object) {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	static bool inicialitzat = false;
+	static double lastTime = time;
+
+	if (!inicialitzat) {
+		generarAsteroidesCinturo(); // Generar asteroides
+		inicialitzat = true;
+	}
+
+	double deltaTime = time - lastTime; // Calcula el temps entre frames
+	lastTime = time;
+
+	// Actualitza la posició dels asteroides del cinturó
+	actualitzarAsteroidesCinturo(deltaTime);
+
+	for (auto& asteroide : ASTEROIDESCINTURO)
+	{
+		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+		ModelMatrix = glm::translate(MatriuTG, asteroide.getPosition());
+		float radi = asteroide.getRadi();
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(radi, radi, radi));
+
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+		TestOBJ->draw_TriVAO_OBJ(sh_programID);
+	}
+}
+
 
 
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,

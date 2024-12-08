@@ -28,8 +28,10 @@
 #include "irrKlang.h"
 const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
 const char* rutaArchivoTest = "./OBJFiles/asteroid/Asteroid_1e.obj";
+const char* rutaArxiuCombustible = "./OBJFiles/Coet/COET JM.obj";
 std::vector<Planeta> PLANETES;
 std::vector<Asteroide> ASTEROIDES;
+std::vector<Asteroide> ASTEROIDESCINTURO;
 
 int PlanetOrigen = -1;
 int PlanetDesti = -1;
@@ -687,7 +689,7 @@ void dibuixa_Escena(float time) {
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet,
 		ObOBJ,				// Classe de l'objecte OBJ que conté els VAO's
-		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau, TestOBJ);
+		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau, TestOBJ, CombustibleOBJ);
 }
 
 
@@ -1913,6 +1915,9 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	// Color per als asteroides
 	ImU32 colorAsteroides = IM_COL32(255, 0, 0, 255);  // Vermell
 
+	// Color per als asteroides
+	ImU32 colorAsteroidescinturons = IM_COL32(139, 69, 19, 155);  // Marró roca
+
 	// Color per al planeta d'origen
 	ImU32 colorPlanetaOrigen = IM_COL32(0, 255, 0, 255);  // Verd
 
@@ -1984,7 +1989,11 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
 			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);  // Vermell
 		}
-
+		
+		for (const auto& asteroide : ASTEROIDESCINTURO) {
+			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
+		}
 		// Dibuixa el jugador
 		//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
 		//drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
@@ -2204,6 +2213,13 @@ void IniciarSimulador() {
 		asteroide.setName("Asteroide_" + std::to_string(i + 1));
 		ASTEROIDES.push_back(asteroide);
 	}
+
+	for (size_t i = 0; i < NUM_ASTEROIDES_CINTURO; ++i) {
+		Asteroide asteroide;
+		asteroide.setName("Asteroide_Cinturo_" + std::to_string(i + 1));
+		ASTEROIDESCINTURO.push_back(asteroide);
+	}
+
 	// ISMAEL CONTINUAR
 	/*for (int i = 0; i < 10; i++)
 	{
@@ -2251,13 +2267,29 @@ void IniciarSimulador() {
 		TestOBJ->netejaTextures_OBJ();
 	}
 	int error2 = TestOBJ->LoadModel(nomOBJTest);
+	//int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+	free(nomOBJTest);
+	//std::this_thread::sleep_for(std::chrono::seconds(4));
+	
+	nfdchar_t* nomOBJCombustible = (nfdchar_t*)malloc((strlen(rutaArxiuCombustible) + 1) * sizeof(nfdchar_t));
+
+	strcpy(nomOBJCombustible, rutaArxiuCombustible);
+
+	if (CombustibleOBJ == NULL)
+		CombustibleOBJ = ::new COBJModel;
+	else {
+		CombustibleOBJ->netejaVAOList_OBJ();
+		CombustibleOBJ->netejaTextures_OBJ();
+	}
+	int error3 = CombustibleOBJ->LoadModel(nomOBJCombustible);
 	int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
 
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
-	free(nomOBJ);
-	//std::this_thread::sleep_for(std::chrono::seconds(4));
-
+	free(nomOBJCombustible);
 }
 
 void MostrarMenuDebug(ImVec2* screenSize) {
