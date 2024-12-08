@@ -328,6 +328,7 @@ void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
 void SetWindowIcon(GLFWwindow* window, const char* iconPath);
 void generarAsteroides();
 void generarAsteroidesCinturo();
+void generarDiposits();
 ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition);
 
 ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,

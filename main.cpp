@@ -26,12 +26,16 @@
 #include "asteroide.h"
 #include <random>
 #include "irrKlang.h"
+#include "objectesEspai.h"
+
 const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
 const char* rutaArchivoTest = "./OBJFiles/asteroid/Asteroid_1e.obj";
 const char* rutaArxiuCombustible = "./OBJFiles/Coet/COET JM.obj";
+const char* rutaArxiuEstacio= "./OBJFiles/station/spacedock.obj";
 std::vector<Planeta> PLANETES;
 std::vector<Asteroide> ASTEROIDES;
 std::vector<Asteroide> ASTEROIDESCINTURO;
+std::vector<objectesEspai> OBJECTESJOC;
 
 int PlanetOrigen = -1;
 int PlanetDesti = -1;
@@ -1918,6 +1922,9 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	// Color per als asteroides
 	ImU32 colorAsteroidescinturons = IM_COL32(139, 69, 19, 155);  // Marró roca
 
+	// Color per als Diposits FUEL
+	ImU32 colorDiposits = IM_COL32(0, 255, 255, 255);
+
 	// Color per al planeta d'origen
 	ImU32 colorPlanetaOrigen = IM_COL32(0, 255, 0, 255);  // Verd
 
@@ -1989,11 +1996,28 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
 			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);  // Vermell
 		}
-		
+
 		for (const auto& asteroide : ASTEROIDESCINTURO) {
 			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
 			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
 		}
+
+		for (const auto& Objjoc : OBJECTESJOC) {
+			// Converteix la posició del dipòsit al mini mapa
+			ImVec2 objEspaiPos = convertirAPosicioMiniMapa(Objjoc.getPosition(), worldSize, minimapSize, p);
+
+			// Dimensions de la pastilla
+			float pillWidth = 8.0f;   // Amplada de la pastilla
+			float pillHeight = 4.0f;  // Alçada de la pastilla
+			float cornerRadius = 2.0f; // Radi de les vores arrodonides
+
+			// Dibuixa la pastilla com un rectangle arrodonit
+			drawList->AddRectFilled(ImVec2(objEspaiPos.x - pillWidth / 2, objEspaiPos.y - pillHeight / 2),
+				ImVec2(objEspaiPos.x + pillWidth / 2, objEspaiPos.y + pillHeight / 2),
+				colorDiposits, cornerRadius);
+		}
+
+
 		// Dibuixa el jugador
 		//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
 		//drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
@@ -2220,6 +2244,12 @@ void IniciarSimulador() {
 		ASTEROIDESCINTURO.push_back(asteroide);
 	}
 
+	for (size_t i = 0; i < NUM_DIPOSITS; ++i) {
+		objectesEspai objJoc;
+		objJoc.setName("Diposit" + std::to_string(i + 1));
+		OBJECTESJOC.push_back(objJoc);
+	}
+	
 	// ISMAEL CONTINUAR
 	/*for (int i = 0; i < 10; i++)
 	{
