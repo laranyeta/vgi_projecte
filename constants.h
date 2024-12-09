@@ -16,7 +16,8 @@
 extern std::vector<Planeta> PLANETES;
 extern std::vector<Asteroide> ASTEROIDES;
 extern std::vector<Asteroide> ASTEROIDESCINTURO;
-extern std::vector<objectesEspai> OBJECTESJOC;
+extern std::vector<objectesEspai> DIPOSITS;
+extern std::vector<objectesEspai> ESTACIONS;
 
 //--------------- VGI: Tipus de Càmera
 #define CAP ' '
@@ -135,6 +136,7 @@ const int NUM_MAX_LLUMS = 8;
 const int NUM_ASTEROIDES = 50;
 const int NUM_ASTEROIDES_CINTURO = 300;
 const int NUM_DIPOSITS = 30;
+const int NUM_ESTACIONS = 5;
 const float MAX_DISTANCIA_ASTEROIDES = 250.0f;
 // TRAJ ORBIT ISMAEL
 const size_t BASE_POINTS = 300;

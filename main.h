@@ -227,6 +227,7 @@ bool pressW, pressS, pressA, pressD, pressZ, pressX, pressUP, pressDOWN, pressLE
 bool mouseControl;
 COBJModel* TestOBJ;
 COBJModel* CombustibleOBJ;
+COBJModel* EstacioOBJ;
 
 int moveN, moveV, moveU, moveCount;
 int rotateN, rotateV, rotateU, rotateCount;
@@ -329,6 +330,7 @@ void SetWindowIcon(GLFWwindow* window, const char* iconPath);
 void generarAsteroides();
 void generarAsteroidesCinturo();
 void generarDiposits();
+void generarEstacions();
 ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition);
 
 ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,

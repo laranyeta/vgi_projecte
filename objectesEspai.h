@@ -31,7 +31,7 @@ public:
     void setVelocitat(const glm::dvec3& velocitat);
     void setAngleRotacio(float angleRotacio);
     void setPosition(const glm::vec3& position);
-    void setCombustible(const float fuel);
+    void setValor(const float value);
     std::vector<glm::vec3> posicionesHistoricas;
 private:
     size_t m_puntsOrbita;
@@ -43,6 +43,6 @@ private:
     double m_radi_orbita;
     float m_radi;
     int m_type;// 1: Combustible, 2: Estacio Vida
-    float m_fuel;
+    float m_valor;
 };
 

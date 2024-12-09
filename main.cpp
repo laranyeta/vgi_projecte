@@ -31,11 +31,12 @@
 const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
 const char* rutaArchivoTest = "./OBJFiles/asteroid/Asteroid_1e.obj";
 const char* rutaArxiuCombustible = "./OBJFiles/Coet/COET JM.obj";
-const char* rutaArxiuEstacio= "./OBJFiles/station/spacedock.obj";
+const char* rutaArxiuEstacio= "./OBJFiles/station/InternationalSpaceStation.obj";
 std::vector<Planeta> PLANETES;
 std::vector<Asteroide> ASTEROIDES;
 std::vector<Asteroide> ASTEROIDESCINTURO;
-std::vector<objectesEspai> OBJECTESJOC;
+std::vector<objectesEspai> DIPOSITS;
+std::vector<objectesEspai> ESTACIONS;
 
 int PlanetOrigen = -1;
 int PlanetDesti = -1;
@@ -54,6 +55,24 @@ ImVec4 colorVerd = ImVec4(0.0f, 0.749f, 0.388f, 1.0f);
 ImVec4 colorVermell = ImVec4(1.0f, 0.192f, 0.192f, 1.0f);
 ImVec4 colorTaronja = ImVec4(1.0f, 0.569f, 0.302f, 1.0f);
 
+// Color per als planetes
+ImU32 colorPlanetes = IM_COL32(255, 255, 255, 255);  // Blanc
+// Color per al jugador
+ImU32 colorJugador = IM_COL32(255, 255, 0, 255);  // Groc
+// Color per als asteroides
+ImU32 colorAsteroides = IM_COL32(255, 0, 0, 255);  // Vermell
+// Color per als asteroides
+ImU32 colorAsteroidescinturons = IM_COL32(139, 69, 19, 155);  // Marró roca
+// Color per als Diposits FUEL
+ImU32 colorDiposits = IM_COL32(0, 255, 255, 255); // Blau Brillant
+// Color per al planeta d'origen
+ImU32 colorPlanetaOrigen = IM_COL32(0, 255, 0, 255);  // Verd
+// Color per al planeta de destí
+ImU32 colorPlanetaDesti = IM_COL32(0, 0, 255, 255);  // Blau
+// Color per al Sol
+ImU32 colorSol = IM_COL32(255, 255, 0, 255);  // Groc brillant
+//Color per Estacions de vida
+ImU32 colorEstacions = IM_COL32(255, 165, 0, 255); // Taronja Brillant 
 
 using namespace irrklang;
 /* Luis inici so--------------------------------------------------------------------------------------------------------------------------------*/
@@ -693,7 +712,7 @@ void dibuixa_Escena(float time) {
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet,
 		ObOBJ,				// Classe de l'objecte OBJ que conté els VAO's
-		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau, TestOBJ, CombustibleOBJ);
+		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau, TestOBJ, CombustibleOBJ,EstacioOBJ);
 }
 
 
@@ -1658,6 +1677,47 @@ void MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 
 }
+void drawOrbitPath2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList) {
+	// Defineix el nombre de punts per a l'òrbita
+	const int numPoints = 360;
+	float a = planeta.getSemieixMajor() * ESCALA_DISTANCIA; // Semieix major escalat
+	float e = planeta.getExcentricitat(); // Excentricitat
+	float longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del node ascendent en radians
+
+	// Contenidor per als punts de l'òrbita
+	std::vector<ImVec2> orbitPoints;
+
+	// Calcular els punts de l'òrbita
+	for (int i = 0; i < numPoints; ++i) {
+		// Anomalia veritable
+		float nu = 2.0f * IM_PI * i / numPoints;
+
+		// Radi en aquest punt de l'òrbita
+		float r = a * (1 - e * e) / (1 + e * cos(nu));
+
+		// Posició en el pla orbital (2D)
+		float x_orb = r * cos(nu);
+		float y_orb = r * sin(nu);
+
+		// Aplicar rotació pel node ascendent
+		float x_rot = cos(longNodeAsc) * x_orb - sin(longNodeAsc) * y_orb;
+		float y_rot = sin(longNodeAsc) * x_orb + cos(longNodeAsc) * y_orb;
+
+		// Convertir a coordenades del mini mapa
+		ImVec2 minimapPoint = convertirAPosicioMiniMapa(
+			glm::vec3(x_rot, y_rot, 0.0f),
+			glm::vec3(tamanySS, tamanySS, 0), // Escala del món
+			minimapSize,
+			minimapPosition
+		);
+
+		orbitPoints.push_back(minimapPoint);
+	}
+
+	// Dibuixar l'òrbita
+	drawList->AddPolyline(orbitPoints.data(), orbitPoints.size(), IM_COL32(200, 200, 200, 255), false, 1.0f);
+}
+
 
 void MostrarPantallaJoc(ImVec2* screenSize) {
 
@@ -1910,30 +1970,6 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 
 
 	//Crear mini mapa
-// Color per als planetes
-	ImU32 colorPlanetes = IM_COL32(255, 255, 255, 255);  // Blanc
-
-	// Color per al jugador
-	ImU32 colorJugador = IM_COL32(255, 255, 0, 255);  // Groc
-
-	// Color per als asteroides
-	ImU32 colorAsteroides = IM_COL32(255, 0, 0, 255);  // Vermell
-
-	// Color per als asteroides
-	ImU32 colorAsteroidescinturons = IM_COL32(139, 69, 19, 155);  // Marró roca
-
-	// Color per als Diposits FUEL
-	ImU32 colorDiposits = IM_COL32(0, 255, 255, 255);
-
-	// Color per al planeta d'origen
-	ImU32 colorPlanetaOrigen = IM_COL32(0, 255, 0, 255);  // Verd
-
-	// Color per al planeta de destí
-	ImU32 colorPlanetaDesti = IM_COL32(0, 0, 255, 255);  // Blau
-
-	// Color per al Sol
-	ImU32 colorSol = IM_COL32(255, 255, 0, 255);  // Groc brillant
-
 
 	//vec3 worldSize(tamanySS, tamanySS, 0);
 	ImVec2 minimapSize(500, 300);
@@ -1970,6 +2006,8 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 		for (const auto& planeta : PLANETES) {
 			ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 			//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
+			drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList);
+
 			if (planeta.getName() == "Sol") {
 				drawList->AddCircleFilled(planetaPos, 12.0f, colorSol);
 
@@ -2002,7 +2040,7 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
 		}
 
-		for (const auto& Objjoc : OBJECTESJOC) {
+		for (const auto& Objjoc : DIPOSITS) {
 			// Converteix la posició del dipòsit al mini mapa
 			ImVec2 objEspaiPos = convertirAPosicioMiniMapa(Objjoc.getPosition(), worldSize, minimapSize, p);
 
@@ -2017,6 +2055,21 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 				colorDiposits, cornerRadius);
 		}
 
+		for (const auto& estacions : ESTACIONS) {
+			ImVec2 estacionsPos = convertirAPosicioMiniMapa(estacions.getPosition(), worldSize, minimapSize, p);
+
+			// Dimensions de la creu
+			float crossSize = 4.0f; // Mida de la creu (ajustable)
+
+			// Dibuixa les dues línies de la creu
+			drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
+				ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
+				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+
+			drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
+				ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
+				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+		}
 
 		// Dibuixa el jugador
 		//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
@@ -2247,7 +2300,13 @@ void IniciarSimulador() {
 	for (size_t i = 0; i < NUM_DIPOSITS; ++i) {
 		objectesEspai objJoc;
 		objJoc.setName("Diposit" + std::to_string(i + 1));
-		OBJECTESJOC.push_back(objJoc);
+		DIPOSITS.push_back(objJoc);
+	}
+
+	for (size_t i = 0; i < NUM_ESTACIONS; ++i) {
+		objectesEspai objJoc;
+		objJoc.setName("Diposit" + std::to_string(i + 1));
+		ESTACIONS.push_back(objJoc);
 	}
 	
 	// ISMAEL CONTINUAR
@@ -2303,7 +2362,7 @@ void IniciarSimulador() {
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
 	free(nomOBJTest);
 	//std::this_thread::sleep_for(std::chrono::seconds(4));
-	
+
 	nfdchar_t* nomOBJCombustible = (nfdchar_t*)malloc((strlen(rutaArxiuCombustible) + 1) * sizeof(nfdchar_t));
 
 	strcpy(nomOBJCombustible, rutaArxiuCombustible);
@@ -2315,11 +2374,29 @@ void IniciarSimulador() {
 		CombustibleOBJ->netejaTextures_OBJ();
 	}
 	int error3 = CombustibleOBJ->LoadModel(nomOBJCombustible);
-	int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+	//int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
 
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
 	free(nomOBJCombustible);
+
+
+	nfdchar_t* nomOBJEstacio = (nfdchar_t*)malloc((strlen(rutaArxiuEstacio) + 1) * sizeof(nfdchar_t));
+
+	strcpy(nomOBJEstacio, rutaArxiuEstacio);
+
+	if (EstacioOBJ == NULL)
+		EstacioOBJ = ::new COBJModel;
+	else {
+		EstacioOBJ->netejaVAOList_OBJ();
+		EstacioOBJ->netejaTextures_OBJ();
+	}
+	int error4 = EstacioOBJ->LoadModel(nomOBJEstacio);
+	int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+
+	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
+	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+	free(nomOBJEstacio); 
 }
 
 void MostrarMenuDebug(ImVec2* screenSize) {

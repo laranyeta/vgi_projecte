@@ -145,7 +145,7 @@ void objectesEspai::setPosition(const glm::vec3& position) {
     m_position = position;
 }
 
-void objectesEspai::setCombustible(const float fuel)
+void objectesEspai::setValor(const float value)
 {
-    m_fuel = fuel;
+    m_valor = value;
 }

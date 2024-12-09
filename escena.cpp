@@ -82,7 +82,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 	COBJModel* objecteOBJ,
-	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ)
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ)
 {
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
@@ -156,6 +156,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
 		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
 		objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object);
+		estacions(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, EstacioOBJ, col_object);
 		// Activar transpar�ncia
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -627,7 +628,7 @@ void generarAsteroides()
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> pos_dist(-2000.0f, 2000.0f);
 	std::uniform_real_distribution<double> vel_dist(-0.2, 0.2);
-	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
+	std::uniform_real_distribution<float> radius_dist(0.1f, 0.5f);
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
 	for (size_t i = 0; i < NUM_ASTEROIDES; ++i) {
@@ -665,7 +666,7 @@ void generarAsteroidesCinturo() {
 	std::uniform_real_distribution<float> radius_dist(160.0f, 180.0f);               // Radi del cercle (cinturó 1)
 	std::uniform_real_distribution<float> radius_dist2(1560.0f, 1580.0f);               // Radi del cercle (cinturó 2)
 	std::uniform_real_distribution<float> height_dist(-8.0f, 8.0f);                // Alçada limitada en l'eix Y
-	std::uniform_real_distribution<float> scale_dist(0.2f, 1.0f);                    // Escala dels asteroides
+	std::uniform_real_distribution<float> scale_dist(0.1f, 0.5f);                    // Escala dels asteroides
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);                // Massa dels asteroides
 
 	//ASTEROIDESCINTURO.clear(); // Esborra els asteroides existents si n'hi ha
@@ -725,10 +726,10 @@ void generarDiposits() {
 		float fuel = fuel_dist(gen);
 
 		// Crear el dipòsit de combustible
-		OBJECTESJOC[i].setRadi(0.2);                     // Radi del dipòsit
-		OBJECTESJOC[i].setPosition(glm::vec3(x, y, z));    // Assignar posició
-		OBJECTESJOC[i].setVelocitat(glm::dvec3(0.0, 0.0, 0.0)); // Velocitat inicial nul·la
-		OBJECTESJOC[i].setCombustible(fuel);               // Assignar la quantitat de combustible
+		DIPOSITS[i].setRadi(0.05);                     // Radi del dipòsit
+		DIPOSITS[i].setPosition(glm::vec3(x, y, z));    // Assignar posició
+		DIPOSITS[i].setVelocitat(glm::dvec3(0.0, 0.0, 0.0)); // Velocitat inicial nul·la
+		DIPOSITS[i].setValor(fuel);               // Assignar la quantitat de combustible
 	}
 }
 
@@ -845,7 +846,7 @@ void actualitzarDiposits(double deltaTime)
 	std::uniform_real_distribution<float> vel_rand(0.0001f, 0.001f);
 	float velocitatAngular = vel_rand(gen);
 
-	for (auto& objJoc : OBJECTESJOC)
+	for (auto& objJoc : DIPOSITS)
 	{
 		glm::vec3 pos = objJoc.getPosition();
 		float radiOrbita = glm::length(glm::vec2(pos.x, pos.y)); // Distància al centre en el pla XZ.
@@ -882,7 +883,7 @@ void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 	// Actualitza la posició dels asteroides del cinturó
 	actualitzarDiposits(deltaTime);
 
-	for (auto& objJoc : OBJECTESJOC)
+	for (auto& objJoc : DIPOSITS)
 	{
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, objJoc.getPosition());
@@ -929,6 +930,107 @@ void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 Mat
 
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		TestOBJ->draw_TriVAO_OBJ(sh_programID);
+	}
+}
+
+void generarEstacions() {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI); // Angle al voltant del cercle
+	std::uniform_real_distribution<float> radius_dist(20.0f, 100.0f);  // Radi de l'òrbita (proper al planeta)
+	std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);    // Alçada limitada
+	std::uniform_real_distribution<float> fuel_dist(100.0f, 500.0f);   // Combustible disponible
+	std::uniform_int_distribution<int> num_estacions(3, 8);            // Nombre d'estacions per planeta
+
+	size_t estacio_index = 0;
+
+	for (auto& planeta : PLANETES) {
+		glm::vec3 pos_planeta = planeta.getPosition(); // Posició del planeta
+		int numEstacions = num_estacions(gen);         // Nombre d'estacions per aquest planeta
+
+		for (int i = 0; i < numEstacions; ++i) {
+			if (estacio_index >= NUM_ESTACIONS) break;
+
+			float angle = angle_dist(gen);   // Angle en radians al voltant del planeta
+			float radius = radius_dist(gen); // Radi d'òrbita
+			float height = height_dist(gen); // Alçada respecte al pla orbital
+
+			// Calcula la posició de l'estació en coordenades cartesianes
+			float x = pos_planeta.x + radius * cos(angle);
+			float y = pos_planeta.y + radius * sin(angle);
+			float z = pos_planeta.z + height;
+
+			float fuel = fuel_dist(gen); // Combustible disponible
+
+			// Configura l'estació
+			ESTACIONS[estacio_index].setRadi(0.01f);
+			ESTACIONS[estacio_index].setPosition(glm::vec3(x, y, z));
+			ESTACIONS[estacio_index].setVelocitat(glm::dvec3(0.0, 0.0, 0.0));
+			ESTACIONS[estacio_index].setValor(fuel);
+
+			++estacio_index;
+		}
+	}
+}
+void actualitzarEstacions(double deltaTime)
+{
+	float velocitatAngulartemp = 0.005f; // Velocitat angular (rad/s). Ajusta segons el que sembli més natural.
+	int i = 0;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> vel_rand(0.0001f, 0.001f);
+	float velocitatAngular = vel_rand(gen);
+
+	for (auto& objJoc : ESTACIONS)
+	{
+		glm::vec3 pos = objJoc.getPosition();
+		float radiOrbita = glm::length(glm::vec2(pos.x, pos.y)); // Distància al centre en el pla XZ.
+
+		// Calcular l'angle actual i el nou angle d'òrbita
+		float angleActual = atan2(pos.y, pos.x); // Angle polar en el pla XZ
+		float angleNou = angleActual + velocitatAngular * deltaTime; // Nou angle actualitzat
+
+		// Calcula la nova posició orbital al pla XZ
+		pos.x = radiOrbita * cos(angleNou);
+		pos.y = radiOrbita * sin(angleNou);
+
+		// Actualitza la posició de l'asteroide
+		objJoc.setPosition(pos);
+		i++;
+	}
+}
+
+void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object) {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	static bool inicialitzat = false;
+	static double lastTime = time;
+
+	if (!inicialitzat) {
+		generarEstacions(); // Generar asteroides
+		inicialitzat = true;
+	}
+
+	double deltaTime = time - lastTime; // Calcula el temps entre frames
+	lastTime = time;
+
+	// Actualitza la posició dels asteroides del cinturó
+	actualitzarDiposits(deltaTime);
+
+	for (auto& objJoc : ESTACIONS)
+	{
+		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+		ModelMatrix = glm::translate(MatriuTG, objJoc.getPosition());
+		float radi = objJoc.getRadi();
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(radi, radi, radi));
+
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+		EstacioOBJ->draw_TriVAO_OBJ(sh_programID);
 	}
 }
 

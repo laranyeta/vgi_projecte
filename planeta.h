@@ -36,11 +36,11 @@ public:
     glm::vec3 getEixosRotacioPlaneta() const;
     glm::vec4 getColor() const;
     glm::vec3 getPosition() const;
-    double getPeriapsis();
-    double getSemieixMajor();
-    double getLongitudNodeAscendent();
-    double getInclinacio();
-    double getExcentricitat();
+    double getPeriapsis() const;
+    double getSemieixMajor() const;
+    double getLongitudNodeAscendent() const;
+    double getInclinacio() const;
+    double getExcentricitat() const;
 	// SETTERS
 	void setTextureIDMenu(unsigned int texID) { m_textureIDMenu = texID; }
 	void setRutaTexturaMenu(const char* rutaTexturaMenu) { m_rutaTexturaMenu = rutaTexturaMenu; }

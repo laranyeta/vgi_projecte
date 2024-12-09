@@ -100,11 +100,11 @@ glm::dvec3 Planeta::getAcceleracio() const { return m_acceleracio; }
 glm::vec3 Planeta::getEixosRotacioPlaneta() const { return m_eixos_rotacio_planeta; }
 glm::vec4 Planeta::getColor() const { return m_color; }
 glm::vec3 Planeta::getPosition() const { return m_position; }
-double Planeta::getPeriapsis() { return m_periapsis; }
-double Planeta::getSemieixMajor() { return m_semieix_major; }
-double Planeta::getLongitudNodeAscendent() { return m_long_node_asc; }
-double Planeta::getInclinacio() { return m_inclinacio; }
-double Planeta::getExcentricitat() { return m_excentricitat; }
+double Planeta::getPeriapsis() const { return m_periapsis; }
+double Planeta::getSemieixMajor() const { return m_semieix_major; }
+double Planeta::getLongitudNodeAscendent() const { return m_long_node_asc; }
+double Planeta::getInclinacio() const { return m_inclinacio; }
+double Planeta::getExcentricitat() const { return m_excentricitat; }
 
 // Setters
 void Planeta::setPuntsOrbita(size_t puntsOrbita) { m_puntsOrbita = puntsOrbita; }
