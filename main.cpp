@@ -29,8 +29,11 @@
 #include "objectesEspai.h"
 
 const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
+//const char* rutaArchivo = "./OBJFiles/ship_2/Ring_Ship.obj";
+//const char* rutaArchivo = "./OBJFiles/ship_3/Satellite.obj";
 const char* rutaArchivoTest = "./OBJFiles/asteroid/Asteroid_1e.obj";
-const char* rutaArxiuCombustible = "./OBJFiles/Coet/COET JM.obj";
+//const char* rutaArchivoTest = "./OBJFiles/asteroid_2/Asteroid_1d.obj";
+const char* rutaArxiuCombustible = "./OBJFiles/Coet/COET_JM.obj";
 const char* rutaArxiuEstacio= "./OBJFiles/station/InternationalSpaceStation.obj";
 std::vector<Planeta> PLANETES;
 std::vector<Asteroide> ASTEROIDES;

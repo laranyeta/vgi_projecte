@@ -709,24 +709,24 @@ void generarDiposits() {
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI); // Angle al voltant del cercle
 	std::uniform_real_distribution<float> radius_dist(30.0f, 1250.0f);              // Radi del cercle (cinturó més gran)
-	std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);                 // Alçada limitada en l'eix Y
+	//std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);                 // Alçada limitada en l'eix Y
 	std::uniform_real_distribution<float> fuel_dist(100.0f, 500.0f);                // Combustible disponible
 
 	for (size_t i = 0; i < NUM_DIPOSITS; ++i) {
 		float angle = angle_dist(gen);    // Angle en radians al voltant del cercle
 		float radius = radius_dist(gen);
-		float height = height_dist(gen); // Posició en l'eix vertical (Y)
+		//float height = height_dist(gen); // Posició en l'eix vertical (Y)
 
 		// Calcula la posició en coordenades cartesianes
 		float x = radius * cos(angle);
 		float y = radius * sin(angle);
-		float z = height; // Limitat a un rang estret (-5 a 5)
+		float z = 0.0f; // Limitat a un rang estret (-5 a 5)
 
 		// Propietats del dipòsit
 		float fuel = fuel_dist(gen);
 
 		// Crear el dipòsit de combustible
-		DIPOSITS[i].setRadi(0.05);                     // Radi del dipòsit
+		DIPOSITS[i].setRadi(1.0f);                     // Radi del dipòsit
 		DIPOSITS[i].setPosition(glm::vec3(x, y, z));    // Assignar posició
 		DIPOSITS[i].setVelocitat(glm::dvec3(0.0, 0.0, 0.0)); // Velocitat inicial nul·la
 		DIPOSITS[i].setValor(fuel);               // Assignar la quantitat de combustible
@@ -887,8 +887,10 @@ void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 	{
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, objJoc.getPosition());
-		float radi = objJoc.getRadi();
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(radi, radi, radi));
+		//float radi = objJoc.getRadi();
+		//ModelMatrix = glm::scale(ModelMatrix, glm::vec3(radi, radi, radi));
+		//ModelMatrix = glm::rotate(ModelMatrix, radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f)); // Ejemplo de escala
 
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
@@ -1023,7 +1025,9 @@ void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, objJoc.getPosition());
 		float radi = objJoc.getRadi();
+		ModelMatrix = glm::rotate(ModelMatrix, radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(radi, radi, radi));
+		//ModelMatrix = glm::rotate(ModelMatrix, radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
@@ -1096,9 +1100,7 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		else {
 			drawHistoricalPath(planeta.getPosicionesHistoricas());
 		}
-
 	}
-
 }
 
 
