@@ -1693,7 +1693,7 @@ void drawOrbitPath2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapP
 	// Calcular els punts de l'òrbita
 	for (int i = 0; i < numPoints; ++i) {
 		// Anomalia veritable
-		float nu = 2.0f * IM_PI * i / numPoints;
+		float nu = 2.0f * PI * i / numPoints;
 
 		// Radi en aquest punt de l'òrbita
 		float r = a * (1 - e * e) / (1 + e * cos(nu));
@@ -2009,8 +2009,51 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 		for (const auto& planeta : PLANETES) {
 			ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 			//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
-			drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList);
+			//drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList);
+			// Defineix el nombre de punts per a l'òrbita
+			const int numPoints = 100;
+			float a = planeta.getSemieixMajor() * ESCALA_DISTANCIA; // Semieix major escalat
+			float e = planeta.getExcentricitat(); // Excentricitat
+			float longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del node ascendent en radians
 
+			// Contenidor per als punts de l'òrbita
+			std::vector<ImVec2> orbitPoints;
+
+			// Calcular els punts de l'òrbita
+			for (int i = 0; i < numPoints; ++i) {
+				// Anomalia veritable
+				float nu = 2.0f * PI * i / numPoints;
+
+				// Radi en aquest punt de l'òrbita
+				float r = a * (1 - e * e) / (1 + e * cos(nu));
+
+				// Posició en el pla orbital (2D)
+				float x_orb = r * cos(nu);
+				float y_orb = r * sin(nu);
+
+				// Aplicar rotació pel node ascendent
+				float x_rot = cos(longNodeAsc) * x_orb - sin(longNodeAsc) * y_orb;
+				float y_rot = sin(longNodeAsc) * x_orb + cos(longNodeAsc) * y_orb;
+
+				// Convertir a coordenades del mini mapa
+				ImVec2 minimapPoint = convertirAPosicioMiniMapa(
+					glm::vec3(x_rot, y_rot, 0.0f),
+					glm::vec3(tamanySS, tamanySS, 0), // Escala del món
+					minimapSize,
+					minimapPosition
+				);
+
+				orbitPoints.push_back(minimapPoint);
+			}
+
+			// Dibuixar l'òrbita
+			drawList->AddPolyline(orbitPoints.data(), orbitPoints.size(), IM_COL32(200, 200, 200, 255), false, 1.0f);
+
+			std::cout << orbitPoints.size() << std::endl;
+
+
+
+			//FI PROVA
 			if (planeta.getName() == "Sol") {
 				drawList->AddCircleFilled(planetaPos, 12.0f, colorSol);
 
