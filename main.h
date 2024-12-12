@@ -50,12 +50,26 @@ bool show_config_so = false;
 bool show_config_controladors = false;
 
 
+//Minimapa
+bool minimapas_circulars = true;
+bool minimapas_centrat_sol = true;
+
+int tamanyminimapa_x = 500;
+int tamanyminimapa_y = 300;
+int tamanyradar = 300;
+
+bool asteroides_minimapa = true;
+bool diposits_minimapa = true;
+bool estacions_minimapa = true;
+bool orbites_minimapa = true;
+
 
 ImFont* rainyhearts;
 ImFont* silkscreen;
 ImFont* droidsans;
 ImFont* silkscreentitle;
 ImFont* silkscreensubtitle;
+
 
 
 // Entorn V3D: Variables de control per Men� C�mera: Esf�rica, Navega, M�bil, Zoom, Satelit, Polars... 
@@ -337,4 +351,14 @@ ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,
 	const glm::vec3& worldSize,
 	const ImVec2& minimapSize,
 	const glm::vec3& posicioJugador);
+
 void MostrarPantallaMenuJugador(ImVec2* screenSize);
+float distanciaEntrePunts(const ImVec2& a, const ImVec2& b);
+
+void crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition);
+void crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition);
+void crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosition,bool abaix, float borderThickness);
+void ferRectangleAcceleracio(ImVec2* screenSize, ImGuiWindowFlags window_flags);
+void crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness);
+void crearColoPickerFill(ImVec4* color, ImVec2 tamany, const char* text);
+void crearColorPickerU32(ImU32* color, ImVec2 tamany, const char* text);

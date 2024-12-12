@@ -53,6 +53,14 @@ GLuint cometa;
 GLuint fons;
 GLuint menu;
 GLuint endarrera;
+GLuint interficie_1;
+GLuint interficie_2;
+
+//Boto General de totes les interficies
+ImVec4 ButtonGeneral = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+ImVec4 HoverButtonGeneral = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
+ImVec4 ActiveButtonGeneral = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+
 
 ImVec4 colorVerd = ImVec4(0.0f, 0.749f, 0.388f, 1.0f);
 ImVec4 colorVermell = ImVec4(1.0f, 0.192f, 0.192f, 1.0f);
@@ -77,6 +85,22 @@ ImU32 colorSol = IM_COL32(255, 255, 0, 255);  // Groc brillant
 //Color per Estacions de vida
 ImU32 colorEstacions = IM_COL32(255, 165, 0, 255); // Taronja Brillant 
 
+ImU32 color_interficie = IM_COL32(200, 200, 200, 255);  // Groc brillant
+
+// Color base: RGB(18, 35, 96)
+ImVec4 Title_config_Color = ImVec4(18.0f / 255.0f, 35.0f / 255.0f, 96.0f / 255.0f, 1.0f); // Blau fosc
+
+// Text blanc per contrastar
+ImVec4 FonsMenuPausa = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);          // Blanc opac
+ImVec4 TextMenuPausa = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);          // Blanc opac
+
+// Botó amb base blau i variacions més contrastades per "hover" i "active"
+ImVec4 ButtonMenuPausa = ImVec4(28.0f / 255.0f, 50.0f / 255.0f, 130.0f / 255.0f, 1.0f);      // Blau pastel (base)
+ImVec4 HoverButtonMenuPausa = ImVec4(50.0f / 255.0f, 80.0f / 255.0f, 180.0f / 255.0f, 1.0f);  // Blau clar més vibrant per "hover"
+ImVec4 ActiveButtonMenuPausa = ImVec4(15.0f / 255.0f, 30.0f / 255.0f, 80.0f / 255.0f, 1.0f);  // Blau més fosc per "active"
+
+
+
 using namespace irrklang;
 /* Luis inici so--------------------------------------------------------------------------------------------------------------------------------*/
 ISoundEngine* engine = createIrrKlangDevice(); //inicialització de soundEngine
@@ -87,6 +111,8 @@ ISound* musica_partida = engine->play2D("./media/musica/white_noise.wav", true, 
 
 float volum_nau = 1;
 float volum_menu = 1;
+float volum_alerta = 1;
+float volum_partida = 1;
 
 
 void cambiarVolumenSuavemente(ISound* sonido, float volumenInicial, float volumenFinal, int duracionMs) {
@@ -140,7 +166,7 @@ void InitGL()
 	OPV_G.R = 15.0;		OPV_G.alfa = 0.0;	OPV_G.beta = 0.0;	// Origen PV en esfèriques per a Vista_Geode
 
 	// Entorn VGI: Variables de control per Menú Vista: Pantalla Completa, Pan, dibuixar eixos i grids 
-	fullscreen = true;
+	fullscreen = false;
 	pan = false;
 	eixos = false;	eixos_programID = 0;  eixos_Id = 0;
 	sw_grid = false;
@@ -1013,10 +1039,6 @@ void draw_Menu_ImGui()
 		MostrarPantallaMenu(screenSize);
 	}
 
-	if (show_game_settings) {
-		MostrarPantallaConfiguracio(screenSize);
-	}
-
 	if (show_menu_jugador_config) {
 		MostrarPantallaMenuJugador(screenSize);
 	}
@@ -1033,6 +1055,9 @@ void draw_Menu_ImGui()
 		MostrarPantallaJoc(screenSize);
 	}
 
+	if (show_game_settings) {
+		MostrarPantallaConfiguracio(screenSize);
+	}
 
 	ImGui::Render();
 }
@@ -1063,7 +1088,7 @@ void MostrarPantallaInicial(ImVec2* screenSize) {
 	*/
 
 
-	ImGui::SetNextWindowPos(ImVec2(-250, screenSize->y - 450));
+	/*ImGui::SetNextWindowPos(ImVec2(-250, screenSize->y - 450));
 	ImGui::SetNextWindowSize(ImVec2(700, 700));
 	ImGui::Begin("Imatge MARS", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
 	ImGui::Image((ImTextureID)(intptr_t)mars, ImVec2(700, 700)); // Adjust size as needed
@@ -1086,7 +1111,7 @@ void MostrarPantallaInicial(ImVec2* screenSize) {
 	ImGui::Begin("Imatge cometa", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
 	ImGui::Image((ImTextureID)(intptr_t)cometa, ImVec2(250, 200)); // Adjust size as needed
 	ImGui::End();
-
+	*/
 	float windowX = screenSize->x * 0.5f - 550;  // Acomoda el desplaçament lateral (325)
 	float windowY = screenSize->y * 0.15f;  // Centrar verticalment a la posició 20% de l'altura de la pantalla
 	ImGui::SetNextWindowPos(ImVec2(windowX, windowY));
@@ -1098,7 +1123,7 @@ void MostrarPantallaInicial(ImVec2* screenSize) {
 	ImGui::PopStyleColor();
 	ImGui::PopFont();
 	ImGui::End();
-
+	
 
 
 	ImGui::SetNextWindowPos(ImVec2(10, 10));
@@ -1244,7 +1269,7 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 		//musica->setPlaybackSpeed(1.5f); // Cambia la velocidad de reproducción
 	}
 
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
 	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
 	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
@@ -1263,7 +1288,7 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	int marge = 60;
 
 	ImVec2 tamany_buttons(200, 45);
-	ImVec2 windowSize(tamany_buttons.x, screenSize->y - 10);
+	ImVec2 windowSize(tamany_buttons.x+40, (tamany_buttons.y+ marge)*3+40);
 	ImVec2 espai(0.0f, 20.0f);
 
 
@@ -1272,11 +1297,12 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	ImGui::SetNextWindowSize(ImVec2(marge+10, marge+10)); // Mida de la finestra
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
 
-	ImGui::Begin("Endarrera", &show_user_windows, window_flags + ImGuiWindowFlags_NoBackground);
+	ImGui::Begin("Endarrera-Config", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);
 
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));      // Color del botó (blanc)
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic
+	ImGui::PushStyleColor(ImGuiCol_Button, ButtonGeneral);      // Color del botó (blanc)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HoverButtonGeneral); // Color quan es passa el ratolí
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ActiveButtonGeneral); // Color quan es fa clic
+
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 20.0f);
 
@@ -1293,8 +1319,8 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 
 	//Titol
 	ImGui::SetNextWindowPos(ImVec2(marge, marge));
-	ImGui::SetNextWindowSize(ImVec2(600, 70));
-	ImGui::Begin("Titol", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);
+	ImGui::SetNextWindowSize(ImVec2(600, 100));
+	ImGui::Begin("Titol-Config", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);
 	ImGui::PushFont(silkscreensubtitle);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
 	ImGui::Text("Configuració");
@@ -1306,18 +1332,22 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 
 	ImGui::SetNextWindowPos(ImVec2(marge, posY+marge), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(windowSize);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+	// Establir el color de fons de la finestra a blanc
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 15.0f);   // Arrodoniment del borde
 
-	ImGui::Begin("Menus", &show_menu_game, window_flags | ImGuiWindowFlags_NoBackground);
+	ImGui::Begin("Menus-Config", &show_menu_game, window_flags | ImGuiWindowFlags_NoScrollbar);
 	// Configura els colors i l'estil
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+	ImGui::PushStyleColor(ImGuiCol_Button, ButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HoverButtonMenuPausa); 
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ActiveButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_Text, TextMenuPausa);
 
 	// Arrodoniment
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
 
-	if (ImGui::Button("Grafics", tamany_buttons)) {
+	if (ImGui::Button("Interficie", tamany_buttons)) {
 		show_config_grafics = true;
 		show_config_so = false;
 		show_config_controladors = false;
@@ -1338,9 +1368,10 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	}
 
 	ImGui::PopStyleVar();
-	ImGui::PopStyleColor(3);
+	ImGui::PopStyleColor(4);
 	ImGui::End();
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor();
 
 
 	ImVec2 tamany_buttons_dins_config(300, 45);
@@ -1355,30 +1386,150 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 15.0f);   // Arrodoniment del borde
 
-	ImGui::Begin("subMenus", &show_menu_game, window_flags);
+	ImGui::Begin("subMenus-Config", &show_menu_game, window_flags);
 	// Configura els colors i l'estil
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.3f, 1.0f)); // Color del botó (blanc)
+	/*ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.3f, 1.0f)); // Color del botó (blanc)
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Color quan es passa el ratolí (grisa clara)
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 1.0f)); // Color quan es fa clic (grisa)*/
+	ImGui::PushStyleColor(ImGuiCol_Button, ButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HoverButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ActiveButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_Text, TextMenuPausa);
 
 	// Arrodoniment
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
 
 	if (show_config_grafics) {
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Disseny Interficie");
+		ImGui::PopStyleColor();
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+
+		if (ImGui::ImageButton((void*)(intptr_t)interficie_1, ImVec2(384, 216))) {
+			minimapas_circulars = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::ImageButton((void*)(intptr_t)interficie_2, ImVec2(384, 216))) {
+			minimapas_circulars = false;
+		}
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Butons d'Accions");
+		ImGui::PopStyleColor();
+
 		if (ImGui::Button("Dibuixa Orbita Completa", tamany_buttons_dins_config)) {
 			paintorbit = !paintorbit;
 		}
+		ImGui::SameLine();
+		if (ImGui::Button("Pantalla Completa", tamany_buttons_dins_config)) {
+			OnFull_Screen(primary, window);
+		}
+
+
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("PROVA2", tamany_buttons_dins_config));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Colors Alertes");
+		ImGui::PopStyleColor();
+		crearColoPickerFill(&colorVerd, ImVec2(400, 280), "Correcte");
+		ImGui::SameLine();
+		crearColoPickerFill(&colorTaronja, ImVec2(400, 280), "Alerta");
+		ImGui::SameLine();
+		crearColoPickerFill(&colorVermell, ImVec2(400, 280), "Perill");
+
+
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("PROVA3", tamany_buttons_dins_config));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Colors Interficie Principal");
+		ImGui::PopStyleColor();
+
+		crearColoPickerFill(&ButtonGeneral, ImVec2(400, 280), "Buto General");
+		ImGui::SameLine();
+		crearColoPickerFill(&HoverButtonGeneral, ImVec2(400, 280), "Hover Boto General");
+		ImGui::SameLine();
+		crearColoPickerFill(&ActiveButtonGeneral, ImVec2(400, 280), "Clicar Boto General");
+
+
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("PROVA4", tamany_buttons_dins_config));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Colors Menus");
+		ImGui::PopStyleColor();
+
+		crearColoPickerFill(&Title_config_Color, ImVec2(400, 280), "Titol");
+		ImGui::SameLine();
+		crearColoPickerFill(&ButtonMenuPausa, ImVec2(400, 280), "Buto Menus");
+		ImGui::SameLine();
+		crearColoPickerFill(&HoverButtonMenuPausa, ImVec2(400, 280), "Hover Boto Menus");
+		ImGui::SameLine();
+		crearColoPickerFill(&ActiveButtonMenuPausa, ImVec2(400, 280), "Clicar Boto Menus");
+
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Colors Interficie");
+		ImGui::PopStyleColor();
+		crearColorPickerU32(&color_interficie, ImVec2(400, 280), "Contorns");
+
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Colors Minimapes");
+		ImGui::PopStyleColor();
+		crearColorPickerU32(&colorPlanetes, ImVec2(400, 280), "Planetes");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorAsteroides, ImVec2(400, 280), "Asteroides");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorAsteroidescinturons, ImVec2(400, 280), "Cinturo Asteroides");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorPlanetaOrigen, ImVec2(400, 280), "Planeta Origen");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorPlanetaDesti, ImVec2(400, 280), "Planeta Destí");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorSol, ImVec2(400, 280), "Sol");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorEstacions, ImVec2(400, 280), "Estacions");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorDiposits, ImVec2(400, 280), "Diposits");
+		ImGui::SameLine();
+		crearColorPickerU32(&colorJugador, ImVec2(400, 280), "Jugador");
+		ImGui::SameLine();
 
 
 
 	}
 	else if (show_config_so) {
+		static ImGuiSliderFlags flags = ImGuiSliderFlags_None;
+
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Sons del Joc");
+		ImGui::PopStyleColor();
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Sons Partida");
+		ImGui::PopStyleColor();
+		ImGui::SliderFloat("partida-sons", &volum_partida, 0.0f, 1.0f, "%.3f", flags);
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Sons dels Menus");
+		ImGui::PopStyleColor();
+		ImGui::SliderFloat("menus-sons", &volum_menu, 0.0f, 1.0f, "%.3f", flags);
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Sons del Jugador");
+		ImGui::PopStyleColor();
+		ImGui::SliderFloat("Jugador-sons", &volum_nau, 0.0f, 1.0f, "%.3f", flags);
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+		ImGui::Text("Sons Alertes");
+		ImGui::PopStyleColor();
+		ImGui::SliderFloat("menus-sons", &volum_alerta, 0.0f, 1.0f, "%.3f", flags);
+
+		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+
 		if (ImGui::Button("SO_PROVA", tamany_buttons_dins_config));
 		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
 		if (ImGui::Button("SO_PROVA2", tamany_buttons_dins_config));
@@ -1398,13 +1549,72 @@ void MostrarPantallaConfiguracio(ImVec2* screenSize) {
 	//if (ImGui::ImageButton((void*)(intptr_t)PLANETES[i].getTextureIDMenu(), ImVec2(subwindowSize.y))) {
 
 	ImGui::PopStyleVar();
-	ImGui::PopStyleColor(3);
+	ImGui::PopStyleColor(4);
 	ImGui::End();
 	// Retorn del color de fons original
 	ImGui::PopStyleColor();
 	ImGui::PopStyleVar(2);
 }
 
+void crearColoPickerFill(ImVec4* color, ImVec2 tamany, const char* text) {
+	ImGuiColorEditFlags flags = ImGuiColorEditFlags_HDR
+		| ImGuiColorEditFlags_NoDragDrop
+		| ImGuiColorEditFlags_AlphaPreview
+		| ImGuiColorEditFlags_AlphaBar
+		| ImGuiColorEditFlags_NoSidePreview
+		| ImGuiColorEditFlags_PickerHueBar
+		| ImGuiColorEditFlags_DisplayRGB
+		| ImGuiColorEditFlags_InputRGB; // Suport per entrades numèriques en RGB
+
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f); // Elimina el marge del "child"
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Fons blanc per al "child"
+
+	ImGui::BeginChild(text,tamany , true, ImGuiWindowFlags_NoScrollbar); // Defineix la regió
+
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ImGui::Text(text);
+	ImGui::PopStyleColor();
+	// Widget de selecció de color
+	ImGui::ColorPicker4(text, (float*)color, flags);
+
+	ImGui::EndChild();
+	ImGui::PopStyleColor(); // Restableix el color de fons
+	ImGui::PopStyleVar();   // Restableix els marges
+}
+
+void crearColorPickerU32(ImU32* color, ImVec2 tamany, const char* text) {
+	ImGuiColorEditFlags flags = ImGuiColorEditFlags_HDR
+		| ImGuiColorEditFlags_NoDragDrop
+		| ImGuiColorEditFlags_AlphaPreview
+		| ImGuiColorEditFlags_AlphaBar
+		| ImGuiColorEditFlags_NoSidePreview
+		| ImGuiColorEditFlags_PickerHueBar
+		| ImGuiColorEditFlags_DisplayRGB
+		| ImGuiColorEditFlags_InputRGB; // Suport per entrades numèriques en RGB
+
+	// Converteix ImU32 a ImVec4
+	ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(*color);
+
+	// Estil i configuració
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f); // Elimina el marge del "child"
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Fons blanc per al "child"
+
+	ImGui::BeginChild(text, tamany, true, ImGuiWindowFlags_NoScrollbar); // Defineix la regió
+
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ImGui::Text(text);
+	ImGui::PopStyleColor();
+
+	// Mostra el ColorPicker
+	if (ImGui::ColorPicker4(text, (float*)&colorVec4, flags)) {
+		// Si l'usuari modifica el color, actualitza l'ImU32
+		*color = ImGui::ColorConvertFloat4ToU32(colorVec4);
+	}
+
+	ImGui::EndChild();
+	ImGui::PopStyleColor(); // Restableix el color de fons
+	ImGui::PopStyleVar();   // Restableix els marges
+}
 
 
 
@@ -1616,32 +1826,20 @@ void MostrarPantallaMenuJugador(ImVec2* screenSize) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 20.0f); // Cantonades rodones de 15 píxels
 
 	// Configura el color de fons blanc
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); // Blanc opac
-	//ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Blanc opac
+	//ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); // negre opac
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, FonsMenuPausa);
 
 	ImGui::Begin("Menus", &show_menu_game, window_flags);
 
 	// Configura els colors i l'estil dels botons
-	/*ImVec4 pastelGreen(0.7f, 0.9f, 0.7f, 1.0f);         // Verd pastel
-	ImVec4 hoverGreen(0.6f, 0.85f, 0.6f, 1.0f);        // Verd més intens quan es passa el ratolí
-	ImVec4 activeGreen(0.5f, 0.8f, 0.5f, 1.0f);        // Verd més fosc quan es fa clic
-
-	ImGui::PushStyleColor(ImGuiCol_Button, pastelGreen);
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverGreen);
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeGreen);
-	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f); // Arrodoniment de 12 píxels per als botons*/
-	ImVec4 buttonWhite(1.0f, 1.0f, 1.0f, 1.0f);         // Color blanc
-	ImVec4 hoverGray(0.9f, 0.9f, 0.9f, 1.0f);          // Gris clar quan es passa el ratolí
-	ImVec4 activeGray(0.8f, 0.8f, 0.8f, 1.0f);         // Gris més fosc quan es fa clic
-
-	ImGui::PushStyleColor(ImGuiCol_Button, buttonWhite);
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverGray);
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, activeGray);
+	ImGui::PushStyleColor(ImGuiCol_Button, ButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HoverButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ActiveButtonMenuPausa);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f); // Arrodoniment de 12 píxels per als botons
 
 	// Centra el text "Menu"
-	//ImVec4 textColor(0.2f, 0.2f, 0.2f, 1.0f); // Gris fosc
-	ImVec4 textColor(1.0f, 1.0f, 1.0f, 1.0f); // Gris fosc
-	ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+
+	ImGui::PushStyleColor(ImGuiCol_Text, Title_config_Color);
 	ImGui::PushFont(silkscreensubtitle);
 
 	ImVec2 textSize = ImGui::CalcTextSize("Menu"); // Mida del text
@@ -1651,7 +1849,8 @@ void MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 	ImGui::PopStyleColor();
 	ImGui::PopFont();
-
+	ImGui::PushStyleColor(ImGuiCol_Text, TextMenuPausa);
+	
 	// Dibuixa espais i botons
 	ImGui::Dummy(espai);
 
@@ -1680,45 +1879,69 @@ void MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 
 }
-void drawOrbitPath2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList) {
-	// Defineix el nombre de punts per a l'òrbita
-	const int numPoints = 360;
-	float a = planeta.getSemieixMajor() * ESCALA_DISTANCIA; // Semieix major escalat
-	float e = planeta.getExcentricitat(); // Excentricitat
-	float longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del node ascendent en radians
+
+void drawOrbitPath2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center) {
+	const int numPoints = 100;
+	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
+	double e = planeta.getExcentricitat(); // Excentricidad
+	double inclinacio = planeta.getInclinacio() * DEG_A_RAD; // Inclinación en radianes
+	double longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del nodo ascendente en radianes
+	double periapsis = planeta.getPeriapsis() * DEG_A_RAD; // Argumento del periapsis en radianes
+
+	// Matrices de rotación para transformar la órbita del plano orbital al espacio 3D
+	glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)periapsis, glm::vec3(0.0f, 0.0f, 1.0f)));
+	glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)inclinacio, glm::vec3(1.0f, 0.0f, 0.0f)));
+	glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)longNodeAsc, glm::vec3(0.0f, 0.0f, 1.0f)));
+	glm::mat3 R = R_longNodeAsc * R_inclinacio * R_periapsis;
 
 	// Contenidor per als punts de l'òrbita
 	std::vector<ImVec2> orbitPoints;
-
-	// Calcular els punts de l'òrbita
+	// Comenzar a dibujar la órbita
 	for (int i = 0; i < numPoints; ++i) {
-		// Anomalia veritable
-		float nu = 2.0f * PI * i / numPoints;
+		// Anomalía verdadera (ángulo alrededor de la órbita)
+		double nu = 2.0 * PI * i / numPoints;
 
-		// Radi en aquest punt de l'òrbita
-		float r = a * (1 - e * e) / (1 + e * cos(nu));
+		// Radio para este punto en la órbita
+		double r = a * (1 - e * e) / (1 + e * cos(nu));
 
-		// Posició en el pla orbital (2D)
-		float x_orb = r * cos(nu);
-		float y_orb = r * sin(nu);
+		// Posición en el plano orbital
+		double x_orb = r * cos(nu);
+		double y_orb = r * sin(nu);
+		double z_orb = 0.0;
 
-		// Aplicar rotació pel node ascendent
-		float x_rot = cos(longNodeAsc) * x_orb - sin(longNodeAsc) * y_orb;
-		float y_rot = sin(longNodeAsc) * x_orb + cos(longNodeAsc) * y_orb;
+		// Transformar del plano orbital al espacio 3D
+		glm::dvec3 posicion_orb(x_orb, y_orb, z_orb);
+		glm::dvec3 posicion_3D = R * posicion_orb;
+
+		// Dibujar el punto en la órbita
 
 		// Convertir a coordenades del mini mapa
 		ImVec2 minimapPoint = convertirAPosicioMiniMapa(
-			glm::vec3(x_rot, y_rot, 0.0f),
+			glm::vec3(x_orb, y_orb, z_orb),
 			glm::vec3(tamanySS, tamanySS, 0), // Escala del món
 			minimapSize,
 			minimapPosition
 		);
-
-		orbitPoints.push_back(minimapPoint);
+		//std::cout << minimapPoint.x << " - " << minimapPoint.y << std::endl;
+		//drawList->AddCircleFilled(minimapPoint, 4.0f, colorPlanetes);
+		if (circular) {
+			if (distanciaEntrePunts(minimapPoint, center) <= radius) {
+				orbitPoints.push_back(minimapPoint);
+			}
+		}
+		else {
+			orbitPoints.push_back(minimapPoint);
+		}
+	}
+	//Per fusuonar amb
+	// 
+	if (orbitPoints.size() > 1) {
+		orbitPoints.push_back(orbitPoints[0]);
 	}
 
 	// Dibuixar l'òrbita
 	drawList->AddPolyline(orbitPoints.data(), orbitPoints.size(), IM_COL32(200, 200, 200, 255), false, 1.0f);
+
 }
 
 
@@ -1742,15 +1965,13 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 		}
 		else if (musica_partida->getVolume() < 0.7)
 			musica_partida->setVolume(musica_partida->getVolume() + 0.01);
-					
-		
 	}
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoCollapse;
 	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
 	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
 	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
@@ -1892,48 +2113,372 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 
 	ImVec2 espai(0.0f, 30.0f);
 	// Dades de progrés
-
-	ImVec2 windowSize(500, 200);
+	ImVec2 windowSize(800, 180);
 	ImVec2 windowPos = ImVec2(20, screenSize->y - windowSize.y);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(windowSize);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 0));
 
-	ImGui::Begin("Dades en quesitos", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
+	if(ImGui::Begin("Dades en quesitos", nullptr, window_flags | ImGuiWindowFlags_NoBackground)){
+		//ImDrawList* drawList = ImGui::GetWindowDrawList();
+		//ImVec2 p = ImGui::GetCursorScreenPos();
+		//drawList->AddRectFilled(ImVec2(0,0), ImVec2(p.x + windowSize.x, p.y + windowSize.y), color_interficie);
 
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(40, 10)); // Change padding (spacing between items)
-	//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); // Change padding inside frames (buttons, input fields, etc.)
-	ImVec4 colorFuel = colorVerd;
-	ImVec4 colorLife = colorVerd;
-	float fuel = nau.getFuel();
-	if (fuel < 0.50f && fuel > 0.25f) {
-		colorFuel = colorTaronja;
-	}
-	else if (fuel < 0.25f) {
-		colorFuel = colorVermell;
-	}
-	float life = nau.getLife();
-	if (life < 0.50f && life > 0.25f) {
-		colorLife = colorTaronja;
-	}
-	else if (life < 0.25f) {
-		colorLife = colorVermell;
-	}
-	CircularProgressBar("Combustible", fuel, ImVec2(100, 100), colorFuel);
-	ImGui::SameLine();
-	CircularProgressBar("Danys", life, ImVec2(100, 100), colorLife);
 
-	//mGui::PopStyleVar();
-	ImGui::PopStyleVar();
-	ImGui::PopStyleColor();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color del botó (blanc)
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(40, 10)); // Change padding (spacing between items)
+		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10)); // Change padding inside frames (buttons, input fields, etc.)
+		ImVec4 colorFuel = colorVerd;
+		ImVec4 colorLife = colorVerd;
+		float fuel = nau.getFuel();
+		if (fuel < 0.50f && fuel > 0.25f) {
+			colorFuel = colorTaronja;
+		}
+		else if (fuel < 0.25f) {
+			colorFuel = colorVermell;
+		}
+		float life = nau.getLife();
+		if (life < 0.50f && life > 0.25f) {
+			colorLife = colorTaronja;
+		}
+		else if (life < 0.25f) {
+			colorLife = colorVermell;
+		}
+		CircularProgressBar("Combustible", fuel, ImVec2(100, 100), colorFuel);
+		ImGui::SameLine();
+		CircularProgressBar("Danys      ", life, ImVec2(100, 100), colorLife);
+		ImGui::SameLine();
+		CircularProgressBar("Acceleració", nau.getPotencia(), ImVec2(100, 100), colorVerd);
+
+		//mGui::PopStyleVar();
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+	}
 	ImGui::End();
 	ImGui::PopStyleVar();
 
+	//ImGui::ProgressBar(progress, ImVec2(0.f, 0.f), buf);
+
+	//Crear mini mapa
+	if (minimapas_circulars) {
+		//Adalt
+		ImVec2 minimapcircularSize(tamanyradar, tamanyradar);
+		ImVec2 minimapPositionCircular = ImVec2(screenSize->x - minimapcircularSize.x-20, 20);
+		ImGui::SetNextWindowSize(ImVec2(minimapcircularSize.x+20, minimapcircularSize.y+20));
+		ImGui::SetNextWindowPos(minimapPositionCircular);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+		if (ImGui::Begin("MiniMapaCircular", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+			if (minimapas_centrat_sol) {
+				crearMiniMapaCentratSolCircular(minimapcircularSize, minimapPositionCircular, false, 5.0f);
+			}
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+		//Radar
+		ImVec2 radarcircularSize(tamanyradar, tamanyradar);
+		ImVec2 radarPositionCircular = ImVec2(screenSize->x - radarcircularSize.x, screenSize->y - radarcircularSize.y);
+		ImGui::SetNextWindowSize(ImVec2(radarcircularSize.x, radarcircularSize.y));
+		ImGui::SetNextWindowPos(radarPositionCircular);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+		if (ImGui::Begin("RadarCircular", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+			if (minimapas_centrat_sol) {
+				crearRadarVertical(radarcircularSize,radarPositionCircular,true,30.0f);
+			}
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+	else {
+		ImVec2 minimapSize(tamanyminimapa_x, tamanyminimapa_y);
+		ImVec2 minimapPosition = ImVec2(screenSize->x - minimapSize.x, 0);
+		ImGui::SetNextWindowSize(ImVec2(minimapSize.x, minimapSize.y));
+		ImGui::SetNextWindowPos(minimapPosition);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+		if (ImGui::Begin("MiniMapa", nullptr, window_flags)) {
+			if (minimapas_centrat_sol) {
+				crearMiniMapaCentratSol(minimapSize, minimapPosition);
+			}
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+		ImVec2 radarSize(tamanyminimapa_x, tamanyminimapa_y);
+		ImVec2 radarPosition = ImVec2(screenSize->x - radarSize.x, screenSize->y - radarSize.y);
+		ImGui::SetNextWindowSize(ImVec2(radarSize.x, radarSize.y));
+		ImGui::SetNextWindowPos(radarPosition);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+		if (ImGui::Begin("Radar", nullptr, window_flags)) {
+			if (minimapas_centrat_sol) {
+				crearMiniMapaCentratSol(radarSize, radarPosition);
+			}
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+}
+//Mirar de fer per fer if mes maco 
+/*void crearMiniMapa(ImVec2* screenSize, float x, float y) {
+	ImVec2 minimapSize(x, y);
+	ImVec2 minimapPosition = ImVec2(screenSize->x - minimapSize.x, 0);
+	ImGui::SetNextWindowSize(ImVec2(minimapSize.x, minimapSize.y));
+	ImGui::SetNextWindowPos(minimapPosition);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	if (ImGui::Begin("MiniMapa", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize)) {
+		if (minimapas_centrat_sol) {
+			crearMiniMapaCentratSol(minimapSize, minimapPosition);
+		}
+	}
+	ImGui::End();
+	ImGui::PopStyleVar();
+
+	ImVec2 radarSize(tamanyminimapa_x, tamanyminimapa_y);
+	ImVec2 radarPosition = ImVec2(screenSize->x - radarSize.x, screenSize->y - radarSize.y);
+	ImGui::SetNextWindowSize(ImVec2(radarSize.x, radarSize.y));
+	ImGui::SetNextWindowPos(radarPosition);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	if (ImGui::Begin("Radar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize)) {
+		if (minimapas_centrat_sol) {
+			crearMiniMapaCentratSol(radarSize, radarPosition);
+		}
+	}
+	ImGui::End();
+	ImGui::PopStyleVar();
+}
+*/
+
+void crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosition, bool abaix, float borderThickness) {
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	ImVec2 p = ImGui::GetCursorScreenPos();
+
+	vec3 worldSize(tamanySS, tamanySS, 0);
+
+	// INICI jugadorPos Comprovacio
+
+	// Convertir la posició del jugador al mini mapa
+	ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, minimapPosition);
+
+	// Centre i radi del mini mapa
+	ImVec2 center = ImVec2(minimapPosition.x + minimapSize.x / 2, minimapPosition.y + minimapSize.y / 2);
+	float radius = std::min(minimapSize.x, minimapSize.y) / 2.0f - borderThickness - 1;
+
+	// Comprovar si el jugador està fora del radi del mini mapa
+	float distance = sqrtf(pow(jugadorPosComprovacio.x - center.x, 2) + pow(jugadorPosComprovacio.y - center.y, 2));
+	if (distance > radius) {
+		// Augmentar la mida del mini mapa
+		tamanySS += tamanySS * 0.5f;  // Augmenta la mida horitzontal
+	}
+
+	// FI jugadorPos Comprovacio
+
+	// Fons del mini mapa
+	if (abaix) {
+		drawList->AddRectFilled(ImVec2(p.x, p.y + minimapSize.y / 2), ImVec2(p.x + minimapSize.x, p.y + minimapSize.y), color_interficie);
+	}
+	drawList->AddCircleFilled(center, radius, IM_COL32(20, 20, 20, 255)); // Fons del mini mapa
+
+	// Dibuixa els planetes
+	for (const auto& planeta : PLANETES) {
+		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
+		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
+		if (orbites_minimapa) {
+			drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList,true,radius,center);
+		}
+		if (distanciaEntrePunts(planetaPos, center) <= radius) {
+			if (planeta.getName() == "Sol") {
+				drawList->AddCircleFilled(planetaPos, 12.0f, colorSol);
+
+			}
+			else if (PlanetOrigen != -1 && PlanetDesti != -1) {
+				if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
+					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
+
+				}
+				else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
+					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
+				}
+				else {
+					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
+				}
+			}
+			else {
+				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
+			}
+		}
+	}
+
+	// Dibuixar els asteroides
+	if (asteroides_minimapa) {
+		for (const auto& asteroide : ASTEROIDES) {
+			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
+			if (distanciaEntrePunts(asteroidePos, center) <= radius) {
+				drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);
+			}
+		}
+	}
+
+	for (const auto& asteroide : ASTEROIDESCINTURO) {
+		ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
+		if (distanciaEntrePunts(asteroidePos, center) <= radius) {
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
+		}
+	}
+
+	if (diposits_minimapa) {
+		for (const auto& Objjoc : DIPOSITS) {
+			// Converteix la posició del dipòsit al mini mapa
+			ImVec2 objEspaiPos = convertirAPosicioMiniMapa(Objjoc.getPosition(), worldSize, minimapSize, p);
+			if (distanciaEntrePunts(objEspaiPos, center) <= radius) {
+				// Dimensions de la pastilla
+				float pillWidth = 8.0f;   // Amplada de la pastilla
+				float pillHeight = 4.0f;  // Alçada de la pastilla
+				float cornerRadius = 2.0f; // Radi de les vores arrodonides
+
+				// Dibuixa la pastilla com un rectangle arrodonit
+				drawList->AddRectFilled(ImVec2(objEspaiPos.x - pillWidth / 2, objEspaiPos.y - pillHeight / 2),
+					ImVec2(objEspaiPos.x + pillWidth / 2, objEspaiPos.y + pillHeight / 2),
+					colorDiposits, cornerRadius);
+			}
+		}
+	}
+
+	if(estacions_minimapa){
+		for (const auto& estacions : ESTACIONS) {
+			ImVec2 estacionsPos = convertirAPosicioMiniMapa(estacions.getPosition(), worldSize, minimapSize, p);
+			if (distanciaEntrePunts(estacionsPos, center) <= radius) {
+
+				// Dimensions de la creu
+				float crossSize = 4.0f; // Mida de la creu (ajustable)
+
+				// Dibuixa les dues línies de la creu
+				drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
+					ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
+					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+
+				drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
+					ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
+					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+			}
+		}
+	}
+	// Centre del jugador en el mapa
+	ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
+	if (distanciaEntrePunts(jugadorPos, center) <= radius) {
+
+		// Radi del triangle i orientació
+		float puntaLlargada = 8.0f; // Longitud de la punta
+		float baseAmple = 5.0f;    // Ample de la base del triangle
+		float orientacio = nau.getCam().getAngle(); // Orientació en radians
+		//std::cout << orientacio << std::endl;
+
+		// Calcular els vèrtexs del triangle
+		ImVec2 p1 = ImVec2(
+			jugadorPos.x + cos(orientacio) * puntaLlargada,
+			jugadorPos.y + sin(orientacio) * puntaLlargada
+		);
+
+		ImVec2 p2 = ImVec2(
+			jugadorPos.x + cos(orientacio + IM_PI * 0.75f) * baseAmple,
+			jugadorPos.y + sin(orientacio + IM_PI * 0.75f) * baseAmple
+		);
+
+		ImVec2 p3 = ImVec2(
+			jugadorPos.x + cos(orientacio - IM_PI * 0.75f) * baseAmple,
+			jugadorPos.y + sin(orientacio - IM_PI * 0.75f) * baseAmple
+		);
+
+		// Dibuixar el triangle
+		drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
+
+	}
+
+	// Dibuixar el border circular
+	drawList->AddCircle(center, radius + (borderThickness / 2), color_interficie, 64, borderThickness);
+
+}
+
+void crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix,float borderThickness) {
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	//ImVec2 p = ImGui::GetCursorScreenPos();
+	vec3 worldSize(tamanySS, tamanySS, 0);
+
+	// Centre del radar i radi
+	ImVec2 center = ImVec2(radarPosition.x + radarSize.x / 2, radarPosition.y + radarSize.y / 2);
+	float radius = std::min(radarSize.x, radarSize.y) / 2.0f - borderThickness - 1;
+
+	if (abaix) {
+		drawList->AddRectFilled(ImVec2(radarPosition.x, radarPosition.y + radarSize.y / 2), ImVec2(radarPosition.x + radarSize.x, radarPosition.y + radarSize.y), color_interficie);
+	}
+	// Dibuixar el fons del radar
+	drawList->AddCircleFilled(center, radius, IM_COL32(20, 20, 20, 255)); // Color de fons
+
+	// Dibuixar la línia horitzontal per indicar l'orientació
+	drawList->AddLine(
+		ImVec2(center.x - radius, center.y), // Inici de la línia (part esquerra)
+		ImVec2(center.x + radius, center.y), // Final de la línia (part dreta)
+		IM_COL32(255, 255, 255, 255),       // Color blanc
+		2.0f                                // Gruix de la línia
+	);
+
+	if (asteroides_minimapa) {
+		// Dibuixar asteroides
+		for (const auto& asteroide : ASTEROIDES) {
+			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, radarSize, radarPosition);
+			if (distanciaEntrePunts(asteroidePos, center) <= radius) {
+				drawList->AddCircleFilled(asteroidePos, 2.0f, IM_COL32(255, 0, 0, 255)); // Asteroides
+			}
+		}
+	}
+
+	for (const auto& asteroide : ASTEROIDESCINTURO) {
+		ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, radarSize, radarPosition);
+		if (distanciaEntrePunts(asteroidePos, center) <= radius) {
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
+		}
+	}
+
+	// Dibuixar el jugador (triangle)
+	ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, radarSize, radarPosition);
+	if (distanciaEntrePunts(jugadorPos, center) <= radius) {
+		float puntaLlargada = 8.0f; // Longitud de la punta
+		float baseAmple = 5.0f;    // Ample de la base del triangle
+		float orientacio = nau.getCam().getAngle(); // Orientació en radians
+
+		// Calcular els vèrtexs del triangle
+		ImVec2 p1 = ImVec2(
+			jugadorPos.x + cos(orientacio) * puntaLlargada,
+			jugadorPos.y + sin(orientacio) * puntaLlargada
+		);
+
+		ImVec2 p2 = ImVec2(
+			jugadorPos.x + cos(orientacio + IM_PI * 0.75f) * baseAmple,
+			jugadorPos.y + sin(orientacio + IM_PI * 0.75f) * baseAmple
+		);
+
+		ImVec2 p3 = ImVec2(
+			jugadorPos.x + cos(orientacio - IM_PI * 0.75f) * baseAmple,
+			jugadorPos.y + sin(orientacio - IM_PI * 0.75f) * baseAmple
+		);
+
+		// Dibuixar el triangle del jugador
+		drawList->AddTriangleFilled(p1, p2, p3, IM_COL32(255, 255, 0, 255)); // Color groc
+	}
+
+	// Dibuixar el border circular
+	drawList->AddCircle(center, radius + (borderThickness / 2), color_interficie, 64, borderThickness);
+}
 
 
+
+void ferRectangleAcceleracio(ImVec2* screenSize, ImGuiWindowFlags window_flags) {
 	ImVec2 ColumnaSize(70, 240); // Augmentem l'altura per donar espai al text
-	ImVec2 ColumnaPos = ImVec2(screenSize->x - ColumnaSize.x, screenSize->y - ColumnaSize.y-300);
+	ImVec2 ColumnaPos = ImVec2(screenSize->x - ColumnaSize.x, screenSize->y - ColumnaSize.y - 300);
 	ImGui::SetNextWindowPos(ColumnaPos, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(ColumnaSize);
 	ImGui::Begin("Potencia", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
@@ -1964,128 +2509,79 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 	// Ajustem la posició per al text sota la barra
 	ImVec2 textSize = ImGui::CalcTextSize("Gas");
 	ImVec2 textPos = ImVec2(
-		pos.x + (size.x - textSize.x * 0.5f)-20,  // Centrat horitzontalment respecte a la barra
+		pos.x + (size.x - textSize.x * 0.5f) - 20,  // Centrat horitzontalment respecte a la barra
 		pos.y + size.y + 5                     // Una mica més avall del final de la barra
 	);
 	ImGui::GetWindowDrawList()->AddText(textPos, IM_COL32(255, 255, 255, 255), "Gas");
-	
+
 	ImGui::End();
+}
 
+void crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	ImVec2 p = ImGui::GetCursorScreenPos();
 
-	//Crear mini mapa
+	//INICI jugadorPos Comprovacio
 
-	//vec3 worldSize(tamanySS, tamanySS, 0);
-	ImVec2 minimapSize(500, 300);
-	//ImVec2 minimapPosition(10, 10);
-	ImVec2 minimapPosition = ImVec2(screenSize->x - minimapSize.x, screenSize->y - minimapSize.y);
-	ImGui::SetNextWindowSize(ImVec2(minimapSize.x, minimapSize.y));
-	ImGui::SetNextWindowPos(minimapPosition);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	// Convertir la posició del jugador al mini mapa
+	ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapa(nau.getCam().getO(), vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition);
 
-	if (ImGui::Begin("MiniMapa", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize)) {
-		ImDrawList* drawList = ImGui::GetWindowDrawList();
-		ImVec2 p = ImGui::GetCursorScreenPos();
+	// Comprovar si el jugador està fora dels límits del mini mapa
+	if (jugadorPosComprovacio.x < minimapPosition.x || jugadorPosComprovacio.x > minimapPosition.x + minimapSize.x ||
+		jugadorPosComprovacio.y < minimapPosition.y || jugadorPosComprovacio.y > minimapPosition.y + minimapSize.y) {
+		// Augmentar la mida del mini mapa
+		tamanySS += tamanySS * 0.5f;  // Augmenta la mida horitzontal
+	}
+	//FI jugadorPos Comprovacio
 
+	vec3 worldSize(tamanySS, tamanySS, 0);
 
-		//INICI jugadorPos Comprovacio
+	// Fons del mini mapa
+	drawList->AddRectFilled(p, ImVec2(p.x + minimapSize.x, p.y + minimapSize.y), IM_COL32(20, 20, 20, 255));
 
-		// Convertir la posició del jugador al mini mapa
-		ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapa(nau.getCam().getO(), vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition);
+	// Dibuixa els planetes
+	for (const auto& planeta : PLANETES) {
+		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
+		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
+		drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList,false,0.0,ImVec2(0,0));
 
-		// Comprovar si el jugador està fora dels límits del mini mapa
-		if (jugadorPosComprovacio.x < minimapPosition.x || jugadorPosComprovacio.x > minimapPosition.x + minimapSize.x ||
-			jugadorPosComprovacio.y < minimapPosition.y || jugadorPosComprovacio.y > minimapPosition.y + minimapSize.y) {
-			// Augmentar la mida del mini mapa
-			tamanySS += tamanySS*0.5f;  // Augmenta la mida horitzontal
+		//FI PROVA
+		if (planeta.getName() == "Sol") {
+			drawList->AddCircleFilled(planetaPos, 12.0f, colorSol);
+
 		}
-		vec3 worldSize(tamanySS, tamanySS, 0);
-		//FI jugadorPos Comprovacio
+		else if (PlanetOrigen != -1 && PlanetDesti != -1) {
+			if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
+				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
 
-
-		// Fons del mini mapa
-		drawList->AddRectFilled(p, ImVec2(p.x + minimapSize.x, p.y + minimapSize.y), IM_COL32(20, 20, 20, 255));
-		
-		// Dibuixa els planetes
-		for (const auto& planeta : PLANETES) {
-			ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
-			//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
-			//drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList);
-			// Defineix el nombre de punts per a l'òrbita
-			const int numPoints = 100;
-			float a = planeta.getSemieixMajor() * ESCALA_DISTANCIA; // Semieix major escalat
-			float e = planeta.getExcentricitat(); // Excentricitat
-			float longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del node ascendent en radians
-
-			// Contenidor per als punts de l'òrbita
-			std::vector<ImVec2> orbitPoints;
-
-			// Calcular els punts de l'òrbita
-			for (int i = 0; i < numPoints; ++i) {
-				// Anomalia veritable
-				float nu = 2.0f * PI * i / numPoints;
-
-				// Radi en aquest punt de l'òrbita
-				float r = a * (1 - e * e) / (1 + e * cos(nu));
-
-				// Posició en el pla orbital (2D)
-				float x_orb = r * cos(nu);
-				float y_orb = r * sin(nu);
-
-				// Aplicar rotació pel node ascendent
-				float x_rot = cos(longNodeAsc) * x_orb - sin(longNodeAsc) * y_orb;
-				float y_rot = sin(longNodeAsc) * x_orb + cos(longNodeAsc) * y_orb;
-
-				// Convertir a coordenades del mini mapa
-				ImVec2 minimapPoint = convertirAPosicioMiniMapa(
-					glm::vec3(x_rot, y_rot, 0.0f),
-					glm::vec3(tamanySS, tamanySS, 0), // Escala del món
-					minimapSize,
-					minimapPosition
-				);
-
-				orbitPoints.push_back(minimapPoint);
 			}
-
-			// Dibuixar l'òrbita
-			drawList->AddPolyline(orbitPoints.data(), orbitPoints.size(), IM_COL32(200, 200, 200, 255), false, 1.0f);
-
-			std::cout << orbitPoints.size() << std::endl;
-
-
-
-			//FI PROVA
-			if (planeta.getName() == "Sol") {
-				drawList->AddCircleFilled(planetaPos, 12.0f, colorSol);
-
-			}else if (PlanetOrigen != -1 && PlanetDesti != -1) {
-				if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
-					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
-
-				}
-				else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
-					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
-				}
-				else {
-					drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
-				}
+			else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
+				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
 			}
 			else {
 				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
 			}
-
+		}
+		else {
+			drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
 		}
 
-		// Dibuixar els asteroides
+	}
+
+	// Dibuixar els asteroides
+	if (asteroides_minimapa) {
 		for (const auto& asteroide : ASTEROIDES) {
 			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
-			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);  // Vermell
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);
 		}
+	}
 
-		for (const auto& asteroide : ASTEROIDESCINTURO) {
-			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
-			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
-		}
+	for (const auto& asteroide : ASTEROIDESCINTURO) {
+		ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
+		drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
+	}
 
+	if (diposits_minimapa) {
 		for (const auto& Objjoc : DIPOSITS) {
 			// Converteix la posició del dipòsit al mini mapa
 			ImVec2 objEspaiPos = convertirAPosicioMiniMapa(Objjoc.getPosition(), worldSize, minimapSize, p);
@@ -2100,7 +2596,9 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 				ImVec2(objEspaiPos.x + pillWidth / 2, objEspaiPos.y + pillHeight / 2),
 				colorDiposits, cornerRadius);
 		}
+	}
 
+	if (estacions_minimapa) {
 		for (const auto& estacions : ESTACIONS) {
 			ImVec2 estacionsPos = convertirAPosicioMiniMapa(estacions.getPosition(), worldSize, minimapSize, p);
 
@@ -2116,77 +2614,78 @@ void MostrarPantallaJoc(ImVec2* screenSize) {
 				ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
 				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
 		}
-
-		// Dibuixa el jugador
-		//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
-		//drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
-
-		// Centre del jugador en el mapa
-		ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
-
-		// Radi del triangle i orientació
-		float puntaLlargada = 8.0f; // Longitud de la punta
-		float baseAmple = 5.0f;    // Ample de la base del triangle
-		float orientacio = nau.getCam().getAngle(); // Orientació en radians
-		std::cout << orientacio << std::endl;
-
-		// Calcular els vèrtexs del triangle
-		ImVec2 p1 = ImVec2(
-			jugadorPos.x + cos(orientacio) * puntaLlargada,
-			jugadorPos.y + sin(orientacio) * puntaLlargada
-		);
-
-		ImVec2 p2 = ImVec2(
-			jugadorPos.x + cos(orientacio + IM_PI * 0.75f) * baseAmple,
-			jugadorPos.y + sin(orientacio + IM_PI * 0.75f) * baseAmple
-		);
-
-		ImVec2 p3 = ImVec2(
-			jugadorPos.x + cos(orientacio - IM_PI * 0.75f) * baseAmple,
-			jugadorPos.y + sin(orientacio - IM_PI * 0.75f) * baseAmple
-		);
-
-		// Dibuixar el triangle
-		drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
-		
-
-		// Dibuixa els planetes
-		/*for (const auto& planeta : PLANETES) {
-			ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, nau.getCam().getO());
-			std::cout << "Posició planeta: " << planetaPos.x << ", " << planetaPos.y << std::endl;  // Depuració
-
-			if (planeta.getName() == "Sol") {
-				drawList->AddCircleFilled(planetaPos, 10.0f, colorSol);
-			}
-			else if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
-				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
-			}
-			else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
-				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
-			}
-			else {
-				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
-			}
-		}
-
-		// Dibuixar els asteroides
-		for (const auto& asteroide : ASTEROIDES) {
-			ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugador(asteroide.getPosition(), worldSize, minimapSize, nau.getCam().getO());
-			std::cout << "Posició asteroide: " << asteroidePos.x << ", " << asteroidePos.y << std::endl;  // Depuració
-			drawList->AddCircleFilled(asteroidePos, 5.0f, colorAsteroides);
-		}
-
-		// Dibuixar el jugador
-		ImVec2 jugadorPos = convertirAPosicioMiniMapaDesdeJugador(nau.getCam().getO(), worldSize, minimapSize, nau.getCam().getO());
-		std::cout << "Posició jugador: " << jugadorPos.x << ", " << jugadorPos.y << std::endl;  // Depuració
-		drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
-		*/
 	}
-	ImGui::End();
-	ImGui::PopStyleVar();
 
+	// Dibuixa el jugador
+	//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
+	//drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
+
+	ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
+
+	// Radi del triangle i orientació
+	float puntaLlargada = 8.0f; // Longitud de la punta
+	float baseAmple = 5.0f;    // Ample de la base del triangle
+	float orientacio = nau.getCam().getAngle(); // Orientació en radians
+	//std::cout << orientacio << std::endl;
+
+	// Calcular els vèrtexs del triangle
+	ImVec2 p1 = ImVec2(
+		jugadorPos.x + cos(orientacio) * puntaLlargada,
+		jugadorPos.y + sin(orientacio) * puntaLlargada
+	);
+
+	ImVec2 p2 = ImVec2(
+		jugadorPos.x + cos(orientacio + IM_PI * 0.75f) * baseAmple,
+		jugadorPos.y + sin(orientacio + IM_PI * 0.75f) * baseAmple
+	);
+
+	ImVec2 p3 = ImVec2(
+		jugadorPos.x + cos(orientacio - IM_PI * 0.75f) * baseAmple,
+		jugadorPos.y + sin(orientacio - IM_PI * 0.75f) * baseAmple
+	);
+
+	// Dibuixar el triangle
+	drawList->AddTriangleFilled(p1, p2, p3, colorJugador);
 }
 
+void crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition) {
+	// Dibuixa els planetes
+	/*for (const auto& planeta : PLANETES) {
+		ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, nau.getCam().getO());
+		std::cout << "Posició planeta: " << planetaPos.x << ", " << planetaPos.y << std::endl;  // Depuració
+
+		if (planeta.getName() == "Sol") {
+			drawList->AddCircleFilled(planetaPos, 10.0f, colorSol);
+		}
+		else if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
+			drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
+		}
+		else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
+			drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
+		}
+		else {
+			drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
+		}
+	}
+
+	// Dibuixar els asteroides
+	for (const auto& asteroide : ASTEROIDES) {
+		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugador(asteroide.getPosition(), worldSize, minimapSize, nau.getCam().getO());
+		std::cout << "Posició asteroide: " << asteroidePos.x << ", " << asteroidePos.y << std::endl;  // Depuració
+		drawList->AddCircleFilled(asteroidePos, 5.0f, colorAsteroides);
+	}
+
+	// Dibuixar el jugador
+	ImVec2 jugadorPos = convertirAPosicioMiniMapaDesdeJugador(nau.getCam().getO(), worldSize, minimapSize, nau.getCam().getO());
+	std::cout << "Posició jugador: " << jugadorPos.x << ", " << jugadorPos.y << std::endl;  // Depuració
+	drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
+	*/
+}
+
+// Funció per calcular la distància entre dos punts
+float distanciaEntrePunts(const ImVec2& a, const ImVec2& b) {
+	return sqrtf((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
 
 ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon,
 	const glm::vec3& worldSize,
@@ -6388,8 +6887,11 @@ int main(void)
 	soyut = loadIMA_SOIL("textures/menu/soyut.png");
 	iss = loadIMA_SOIL("textures/menu/iss.png");
 	cometa = loadIMA_SOIL("textures/menu/asteroid.png");
-	fons = loadIMA_SOIL("textures/menu/space2gran.jpeg");
+	//fons = loadIMA_SOIL("textures/menu/space2gran.jpeg");
+	fons = loadIMA_SOIL("textures/menu/fons5.png");
 	endarrera = loadIMA_SOIL("textures/menu/atras.png");
+	interficie_1 = loadIMA_SOIL("textures/menu/2.png");
+	interficie_2 = loadIMA_SOIL("textures/menu/1.png");
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -6429,8 +6931,8 @@ int main(void)
 	}
 
 	// Check if the ESC key was pressed or the window was closed
-	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-		glfwWindowShouldClose(window) == 0);
+	//while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+	//	glfwWindowShouldClose(window) == 0);
 
 	// Entorn VGI.ImGui: Cleanup ImGui
 	ImGui_ImplOpenGL3_Shutdown();
