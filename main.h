@@ -52,7 +52,7 @@ bool show_config_controladors = false;
 
 //Minimapa
 bool minimapas_circulars = true;
-bool minimapas_centrat_sol = true;
+bool minimapas_centrat_sol = false;
 
 int tamanyminimapa_x = 500;
 int tamanyminimapa_y = 300;
@@ -69,6 +69,7 @@ ImFont* silkscreen;
 ImFont* droidsans;
 ImFont* silkscreentitle;
 ImFont* silkscreensubtitle;
+ImFont* silkscreenh3;
 
 
 
@@ -362,3 +363,4 @@ void ferRectangleAcceleracio(ImVec2* screenSize, ImGuiWindowFlags window_flags);
 void crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness);
 void crearColoPickerFill(ImVec4* color, ImVec2 tamany, const char* text);
 void crearColorPickerU32(ImU32* color, ImVec2 tamany, const char* text);
+void crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimapPosition, bool abaix, float borderThickness);
