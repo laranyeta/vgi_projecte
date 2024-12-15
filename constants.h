@@ -12,12 +12,14 @@
 #include "planeta.h"
 #include "asteroide.h"
 #include "objectesEspai.h"
+//#include "GUI.h"
 
 extern std::vector<Planeta> PLANETES;
 extern std::vector<Asteroide> ASTEROIDES;
 extern std::vector<Asteroide> ASTEROIDESCINTURO;
 extern std::vector<objectesEspai> DIPOSITS;
 extern std::vector<objectesEspai> ESTACIONS;
+//extern GUI INTERFICIE;
 
 //--------------- VGI: Tipus de Càmera
 #define CAP ' '
