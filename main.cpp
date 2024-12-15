@@ -673,8 +673,6 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 				ilumina, llum_ambient, llumGL, ifixe, ilum2sides,
 				eixos, grid, hgrid);
 
-			nau.setModel(ObOBJ);
-
 		}
 		else if (camera == CAM_GEODE) {
 			ViewMatrix = Vista_Geode(shader_programID, OPV_G, Vis_Polar, pan, tr_cpv, tr_cpvF, c_fons, col_obj, objecte, mida, pas,
@@ -5298,15 +5296,50 @@ void Teclat_Nau(int key, int action)
 	if (press && key == GLFW_KEY_R)
 	{
 		Nau newNau;
-		newNau.setModel(nau.getModel());
+		//newNau.setModel(nau.getModel());
 		nau = newNau;
 	}
 
 	if (press || release)
 	{
-
 		switch (key)
 		{
+		//
+		// 
+		// 
+		// 
+		// 
+		// 
+		// CAMRERAS
+		case GLFW_KEY_1: //PRIMERA PERSONA
+			if (press)
+			{
+				nau.setCamAngle(1);
+				//CAMBIAR A MODEL VIDRE TRANSPARENT
+				nau.setModel(&nullObj);
+			}
+			break;
+		case GLFW_KEY_2: //MIRAR DIRECTAMENT A NAU
+			if (press)
+			{
+				nau.setCamAngle(2);
+				nau.setModel(&ObOBJ);
+			}
+			break;
+		case GLFW_KEY_3: //TERCERA PERSONA
+			if (press)
+			{
+				nau.setCamAngle(3);
+				nau.setModel(&ObOBJ);
+			}
+			break;
+		//END CAMERAS
+		// 
+		// 
+		// 
+		// 
+		// 
+		// 
 			// Tecla cursor amunt
 		case GLFW_KEY_W:
 			pressW = status;
@@ -6892,6 +6925,8 @@ int main(void)
 	endarrera = loadIMA_SOIL("textures/menu/atras.png");
 	interficie_1 = loadIMA_SOIL("textures/menu/2.png");
 	interficie_2 = loadIMA_SOIL("textures/menu/1.png");
+
+	nau.setModel(&ObOBJ);
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef NAU_H
 #define NAU_H
@@ -32,7 +32,7 @@ private:
 
 	//objects owned by nau
 	Camera m_cam; //camera
-	COBJModel* m_model;
+	COBJModel** m_model;
 
 	float m_fuel;
 	float m_life;
@@ -91,14 +91,16 @@ public:
 
 	~Nau() {}
 
-	void setModel(COBJModel* obj) { m_model = obj; }
+	void setModel(COBJModel** obj) { 
+		m_model = obj; 
+	}
 
 	vec3 getN() const { return m_n; }
 	vec3 getV() const { return m_v; }
 	vec3 getU() const { return m_u; }
 	vec3 getO() const { return m_o; }
 	COBJModel* getModel() const {
-		return m_model;
+		return *m_model;
 	}
 	Camera getCam() const {
 		return m_cam;
@@ -114,7 +116,7 @@ public:
 	//MOVIMENT
 	void move(vec3 move) { m_o += move; m_cam.move(move); }
 
-	// ROTACI� SOBRE SI MATEIX
+	// ROTACIÓ SOBRE SI MATEIX
 	void rotN(float angle) {
 		m_q = rotate(mat4(1), radians(angle), m_n) * m_q;
 
@@ -179,6 +181,94 @@ public:
 	//Extra
 	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
 	void moveS(double delta) { move((float)(m_s * delta) * m_n); }
+
+
+
+	//
+	// 
+	// 
+	// 
+	// 
+	// 
+	// ANGLE CAMERA
+	void setCamAngle(int i)
+	{
+		vec3 pos;
+		vec3 n;
+		vec3 v;
+		vec3 u;
+
+		switch (i)
+		{
+			case 1:	//posem acmera primera persona
+				pos = m_o;
+				n = m_n;
+				v = m_v;
+				u = m_u;
+
+				m_cam = Camera(pos, n, v, u);
+				break;
+			case 2:
+				pos = m_o - vec3(m_q * vec4(RAD * vec3(-cos(ANG), 0, -sin(ANG)), 1.0f));
+				n = -m_n;
+				v = m_v;
+				u = -m_u;
+
+				m_cam = Camera(pos, n, v, u);
+				break;
+
+			case 3:
+				pos = m_o - vec3(m_q * vec4(RAD*vec3(cos(ANG), 0, -sin(ANG)), 1.0f));
+				n = m_n;
+				v = m_v;
+				u = m_u;
+
+				m_cam = Camera(pos, n, v, u);
+				break;
+
+			default:
+				break;
+		}
+	}
+	// END ANGLE CAMERA
+	// ANGLE MAP
+	float getAngle() {
+		vec2 n = vec2(m_n.x, m_n.y); // Vector normal
+		vec2 v = vec2(1.0, 0.0); // Vector de referència
+
+		// Angle entre els vectors
+		float angle = acos(dot(normalize(n), normalize(v)));
+
+		float cross = n.x * v.y - n.y * v.x;
+
+		if (cross < 0) {
+			angle = 2.0f * PI - angle;
+		}
+
+		return angle; // Retorna l’angle entre 0 i 2π
+	}
+	float getAngleV() {
+		vec2 n = vec2(m_v.y, m_v.z); // Vector normal
+		vec2 v = vec2(0.0, 1.0); // Vector de referència
+
+		// Angle entre els vectors
+		float angle = acos(dot(normalize(n), normalize(v)));
+
+		float cross = n.x * v.y - n.y * v.x;
+
+		if (cross < 0) {
+			angle = 2.0f * PI - angle;
+		}
+
+		return angle; // Retorna l’angle entre 0 i 2π
+	}
+	// END ANGLE MAP
+	//
+	// 
+	// 
+	// 
+	// 
+	// 
 };
 
 #endif

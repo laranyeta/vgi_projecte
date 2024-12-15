@@ -251,7 +251,7 @@ int rotateN, rotateV, rotateU, rotateCount;
 Nau nau;
 Camera camProva;
 bool pause;
-
+COBJModel* nullObj = NULL;
 //-------------- Entorn VGI: Fi De Variables globals de main
 
 //-------------- Entorn VGI: Declaraci� funcions main

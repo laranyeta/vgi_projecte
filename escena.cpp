@@ -1317,5 +1317,8 @@ void d_nau(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool 
 
 	// Configuraci�n del material y dibujo del objeto
 	SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
-	nau.getModel()->draw_TriVAO_OBJ(sh_programID);
+
+	COBJModel* nauModel = nau.getModel();
+	if(nauModel != NULL)
+		nauModel->draw_TriVAO_OBJ(sh_programID);
 }

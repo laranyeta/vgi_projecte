@@ -113,6 +113,24 @@ public:
 	{
 		/*TO DO*/
 	}
+
+	//
+	// 
+	// 
+	// 
+	// 
+	// 
+	// ANGLE CAMERA
+	Camera(vec3 pos, vec3 n, vec3 v, vec3 u)
+	{
+		m_o = pos;
+		m_p = pos + n;
+
+		m_n = n;
+		m_u = u;
+		m_v = v;
+	}
+	// END ANGLE CAMERA
 };
 
 #endif
