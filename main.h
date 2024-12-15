@@ -12,7 +12,7 @@
 #include "objLoader.h"	
 #include "camera.h"
 #include "nau.h"
-
+#include "shader.h"
 
 //-------------- Entorn VGI: Variables globals de main
 
@@ -29,48 +29,6 @@ GLFWwindow* window;
 bool statusB;	// Opci� booleana per a mostrar Status Bar per consola [0:NO,1:SI]
 
 // EntornVGI.ImGui: Gesti� de finestres de men� ImGui
-bool show_demo_window = false;
-bool show_another_window = false;
-bool show_EntornVGI_window = false;
-bool show_window_about = false;
-
-bool show_debug_windows = false;
-bool show_user_windows = true;
-bool show_menu_game = false;
-bool show_selector_planeta_origen = false;
-bool show_selector_planeta_desti = false;
-bool show_game_window = false;
-bool show_game_settings = false;
-bool show_fons = true;
-bool show_pantalla_carrega = false;
-bool show_menu_jugador_config = false;
-
-bool show_config_grafics = true;
-bool show_config_so = false;
-bool show_config_controladors = false;
-
-
-//Minimapa
-bool minimapas_circulars = true;
-bool minimapas_centrat_sol = false;
-
-int tamanyminimapa_x = 500;
-int tamanyminimapa_y = 300;
-int tamanyradar = 300;
-
-bool asteroides_minimapa = true;
-bool diposits_minimapa = true;
-bool estacions_minimapa = true;
-bool orbites_minimapa = true;
-
-
-ImFont* rainyhearts;
-ImFont* silkscreen;
-ImFont* droidsans;
-ImFont* silkscreentitle;
-ImFont* silkscreensubtitle;
-ImFont* silkscreenh3;
-
 
 
 // Entorn V3D: Variables de control per Men� C�mera: Esf�rica, Navega, M�bil, Zoom, Satelit, Polars... 
@@ -251,7 +209,7 @@ int rotateN, rotateV, rotateU, rotateCount;
 //bool angleControl[6]; int angleCount;
 Nau nau;
 Camera camProva;
-bool pause;
+//bool pause;
 
 //-------------- Entorn VGI: Fi De Variables globals de main
 
@@ -321,7 +279,7 @@ void OnTimer();
 // ---------------- Entorn VGI: Funcions locals a main.cpp
 int Log2(int num);							// Log2: C�lcul del log base 2 de num
 int llegir_ptsC(const char* nomf);				// Llegir Punts Control Corbes Bezier i B-Spline
-void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow* window);
+//void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow* window);
 // ---------------- Entorn VGI: Tractament d'errors
 void error_callback(int code, const char* description);
 GLenum glCheckError_(const char* file, int line);
@@ -329,38 +287,10 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severi
 	const GLchar* message, const void* userParam);
 
 //Funcions propies
-void IniciarSimulador();
-void MostrarPantallaInicial(ImVec2* screenSize);
-void MostrarMenuDebug(ImVec2* screenSize);
-void MostrarPantallaMenu(ImVec2* screenSize);
-void MostrarPantallaConfiguracio(ImVec2* screenSize);
-void MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio);
-void MostrarPantallaJoc(ImVec2* screenSize);
-void MostrarPantallaCarrega(ImVec2* screenSize);
-void PosicionsInicialsSistemaSolar();
-float distanciaEuclidiana(const vec3& point1, const vec3& point2);
-void CircularProgressBar(const char* label, float progress, const ImVec2& size, const ImVec4& color);
-void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
+
 void SetWindowIcon(GLFWwindow* window, const char* iconPath);
 void generarAsteroides();
 void generarAsteroidesCinturo();
 void generarDiposits();
 void generarEstacions();
-ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition);
-
-ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,
-	const glm::vec3& worldSize,
-	const ImVec2& minimapSize,
-	const glm::vec3& posicioJugador);
-
-void MostrarPantallaMenuJugador(ImVec2* screenSize);
-float distanciaEntrePunts(const ImVec2& a, const ImVec2& b);
-
-void crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition);
-void crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition);
-void crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosition,bool abaix, float borderThickness);
-void ferRectangleAcceleracio(ImVec2* screenSize, ImGuiWindowFlags window_flags);
-void crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness);
-void crearColoPickerFill(ImVec4* color, ImVec2 tamany, const char* text);
-void crearColorPickerU32(ImU32* color, ImVec2 tamany, const char* text);
-void crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimapPosition, bool abaix, float borderThickness);
+void PosicionsInicialsSistemaSolar();
