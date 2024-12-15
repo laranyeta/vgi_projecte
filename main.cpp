@@ -57,18 +57,7 @@ float volum_alerta = 1;
 float volum_partida = 1;
 
 
-void cambiarVolumenSuavemente(ISound* sonido, float volumenInicial, float volumenFinal, int duracionMs) {
-	if (!sonido) return;
 
-	int pasos = 20; // Número de pasos en la transición
-	float incremento = (volumenFinal - volumenInicial) / pasos;
-	int delay = duracionMs / pasos; // Tiempo entre pasos en milisegundos
-
-	for (int i = 0; i <= pasos; ++i) {
-		sonido->setVolume(volumenInicial + i * incremento); // Ajusta el volumen gradualmente
-		std::this_thread::sleep_for(std::chrono::milliseconds(delay)); // Espera un poco
-	}
-}
 /*-----------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void InitGL()
@@ -3548,7 +3537,7 @@ void Moviment_Nau()
 			{
 				so_nau->setIsPaused(false);
 			}
-			if (volumNauActual < 0.1)
+			if (volumNauActual < volum_nau)
 				so_nau->setVolume(so_nau->getVolume() + 0.01);
 		}
 	}

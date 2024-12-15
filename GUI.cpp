@@ -115,8 +115,14 @@ void GUI::MostrarPantallaInicial(ImVec2* screenSize) {
 		float volumActual = musica_menu->getVolume();
 		if (musica_menu->getIsPaused())
 			musica_menu->setIsPaused(false);
-		if (volumActual < 1)
-			musica_menu->setVolume(volumActual + 0.005);
+		if (volumActual < *volum_menu)
+			musica_menu->setVolume(volumActual + 0.0005);
+		else if (volumActual > *volum_menu)
+			musica_menu->setVolume(*volum_menu);
+	}
+	if (musica_partida) {
+		if (!musica_partida->getIsPaused())
+			musica_partida->setIsPaused(true);
 	}
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
@@ -234,9 +240,17 @@ void GUI::MostrarPantallaInicial(ImVec2* screenSize) {
 void GUI::MostrarPantallaMenu(ImVec2* screenSize) {
 
 	if (musica_menu) {
-		musica_menu->setIsPaused(false); // Pausa el sonido
-		musica_menu->setVolume(1.0f);  // Cambia el volumen (0.0 a 1.0)
-		//musica->setPlaybackSpeed(1.5f); // Cambia la velocidad de reproducción
+		float volumActual = musica_menu->getVolume();
+		if (musica_menu->getIsPaused())
+			musica_menu->setIsPaused(false);
+		if (volumActual < *volum_menu)
+			musica_menu->setVolume(volumActual + 0.05);
+		else if (volumActual > *volum_menu)
+			musica_menu->setVolume(*volum_menu);
+	}
+	if (musica_partida) {
+		if (!musica_partida->getIsPaused())
+			musica_partida->setIsPaused(true);
 	}
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
@@ -318,9 +332,17 @@ void GUI::MostrarPantallaMenu(ImVec2* screenSize) {
 void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 
 	if (musica_menu) {
-		musica_menu->setIsPaused(false); // Pausa el sonido
-		musica_menu->setVolume(*volum_menu);  // Cambia el volumen (0.0 a 1.0)
-		//musica->setPlaybackSpeed(1.5f); // Cambia la velocidad de reproducción
+		float volumActual = musica_menu->getVolume();
+		if (musica_menu->getIsPaused())
+			musica_menu->setIsPaused(false);
+		if (volumActual < *volum_menu)
+			musica_menu->setVolume(volumActual + 0.05);
+		else if (volumActual > *volum_menu)
+			musica_menu->setVolume(*volum_menu);
+	}
+	if (musica_partida) {
+		if (!musica_partida->getIsPaused())
+			musica_partida->setIsPaused(true);
 	}
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
@@ -820,10 +842,19 @@ void GUI::crearColorPickerU32(ImU32* color, ImVec2 tamany, const char* text) {
 void GUI::MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio) {
 
 	if (musica_menu) {
-		musica_menu->setIsPaused(false); // Pausa el sonido
-		musica_menu->setVolume(*volum_menu);  // Cambia el volumen (0.0 a 1.0)
-		//musica->setPlaybackSpeed(1.5f); // Cambia la velocidad de reproducción
+		float volumActual = musica_menu->getVolume();
+		if (musica_menu->getIsPaused())
+			musica_menu->setIsPaused(false);
+		if (volumActual < *volum_menu)
+			musica_menu->setVolume(volumActual + 0.05);
+		else if (volumActual > *volum_menu)
+			musica_menu->setVolume(*volum_menu);
 	}
+	if (musica_partida) {
+		if (!musica_partida->getIsPaused())
+			musica_partida->setIsPaused(true);
+	}
+
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
@@ -992,9 +1023,17 @@ void GUI::CircularProgressBar(const char* label, float progress, const ImVec2& s
 void GUI::MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 	if (musica_menu) {
-		musica_menu->setIsPaused(false); // Pausa el sonido
-		musica_menu->setVolume(1.0f);  // Cambia el volumen (0.0 a 1.0)
-		//musica->setPlaybackSpeed(1.5f); // Cambia la velocidad de reproducción
+		float volumActual = musica_menu->getVolume();
+		if (musica_menu->getIsPaused())
+			musica_menu->setIsPaused(false);
+		if (volumActual < *volum_menu)
+			musica_menu->setVolume(volumActual + 0.05);
+		else if (volumActual > *volum_menu)
+			musica_menu->setVolume(*volum_menu);
+	}
+	if (musica_partida) {
+		if (!musica_partida->getIsPaused())
+			musica_partida->setIsPaused(true);
 	}
 
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
@@ -1206,21 +1245,19 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 		if (!musica_menu->getIsPaused())
 		{
 			if (musica_menu->getVolume() > 0)
-				musica_menu->setVolume(musica_menu->getVolume() - 0.005);
+				musica_menu->setVolume(musica_menu->getVolume() - 0.015);
 			else
 				musica_menu->setIsPaused(true);
 		}
 	}
 
-	if (musica_partida)
-	{
+	if (musica_partida) {
 		if (musica_partida->getIsPaused())
-		{
 			musica_partida->setIsPaused(false);
-		}
-		else if (musica_partida->getVolume() < 0.7)
-			musica_partida->setVolume(musica_partida->getVolume() + 0.01);
+		if (musica_partida->getVolume() != *volum_partida)
+			musica_partida->setVolume(*volum_partida);
 	}
+
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -1298,8 +1335,10 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 				//isNearAnyPlanet = true;
 				//std::cout << "Estàs MOLT APROP " << PLANETES[i].getName() << "!" << std::endl;
 				if (so_alerta) {
-					if (so_alerta->getVolume() < 1)
-						so_alerta->setVolume(so_alerta->getVolume() + 0.05);
+					if (so_alerta->getVolume() < *volum_alerta)
+						so_alerta->setVolume(so_alerta->getVolume() + 0.15);
+					else if (so_alerta->getVolume() > *volum_alerta)
+						so_alerta->setVolume(*volum_alerta);
 
 					if (so_alerta->getVolume() > 0)
 						so_alerta->setIsPaused(false);
@@ -1334,6 +1373,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
 	ImGui::Begin("Opcions", &show_user_windows, window_flags);
+
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
 
 	if (planetaAprop >= 0) {
