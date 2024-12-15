@@ -8,7 +8,7 @@
 #include "stdafx.h"
 #include "camera.h"
 #include "objLoader.h"
-
+#include "ImGui\nfd.h" // Native File Dialog
 class Nau {
 private:
 	//position
@@ -33,6 +33,8 @@ private:
 	//objects owned by nau
 	Camera m_cam; //camera
 	COBJModel** m_model;
+	nfdchar_t* rutaOBJ;
+	nfdchar_t* rutaOBJNGlass;
 
 	float m_fuel;
 	float m_life;
@@ -200,8 +202,8 @@ public:
 
 		switch (i)
 		{
-			case 1:	//posem acmera primera persona
-				pos = m_o;
+			case 1:	//posem camera primera persona
+				pos = m_o - vec3(m_q * vec4(vec3(-0.14f, 0, -0.06), 1.0f));
 				n = m_n;
 				v = m_v;
 				u = m_u;
