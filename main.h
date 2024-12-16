@@ -158,6 +158,7 @@ ImVec4 clear_colorO = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);	// ImGui: Color de l'obje
 
 // Entorn VGI: Objecte OBJ:
 COBJModel* ObOBJ;		// Variable d'objecte format OBJ (*.OBJ)
+COBJModel* ObOBJnGlass;		// Variable d'objecte format OBJ (*.OBJ)
 CVAO vao_OBJ;			// Identificador VAO per a objecte OBJ
 
 // Entorn VGI: OBJECTE --> Corbes Bezier i BSpline
