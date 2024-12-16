@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <ImGui/imgui.h>
 #include <vector>
 //#include <glm/glm.hpp>
@@ -10,6 +10,9 @@
 #include <ImGui/imgui_internal.h>
 #include "visualitzacio.h"
 
+
+using namespace irrklang;
+
 //#include "main.h"
 #include <iostream>
 
@@ -20,6 +23,7 @@ public:
 	void inicialitzarImatges();
 	void inicialitzarFonts(ImGuiIO& io);
 	ImFont* fontPrincipal();
+	ImFont* fontDroidsans();
 	void inicialitzarSons(irrklang::ISoundEngine* temp_engine,irrklang::ISound* temp_so_alerta,
 		irrklang::ISound* temp_so_nau,
 		irrklang::ISound* temp_musica_menu,
@@ -33,7 +37,7 @@ public:
 
 
 	void MostrarPantallaInicial(ImVec2* screenSize);
-	void MostrarMenuDebug(ImVec2* screenSize);
+	//void MostrarMenuDebug(ImVec2* screenSize);
 	void MostrarPantallaMenu(ImVec2* screenSize);
 	void MostrarPantallaConfiguracio(ImVec2* screenSize);
 	void MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio);
@@ -44,10 +48,12 @@ public:
 	void CircularProgressBar(const char* label, float progress, const ImVec2& size, const ImVec4& color);
 	void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
 	ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition);
-	ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,
-		const glm::vec3& worldSize,
-		const ImVec2& minimapSize,
+	ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon, 
+		const glm::vec3& worldSize, 
+		const ImVec2& minimapSize, 
+		const ImVec2& minimapPosition, 
 		const glm::vec3& posicioJugador);
+	ImVec2 convertirAPosicioMiniMapaDesdeJugadorVertical(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition, const glm::vec3& posicioJugador);
 	void MostrarPantallaMenuJugador(ImVec2* screenSize);
 	float distanciaEntrePunts(const ImVec2& a, const ImVec2& b);
 	void crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition);
@@ -55,22 +61,30 @@ public:
 	void crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosition, bool abaix, float borderThickness);
 	void ferRectangleAcceleracio(ImVec2* screenSize, ImGuiWindowFlags window_flags);
 	void crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness);
+	void crearRadarVerticalQuadrat(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness);
 	void crearColoPickerFill(ImVec4* color, ImVec2 tamany, const char* text);
 	void crearColorPickerU32(ImU32* color, ImVec2 tamany, const char* text);
 	void crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimapPosition, bool abaix, float borderThickness);
-	void drawOrbitPath2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center);
+	void dibuixarOrbita2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center, bool centratsol);
 	void DrawSpeedometer(float value, float maxValue, float centerX, float centerY, float radius, bool isRPM);
+
 	void DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos, ImVec2 size, float landa);
+	void MostrarMapaSistemaSolar(ImVec2* screenSize);
+
 	//Getters
 	bool getMenuJugadorConfig() const;
 	bool* getWindowAbout();
 	bool getPause();
+	bool* getDebugWindow();
+	bool* getDemoWindow();
+	bool* getMapaWindow();
 	int getPlanetaOrigen();
 	int getPlanetaDesti();
 
 	//Setters
 	void switchMenuJugadorConfig();
 	void switchPause();
+	void switchMapaWindow();
 private:
 	bool pause = false;
 
@@ -89,10 +103,12 @@ private:
 	bool show_fons = true;
 	bool show_pantalla_carrega = false;
 	bool show_menu_jugador_config = false;
+	bool show_mapa_windows = false;
 
 	bool show_config_grafics = true;
 	bool show_config_so = false;
 	bool show_config_controladors = false;
+	bool show_config_credits = false;
 
 
 	//Minimapa
@@ -192,7 +208,7 @@ private:
 	float* volum_partida;
 
 	GLFWmonitor* primary;
-	const GLFWvidmode* mode;
+	//const GLFWvidmode* mode;
 	GLFWwindow* window;
 
 	Nau* nau;
@@ -200,3 +216,5 @@ private:
 
 void IniciarSimulador();
 void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow* window);
+void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int size_y, ImGuiWindowFlags window_flags);
+void MostrarMenuDebug(ImVec2* screenSize);
