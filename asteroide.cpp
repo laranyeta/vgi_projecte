@@ -1,7 +1,8 @@
 #include "asteroide.h"
 #include <glm/gtx/norm.hpp> // For distance calculations
 #include <cmath>
-
+#include<iostream> //luis
+using namespace std;//luis
 // Constructors
 
 // Default constructor
@@ -13,9 +14,11 @@ Asteroide::Asteroide()
     m_velocitat(0.0, 0.0, 0.0),
     m_angle_rotacio_orbita(0.0f),
     m_radi_orbita(0.0),
-    m_radi(0.5f) // Default radius for an asteroid
+    m_radi(0.5f), // Default radius for an asteroid
+    m_so_colisio(false) //luis
 {
     posicionesHistoricas.reserve(m_puntsOrbita);
+    m_soundEngine = createIrrKlangDevice();//luis
 }
 
 // Parameterized constructor without orbit radius
@@ -27,9 +30,11 @@ Asteroide::Asteroide(float radi, double massa, const glm::dvec3& velocitat, cons
     m_velocitat(velocitat),
     m_angle_rotacio_orbita(0.0f),
     m_radi_orbita(0.0),
-    m_radi(radi)
+    m_radi(radi),
+    m_so_colisio(false) //luis
 {
     posicionesHistoricas.reserve(m_puntsOrbita);
+    m_soundEngine = createIrrKlangDevice();//luis
 }
 
 // Parameterized constructor with orbit radius
@@ -41,9 +46,11 @@ Asteroide::Asteroide(float radi, double massa, const glm::dvec3& velocitat, doub
     m_velocitat(velocitat),
     m_angle_rotacio_orbita(0.0f),
     m_radi_orbita(radiOrbita),
-    m_radi(radi)
+    m_radi(radi),
+    m_so_colisio(false) //luis
 {
     posicionesHistoricas.reserve(m_puntsOrbita);
+    m_soundEngine = createIrrKlangDevice();//luis
 }
 
 // Parameterized constructor with angle rotation and orbit radius
@@ -55,9 +62,11 @@ Asteroide::Asteroide(float radi, double massa, const glm::dvec3& velocitat, floa
     m_velocitat(velocitat),
     m_angle_rotacio_orbita(angleRotacio),
     m_radi_orbita(radiOrbita),
-    m_radi(radi)
+    m_radi(radi),
+    m_so_colisio(false) //luis
 {
     posicionesHistoricas.reserve(m_puntsOrbita);
+    m_soundEngine = createIrrKlangDevice();//luis
 }
 
 // Orbital Trajectory Methods
@@ -75,10 +84,19 @@ const std::vector<glm::vec3>& Asteroide::getPosicionesHistoricas() const {
 
 // Collision Handling
 
-bool Asteroide::isCollidingWith(const Asteroide& other) const {
+bool Asteroide::isCollidingWith(const Asteroide& other) { //li vaig treure el const per poder modificar el boolea, si trobem la manera de fer-ho sense boolea podem tornar el const
     double distanceSquared = glm::distance2(glm::dvec3(m_position), glm::dvec3(other.m_position));
     double radiusSum = static_cast<double>(m_radi*2.2) + static_cast<double>(other.m_radi*2.2);
-    return distanceSquared <= (radiusSum * radiusSum);
+
+    bool isColliding = distanceSquared <= (radiusSum * radiusSum); //luis
+
+    if (!isColliding)
+    {
+        if (m_so_colisio)
+            m_so_colisio = false; //luis
+    }
+
+    return isColliding; //luis
 }
 
 void Asteroide::resolveCollision(Asteroide& other) {
@@ -99,6 +117,23 @@ void Asteroide::resolveCollision(Asteroide& other) {
     // Do not resolve if velocities are separating
     if (velocityAlongNormal > 0)
         return;
+
+    if (!m_so_colisio) { //luis
+        // Calcular la posición promedio de la colisión
+        /*glm::vec3 minDistancePosition = glm::vec3(0.1f, 0.1f, 0.1f);
+        irrklang::vec3df collisionPosition = irrklang::vec3df(
+            std::max(collisionPosition.X, minDistancePosition.x), //tot això són intents de so direccional
+            std::max(collisionPosition.Y, minDistancePosition.y),
+            std::max(collisionPosition.Z, minDistancePosition.z)
+        );*/
+
+        // Reproducir el sonido de la colisión en 3D Luis
+        //engine2->play3D("./media/altres/seleccio_menu.wav", collisionPosition, false, false, false);
+
+        playCollisionSound();
+        m_so_colisio = true;
+
+    }
 
     // Coefficient of restitution (1.0 for elastic collision)
     double e = 1.0;
@@ -123,6 +158,24 @@ void Asteroide::resolveCollision(Asteroide& other) {
         other.m_position += static_cast<float>(correction.x * this->m_massa / (this->m_massa + other.m_massa));
         other.m_position += static_cast<float>(correction.y * this->m_massa / (this->m_massa + other.m_massa));
         other.m_position += static_cast<float>(correction.z * this->m_massa / (this->m_massa + other.m_massa));
+    }
+}
+
+void Asteroide::playCollisionSound() { //luis
+    if (m_soundEngine) {
+        m_soundEngine->play2D("C:/Users/lvera/Desktop/vgi cosas/Entorn VGI-GLFW-VS2022 - GL4.3 - ImGui/EntornVGI/media/altres/colisio.wav", false, false, false);
+
+    }
+
+    /*if (m_soundEngine) {
+        // Convertir la posición del asteroide de glm::vec3 a irrklang::vec3df
+        irrklang::vec3df soundPosition(m_position.x, m_position.y, m_position.z);
+
+        // Reproducir el sonido en la posición 3D del asteroide
+        m_soundEngine->play3D("C:/Users/lvera/Desktop/vgi cosas/Entorn VGI-GLFW-VS2022 - GL4.3 - ImGui/EntornVGI/media/altres/colisio.wav", soundPosition, false, false, true);
+    }*/
+    else {
+        std::cerr << "Error: El motor de sonido no está inicializado." << std::endl;
     }
 }
 

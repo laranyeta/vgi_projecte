@@ -10,6 +10,9 @@
 #include <ImGui/imgui_internal.h>
 #include "visualitzacio.h"
 
+
+using namespace irrklang;
+
 //#include "main.h"
 #include <iostream>
 
