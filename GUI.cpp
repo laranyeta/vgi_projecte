@@ -1,6 +1,6 @@
 #include "GUI.h"
 
-void GUI::inicialitzarWindow(GLFWmonitor* temp_primary,GLFWwindow* temp_window, Nau* temp_nau) {
+void GUI::inicialitzarWindow(GLFWmonitor* temp_primary, GLFWwindow* temp_window, Nau* temp_nau) {
 	primary = temp_primary;
 	window = temp_window;
 	nau = temp_nau;
@@ -33,12 +33,12 @@ void GUI::inicialitzarFonts(ImGuiIO& io) {
 	barlowtitleDown = io.Fonts->AddFontFromFileTTF("textures/menu/BarlowCondensed-ExtraBold.ttf", 400.0f);
 }
 
-void GUI::DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos,ImVec2 size, float landa)
+void GUI::DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos, ImVec2 size, float landa)
 {
 	static float rotation_angle = 0.0f; // Angle inicial
 	rotation_angle += ImGui::GetIO().DeltaTime * landa; // Incrementa l'angle basant-se en el temps
 
-	ImGui::SetNextWindowPos(ImVec2(screenSize->x*pos.x, screenSize->y * pos.y));
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * pos.x, screenSize->y * pos.y));
 	ImGui::SetNextWindowSize(ImVec2(1920, 1080));
 	ImGui::Begin("Imatge Terra rot", &show_user_windows, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar);
 
@@ -68,7 +68,7 @@ void GUI::DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos,I
 		texture,
 		points[0], points[1], points[2], points[3]
 	);
-	
+
 	ImGui::End();
 }
 
@@ -81,7 +81,7 @@ ImFont* GUI::fontDroidsans() {
 	return droidsans;
 }
 
-void GUI::inicialitzarSons(irrklang::ISoundEngine* temp_engine, irrklang::ISound* temp_so_alerta, irrklang::ISound* temp_so_nau, irrklang::ISound* temp_musica_menu, irrklang::ISound* temp_musica_partida,float* temp_volum_nau,float* temp_volum_menu,float* temp_volum_alerta,float* temp_volum_partida) {
+void GUI::inicialitzarSons(irrklang::ISoundEngine* temp_engine, irrklang::ISound* temp_so_alerta, irrklang::ISound* temp_so_nau, irrklang::ISound* temp_musica_menu, irrklang::ISound* temp_musica_partida, float* temp_volum_nau, float* temp_volum_menu, float* temp_volum_alerta, float* temp_volum_partida) {
 	engine = temp_engine;
 	so_alerta = temp_so_alerta;
 	so_nau = temp_so_nau;
@@ -450,6 +450,10 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 
 	if (ImGui::ImageButton((void*)(intptr_t)endarrera, ImVec2(40, 40))) {
 		show_game_settings = false;
+		show_config_grafics = true;
+		show_config_so = false;
+		show_config_controladors = false;
+		show_config_credits = false;
 	}
 
 	ImGui::PopStyleVar();
@@ -843,6 +847,39 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 		if (borderWidth > 0.0f) {
 			drawList->AddRect(childMin, childMax, ImColor(ButtonMenuPausa), borderRadius, ImDrawFlags_RoundCornersAll, borderWidth);
 		}
+	}
+	else if (show_config_credits)
+	{
+		ImVec2 windowSize = ImGui::GetWindowSize();
+
+		const char* noms[] = {
+			"Martí Armengod Villar",
+			"Lara Castillejo Roig",
+			"Ismael Fernandez Zarza",
+			"Julia Lipin Gener Rey",
+			"Joan Marc Samó Rojas",
+			"Luis Vera Albarca"
+		};
+
+		ImGui::PushFont(silkscreenh3);
+		ImGui::PushStyleColor(ImGuiCol_Text, ButtonMenuPausa);
+		ImGui::Dummy(ImVec2(0.0f, 150.0f));
+		for (const char* nom : noms) {
+			// Calcular la mida del text
+			ImVec2 textSize = ImGui::CalcTextSize(nom);
+
+			// Calcular la posició horitzontal per centrar el text
+			float textPosX = (windowSize.x - textSize.x) * 0.5f;
+
+			ImGui::SetCursorPosX(textPosX);
+
+			ImGui::Text("%s", nom);
+			ImGui::Dummy(ImVec2(0.0f, 30.0f));
+		}
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+		ImGui::PopFont();
+
 	}
 
 	ImGui::PopStyleVar();
@@ -1285,7 +1322,7 @@ void GUI::MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 }
 
-void GUI::dibuixarOrbita2D(Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center,bool centratsol) {
+void GUI::dibuixarOrbita2D(Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center, bool centratsol) {
 	const int numPoints = 100;
 	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
 	double e = planeta.getExcentricitat(); // Excentricidad
@@ -1339,7 +1376,7 @@ void GUI::dibuixarOrbita2D(Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapP
 	}
 
 	if (orbitSegments.size() >= 1) {
-		orbitSegments[orbitSegments.size()-1].push_back(orbitSegments[0][0]);
+		orbitSegments[orbitSegments.size() - 1].push_back(orbitSegments[0][0]);
 	}
 
 	// Dibuixar tots els segments
@@ -1429,8 +1466,8 @@ void GUI::MostrarMapaSistemaSolar(ImVec2* screenSize) {
 
 	// Calcular les mides de la llegenda i del mapa
 	ImVec2 TitleSize(windowMapaSize.x, 80);
-	ImVec2 LlegendaSize(windowMapaSize.x * llegendaRatio, windowMapaSize.y- TitleSize.y- marge);
-	ImVec2 MapaSize(windowMapaSize.x * mapaRatio - marge, windowMapaSize.y- TitleSize.y- marge);
+	ImVec2 LlegendaSize(windowMapaSize.x * llegendaRatio, windowMapaSize.y - TitleSize.y - marge);
+	ImVec2 MapaSize(windowMapaSize.x * mapaRatio - marge, windowMapaSize.y - TitleSize.y - marge);
 
 	// Posició de la finestra principal
 	ImVec2 windowMapaPosition = ImVec2((screenSize->x - windowMapaSize.x) / 2, (screenSize->y - windowMapaSize.y) / 2);
@@ -1449,7 +1486,7 @@ void GUI::MostrarMapaSistemaSolar(ImVec2* screenSize) {
 
 	if (ImGui::Begin("Mapa Gran", nullptr, window_flags)) {
 		//Titol
-		ImGui::SetCursorPos(ImVec2(0,0));
+		ImGui::SetCursorPos(ImVec2(0, 0));
 		ImGui::BeginChild("Titol mapa", TitleSize, true, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
 		ImGui::PushFont(silkscreensubtitle);
 		ImGui::PushStyleColor(ImGuiCol_Text, ButtonMenuPausa); // Color blanc
@@ -1467,7 +1504,7 @@ void GUI::MostrarMapaSistemaSolar(ImVec2* screenSize) {
 		// Arrodoniment
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
 
-		ImVec2 tamany_botons(LlegendaSize.x-marge*2, 40);
+		ImVec2 tamany_botons(LlegendaSize.x - marge * 2, 40);
 		// Dibuixar la llegenda
 		ImGui::SetCursorPos(LlegendaPosition);
 		ImGui::BeginChild("Llegenda", LlegendaSize, false, ImGuiWindowFlags_NoBackground);
@@ -1871,7 +1908,7 @@ void GUI::crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosi
 		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if (orbites_minimapa) {
-			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center,true);
+			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center, true);
 		}
 		if (distanciaEntrePunts(planetaPos, center) <= radius) {
 			if (planeta.getName() == "Sol") {
@@ -2021,7 +2058,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 		ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, p, nau->getO());
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if (orbites_minimapa) {
-			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center,false);
+			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center, false);
 		}
 		if (distanciaEntrePunts(planetaPos, center) <= radius) {
 			if (planeta.getName() == "Sol") {
@@ -2239,7 +2276,7 @@ void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix,
 					ImVec2(objEspaiPos.x + pillWidth / 2, objEspaiPos.y + pillHeight / 2),
 					colorDiposits, cornerRadius);
 			}
-			
+
 		}
 	}
 
@@ -2297,7 +2334,7 @@ void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix,
 	// Dibuixar el triangle al radar
 	drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
 	*/
-	
+
 
 	// Border del radar
 	drawList->AddCircle(center, radius + (borderThickness / 2), color_interficie, 64, borderThickness);
@@ -2378,7 +2415,7 @@ void GUI::crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
 	for (auto& planeta : PLANETES) {
 		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
-		if(orbites_minimapa){
+		if (orbites_minimapa) {
 			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, false, 0.0, ImVec2(0, 0), true);
 		}
 
@@ -2776,7 +2813,7 @@ bool GUI::getMenuJugadorConfig() const {
 	return show_menu_jugador_config;
 }
 
-bool* GUI::getWindowAbout(){
+bool* GUI::getWindowAbout() {
 	return &show_window_about;
 }
 
@@ -2805,4 +2842,3 @@ void GUI::switchMapaWindow() {
 	show_mapa_windows = !show_mapa_windows;
 	show_game_window = !show_game_window;
 }
-
