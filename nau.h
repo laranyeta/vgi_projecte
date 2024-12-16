@@ -9,7 +9,18 @@
 #include "camera.h"
 #include "objLoader.h"
 #include "ImGui\nfd.h" // Native File Dialog
+#include "OBB.h"
+#include <iostream>
+
 class Nau {
+public:
+	// Necessari per evitar cridar m�s d'una vegada la funci�
+	// de tractar la col�lisi� quan nom�s hem col�lisionat
+	// una vegada
+	enum CollisionState {
+		NotColliding,
+		Colliding,
+	};
 private:
 	//position
 	vec3 m_o; //coord origin
@@ -40,6 +51,13 @@ private:
 	float m_life;
 	float m_potencia;
 	// combustible, particulas, efectos, etc.
+		// Colisions
+	glm::vec3 m_shipDimensions = glm::vec3(0.5, 0.5, 0.25); // profunditat, amplada, altura de la OBB
+	glm::vec3 m_velocitat; // Vector de velocitat + direcci�
+	glm::vec3 m_angularVelocity;
+	double m_massa;
+	OBB m_obb;
+	CollisionState m_collisionState;
 
 public:
 	// BASIQUES
@@ -66,6 +84,12 @@ public:
 		m_fuel = 1.00f;
 		m_life = 1.00;
 		m_potencia = 0.00f;
+
+		//Colisions
+		updateOBB();
+		m_massa = 1.0e22;
+		m_collisionState = NotColliding;
+		m_angularVelocity = glm::vec3(0.0f);
 	}
 
 	Nau operator=(Nau n) {
@@ -87,6 +111,8 @@ public:
 
 		m_cam = n.m_cam;;
 		m_model = n.m_model;
+
+		m_massa = n.m_massa;
 
 		return *this;
 	}
@@ -182,7 +208,12 @@ public:
 
 	//Extra
 	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
-	void moveS(double delta) { move((float)(m_s * delta) * m_n); }
+	void moveS(double delta) {
+		updateVelocity();
+		move((float)(m_s * delta) * m_n);
+		//colisions
+		updateOBB();
+	}
 
 
 
@@ -271,6 +302,26 @@ public:
 	// 
 	// 
 	// 
+	//  Colisions 
+	void updateVelocity() {
+		m_velocitat = static_cast<float>(m_s) * m_n;
+	}
+	// colisions
+	void updateOBB() {
+		// Mateixos eixos locals que els de la nau
+		glm::vec3 axes[3] = { m_n, m_u, m_v };
+		glm::vec3 halfExtents = m_shipDimensions * 0.5f;
+		m_obb = OBB(m_o, axes, halfExtents);
+	}
+	OBB getOBB() const { return m_obb; }
+	CollisionState getCollisionState() { return m_collisionState; }
+	void setCollisionState(CollisionState c) { m_collisionState = c; }
+	void resolveCollisionWithAsteroid(Asteroide& asteroid, const glm::vec3& collisionPoint);
+	float getSpeed() { return m_s; }
+	glm::vec3 getVelocitat() {
+		return static_cast<float>(m_s) * m_n;
+	}
+	void updatePhysicsWithPlanets(const std::vector<Planeta>& planetas, double deltaTime);
 };
 
 #endif

@@ -167,7 +167,99 @@ const double LONG_NODES_ASC[9] = {
 const double PERIAPSIS[9] = {
 	29.1241, 54.85229, 102.9373, 286.4623, 273.867, 339.392, 96.998857, 273.187, 318.15
 };
-const double MASSES[10] = {
+const int NUMERO_DE_LLUNES[9] = { 0, 0, 0, 1, 2, 8, 8, 5, 5 };
+const std::string RUTES_TEXTURA_MOONS[29] = {
+	// Earth (1)
+	"moon.jpg",
+	// Mars (2)
+	"phobos.png", "deimos.png",
+	// Jupiter (8)
+	"Io.jpeg", "Europa.jpg", "Ganymede.jpeg", "Callisto.jpg", "Amalthea.jpg", "Himalia.jpg", "Elara.jpg", "Pasiphae.jpg",
+	// Saturn (8)
+	"TitanClouds.jpg", "Rhea.jpg", "Iapetus.jpg", "Dione.jpeg", "Tethys.jpeg", "Enceladus.jpeg", "Mimas.jpg", "Hyperion.jpg",
+	// Uranus (5)
+	"moon.jpg", "moon.jpg", "moon.jpg", "moon.jpg", "moon.jpg",
+	// Neptune (5)
+	"moon.jpg", "moon.jpg", "moon.jpg", "moon.jpg", "moon.jpg"
+};
+
+const std::string NAMES_MOONS[29] = {
+	"Lluna",
+	// Mars (2)
+	"Phobos", "Deimos",
+	// Jupiter (8)
+	"Io", "Europa", "Ganymede", "Callisto", "Amalthea", "Himalia", "Elara", "Pasiphae",
+	// Saturn (8)
+	"Titan", "Rhea", "Iapetus", "Dione", "Tethys", "Enceladus", "Mimas", "Hyperion",
+	// Uranus (5)
+	"Titania", "Oberon", "Umbriel", "Ariel", "Miranda",
+	// Neptune (5)
+	"Triton", "Proteus", "Nereid", "Larissa", "Galatea"
+};
+
+const double MASSES_MOONS[29] = {
+	7.342e22f,
+	// Mars (2)
+	7.342e22f, 7.342e22f,
+	// Jupiter (8)
+	8.93e22f, 4.8e22f, 1.5e23f, 1.08e23f, 2.08e19f, 9.56e18f, 8.0e18f, 7.1e18f,
+	// Saturn (8)
+	1.345e23f, 2.31e21f, 1.8e21f, 1.05e21f, 7.9e20f, 1.08e20f, 3.8e19f, 5.6e19f,
+	// Uranus (5)
+	3.5e21f, 3.0e21f, 1.3e21f, 9.5e20f, 6.6e20f,
+	// Neptune (5)
+	2.14e22f, 4.4e19f, 2.3e19f, 1.2e19f, 1.1e19f
+};
+
+const int DIRECCIONS_ROTACIO_MOONS[29] = {
+	// Earth (1)
+	1,
+	// Mars (2)
+	-1, 1,
+	// Jupiter (8)
+	1, -1, -1, -1, 1, -1, 1, -1,
+	// Saturn (8)
+	1, -1, 1, 1, -1, 1, 1, -1,
+	// Uranus (5)
+	-1, 1, -1, -1, -1,
+	// Neptune (5)
+	-1, 1, 1, -1, 1
+};
+
+const float ANGLES_INCLINACIO_ROTACIO_MOONS[29] = {
+	// Earth (1)
+	6.0f,
+	// Mars (2)
+	2.0f, 0.0f,
+	// Jupiter (8)
+	7.0f, 5.0f, -6.0f, 3.0f, -5.0f, 0.0f, 6.0f, -7.0f,
+	// Saturn (8)
+	7.0f, 2.0f, -7.0f, 6.0f, 5.0f, -6.0f, 0.0f, 4.0f,
+	// Uranus (5)
+	7.0f, 1.5f, -7.0f, 0.0f, -5.0f,
+	// Neptune (5)
+	7.0f, 0.5f, -7.0f, 6.0f, 0.0f
+};
+
+
+const double RADIS_MOONS[29] = {
+	// Earth (1)
+	1.65825e10,
+	// Mars (2)
+	1.492425e10, 1.806075e10,
+	// Jupiter (8)
+	6.457575e10, 6.608775e10, 7.492425e10, 6.15825e10, 6.457575e10, 6.75855e10, 6.908625e10, 7.057725e10,
+	// Saturn (8)
+	6.15825e10, 6.608775e10, 6.457575e10, 6.15825e10, 7.357575e10, 6.306075e10, 7.057725e10, 6.75855e10,
+	// Uranus (5)
+	1.807575e10, 1.492425e10, 2.108775e10, 2.40885e10, 1.65825e10,
+	// Neptune (5)
+	1.65825e10, 1.957575e10, 1.806075e10, 1.357575e10, 2.557725e10
+};
+
+
+
+const double MASSES[9] = {
 		1.989e30f,  // Sol
 		3.301e23f,  // Mercuri
 		4.867e24f,  // Venus
@@ -177,9 +269,8 @@ const double MASSES[10] = {
 		5.683e26f,  // Saturn
 		8.681e25f,  // Urà
 		1.024e26f,   // Neptú
-		7.342e22f   // Lluna
 };
-const int DIRECCIONS_ROTACIO[10] = {
+const int DIRECCIONS_ROTACIO[9] = {
 		1,  // Sol
 		1,  // Mercuri
 	   -1,  // Venus
@@ -189,9 +280,8 @@ const int DIRECCIONS_ROTACIO[10] = {
 		1,  // Saturn
 	   -1,  // Urà 
 		1,   // Neptú
-		1	// Lluna
 };
-const float ANGLES_INCLINACIO_ROTACIO[10] = {
+const float ANGLES_INCLINACIO_ROTACIO[9] = {
 		7.25f,    // Sol
 		0.03f,    // Mercuri
 		2.64f,    // Venus 
@@ -201,9 +291,8 @@ const float ANGLES_INCLINACIO_ROTACIO[10] = {
 		26.73f,   // Saturn
 		82.23f,   // Urà 
 		28.32f,   // Neptú
-		6.68f	  // Lluna
 };
-const double RADI_ORBITAL[10] = {
+const double RADI_ORBITAL[9] = {
 		0.0f,        // Sol +++1
 		57.9e10f,     // Mercuri
 		108.2e10f,    // Venus
@@ -213,7 +302,6 @@ const double RADI_ORBITAL[10] = {
 		1.4335e13f,  // Saturn
 		2.8725e13f,  // Ur�
 		4.4951e13f,   // Nept�
-		3.844e10f	  // Lluna
 };
 //--------------- VGI: Valor constant de pi
 const double PI=3.14159;

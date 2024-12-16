@@ -1286,7 +1286,7 @@ void GUI::MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 }
 
-void GUI::dibuixarOrbita2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center,bool centratsol) {
+void GUI::dibuixarOrbita2D(Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center,bool centratsol) {
 	const int numPoints = 100;
 	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
 	double e = planeta.getExcentricitat(); // Excentricidad
@@ -1868,7 +1868,7 @@ void GUI::crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosi
 	drawList->AddCircleFilled(center, radius, IM_COL32(20, 20, 20, 255)); // Fons del mini mapa
 
 	// Dibuixa els planetes
-	for (const auto& planeta : PLANETES) {
+	for (auto& planeta : PLANETES) {
 		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if (orbites_minimapa) {
@@ -2018,7 +2018,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 	drawList->AddCircleFilled(center, radius, IM_COL32(20, 20, 20, 255)); // Fons del mini mapa
 
 	// Dibuixa els planetes
-	for (const auto& planeta : PLANETES) {
+	for (auto& planeta : PLANETES) {
 		ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, p, nau->getO());
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if (orbites_minimapa) {
@@ -2376,7 +2376,7 @@ void GUI::crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
 	drawList->AddRectFilled(p, ImVec2(p.x + minimapSize.x, p.y + minimapSize.y), IM_COL32(20, 20, 20, 255));
 
 	// Dibuixa els planetes
-	for (const auto& planeta : PLANETES) {
+	for (auto& planeta : PLANETES) {
 		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if(orbites_minimapa){
@@ -2510,7 +2510,7 @@ void GUI::crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition
 	drawList->AddRectFilled(p, ImVec2(p.x + minimapSize.x, p.y + minimapSize.y), IM_COL32(20, 20, 20, 255));
 
 	// Dibuixa els planetes
-	for (const auto& planeta : PLANETES) {
+	for (auto& planeta : PLANETES) {
 		ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, p, nau->getO());
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if (orbites_minimapa) {

@@ -117,7 +117,7 @@ void Asteroide::resolveCollision(Asteroide& other) {
     // Do not resolve if velocities are separating
     if (velocityAlongNormal > 0)
         return;
-
+    /*
     if (!m_so_colisio) { //luis
         // Calcular la posición promedio de la colisión
         /*glm::vec3 minDistancePosition = glm::vec3(0.1f, 0.1f, 0.1f);
@@ -125,7 +125,7 @@ void Asteroide::resolveCollision(Asteroide& other) {
             std::max(collisionPosition.X, minDistancePosition.x), //tot això són intents de so direccional
             std::max(collisionPosition.Y, minDistancePosition.y),
             std::max(collisionPosition.Z, minDistancePosition.z)
-        );*/
+        );
 
         // Reproducir el sonido de la colisión en 3D Luis
         //engine2->play3D("./media/altres/seleccio_menu.wav", collisionPosition, false, false, false);
@@ -134,7 +134,7 @@ void Asteroide::resolveCollision(Asteroide& other) {
         m_so_colisio = true;
 
     }
-
+    */
     // Coefficient of restitution (1.0 for elastic collision)
     double e = 1.0;
 

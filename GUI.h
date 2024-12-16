@@ -65,7 +65,7 @@ public:
 	void crearColoPickerFill(ImVec4* color, ImVec2 tamany, const char* text);
 	void crearColorPickerU32(ImU32* color, ImVec2 tamany, const char* text);
 	void crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimapPosition, bool abaix, float borderThickness);
-	void dibuixarOrbita2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center, bool centratsol);
+	void dibuixarOrbita2D(Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center, bool centratsol);
 	void DrawSpeedometer(float value, float maxValue, float centerX, float centerY, float radius, bool isRPM);
 
 	void DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos, ImVec2 size, float landa);

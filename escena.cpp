@@ -82,7 +82,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 	COBJModel* objecteOBJ,
-	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ)
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ)
 {
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
@@ -152,8 +152,8 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 	case PROVA_PLANETA:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
-		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur);
-		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
+		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, nau);
+		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
 		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
 		objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object);
 		estacions(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, EstacioOBJ, col_object);
@@ -361,23 +361,6 @@ void processaFisica()
 		}
 		else
 		{
-
-			// TEMPORAL: ISMAEL
-			if (PLANETES[i].getName() == "Lluna")
-			{
-				double distanciaTerraLluna = 3.844e8 * ESCALA_DISTANCIA;
-				glm::vec3 posRelativa = glm::vec3(distanciaTerraLluna, 0.0f, 0.0f);
-
-				PLANETES[i].setPosition(PLANETES[3].getPosition() + posRelativa);
-
-				double v = sqrt(G * PLANETES[3].getMassa() / distanciaTerraLluna);
-
-				glm::dvec3 direccio = glm::normalize(glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), posRelativa));
-				glm::dvec3 velocitat = direccio * v;
-
-				PLANETES[i].setVelocitat(PLANETES[3].getVelocitat() + velocitat);
-			}
-			else {
 				// Elements orbitals keplerians
 				double a = PLANETES[i].getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA;
 				double e = PLANETES[i].getExcentricitat();
@@ -425,7 +408,7 @@ void processaFisica()
 
 				PLANETES[i].setPosition(glm::vec3(posicio_3D));
 				PLANETES[i].setVelocitat(velocitat_3D);
-			}
+			
 		}
 	}
 }
@@ -453,6 +436,89 @@ void processaPlanetes()
 	processaTextures();
 }
 
+void updateSatelitsAnalytical(double time, Planeta& planeta)
+{
+	std::vector<Planeta>& moons = planeta.moons;
+	if (moons.empty()) return;
+
+	std::string pname = planeta.getName();
+
+	double baseRadius = 0.0;
+	double radiusIncrement = 0.1;
+	double orbitalPeriod = 0.0;
+
+	if (pname == "Terra") {
+		baseRadius = 6084400e3;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Mart") {
+		baseRadius = 6084400e3;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Júpiter") {
+		double avgRadius = 5.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Saturn") {
+		double avgRadius = 5.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Urà") {
+		double avgRadius = 2.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Neptú") {
+		double avgRadius = 2.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else {
+		baseRadius = 6084400e3;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+
+	double angularSpeed = TWOPI / orbitalPeriod;
+	double angle = angularSpeed * time * VELOCITAT_SIMULACIO;
+	angle = fmod(angle, TWOPI);
+
+	glm::vec3 planetPos = planeta.getPosition();
+
+	for (size_t i = 0; i < moons.size(); ++i) {
+		Planeta& moon = moons[i];
+
+		double currentRadius = baseRadius + radiusIncrement * i * baseRadius;
+
+		double orbitalRadius = currentRadius * (DISTANCIA_DEFAULT_TERRA / (1.0 * 1.496e11));
+
+		double moonAngle = angle + moon.getOffsetInicial();
+
+		double x_rel = orbitalRadius * cos(moonAngle);
+		double y_rel = orbitalRadius * sin(moonAngle);
+		double z_rel = 0.0;
+
+		float inclination = moon.getAngleRotacio();
+		float inclinationRad = glm::radians(inclination);
+
+		glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f),
+			inclinationRad,
+			glm::vec3(1.0f, 0.0f, 0.0f));
+
+		glm::vec4 pos4D(x_rel, y_rel, z_rel, 1.0f);
+		pos4D = rotationMatrix * pos4D;
+
+		glm::vec3 rotatedPos = glm::vec3(pos4D);
+
+		glm::vec3 moonPosition = planetPos + rotatedPos;
+		moon.setPosition(moonPosition);
+
+		moon.agregarPosicionHistorica(moonPosition);
+	}
+}
+
+
 void updatePlanetesAnalytical(double time)
 {
 	const double G = 6.67430e-11 * pow(ESCALA_DISTANCIA, 3);
@@ -461,6 +527,8 @@ void updatePlanetesAnalytical(double time)
 	for (int i = 1; i < PLANETES.size(); ++i) // Comenzamos desde 1 para omitir el Sol
 	{
 		Planeta& planeta = PLANETES[i];
+
+		updateSatelitsAnalytical(time, planeta);
 
 		// Obtener parámetros orbitales
 		double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
@@ -586,19 +654,24 @@ void drawHistoricalPath(std::vector<glm::vec3> posiciones) {
 bool estaForaDelsLimits(const Asteroide& asteroide)
 {
 	glm::vec3 pos = asteroide.getPosition();
-	float distanceSquared = glm::dot(pos, pos); // Equivalent to glm::length2(pos)
+	float distanceSquared = glm::dot(pos, pos);
 	return distanceSquared > (MAX_DISTANCIA_ASTEROIDES * MAX_DISTANCIA_ASTEROIDES);
 }
-
+/*
+	Mètode per evitar que els asteroides es moguin massa lluny del punt d'origen (el sol)
+	MAX_DISTANCIA_ASTEROIDES indica la màxima distancia a la que poden estar, si s'allunyen
+	massa, en comptes d'eliminar-lo, tornem a utilitzar un generador aleatori per alterar les
+	seves propietats i el moguem a la zona de generació d'asteroides.
+*/
 void resetAsteroide(Asteroide& asteroide, std::mt19937& gen)
 {
 	std::uniform_real_distribution<float> pos_dist(-MAX_DISTANCIA_ASTEROIDES / 2.0f, MAX_DISTANCIA_ASTEROIDES / 2.0f);
-	std::uniform_real_distribution<double> vel_dist(-0.2, 0.2);
+	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
 	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
-	float radius = radius_dist(gen);         // Radius between 1.0 and 2.0
-	double mass = mass_dist(gen);            // Mass between 1.0e12 and 1.0e13
+	float radius = radius_dist(gen);
+	double mass = mass_dist(gen);
 
 	glm::vec3 position(pos_dist(gen), pos_dist(gen), pos_dist(gen));
 	glm::dvec3 velocity(vel_dist(gen), vel_dist(gen), vel_dist(gen));
@@ -610,29 +683,35 @@ void resetAsteroide(Asteroide& asteroide, std::mt19937& gen)
 	asteroide.posicionesHistoricas.clear();
 }
 
+/*
+	Moviment dels asteroides
+*/
 void actualitzarAsteroides(double deltaTime)
 {
 	for (auto& asteroide : ASTEROIDES)
 	{
 		glm::vec3 pos = asteroide.getPosition();
 		glm::dvec3 vel = asteroide.getVelocitat();
-		pos += glm::vec3(vel * deltaTime); // Assuming velocity is in units per second
+		pos += glm::vec3(vel * deltaTime);
 		asteroide.setPosition(pos);
 	}
 }
 
 // ISMAEL ASTEROIDES
+/*
+	Generació d'asteroides en posicions aleatories amb velocitats, radi i massa aleatoria
+	NUM_ASTEROIDES: màxim d'asteroides
+*/
 void generarAsteroides()
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> pos_dist(-2000.0f, 2000.0f);
-	std::uniform_real_distribution<double> vel_dist(-0.2, 0.2);
-	std::uniform_real_distribution<float> radius_dist(0.1f, 0.5f);
+	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
+	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
 	for (size_t i = 0; i < NUM_ASTEROIDES; ++i) {
-		/* TESTING
 		if (i == 0) {
 			ASTEROIDES[i].setRadi(1.5f);
 			ASTEROIDES[i].setMassa(1.0e12);
@@ -645,18 +724,33 @@ void generarAsteroides()
 			ASTEROIDES[i].setPosition(glm::vec3(200.0f, 50.0f, 50.0f));
 			ASTEROIDES[i].setVelocitat(glm::dvec3(10.0, 0.0, 0.0));
 		}
-		*/
-		float radius = radius_dist(gen);
-		double mass = mass_dist(gen);
+		else
+		{
 
-		glm::vec3 position(pos_dist(gen), pos_dist(gen), pos_dist(gen));
-		glm::dvec3 velocity(vel_dist(gen), vel_dist(gen), vel_dist(gen));
 
-		ASTEROIDES[i].setMassa(mass);
-		ASTEROIDES[i].setRadi(radius);
-		ASTEROIDES[i].setVelocitat(velocity);
-		ASTEROIDES[i].setPosition(position);
+			float radius = radius_dist(gen);
+			double mass = mass_dist(gen);
+
+			glm::vec3 position(pos_dist(gen), pos_dist(gen), pos_dist(gen));
+			glm::dvec3 velocity(vel_dist(gen), vel_dist(gen), vel_dist(gen));
+
+			ASTEROIDES[i].setMassa(mass);
+			ASTEROIDES[i].setRadi(radius);
+			ASTEROIDES[i].setVelocitat(velocity);
+			ASTEROIDES[i].setPosition(position);
+		}
 	}
+}
+
+glm::vec3 randomUnitVector() {
+	float theta = static_cast<float>(rand()) / RAND_MAX * glm::two_pi<float>();
+	float phi = acos(2.0f * static_cast<float>(rand()) / RAND_MAX - 1.0f);
+
+	float x = sin(phi) * cos(theta);
+	float y = sin(phi) * sin(theta);
+	float z = cos(phi);
+
+	return glm::vec3(x, y, z);
 }
 
 void generarAsteroidesCinturo() {
@@ -733,32 +827,160 @@ void generarDiposits() {
 	}
 }
 
+void spawnAsteroidToCollide(
+	double t,
+	const glm::vec3& shipPosition,
+	const glm::dvec3& shipVelD
+) {
+	glm::vec3 shipVelocity = glm::vec3(shipVelD);
+
+	glm::vec3 shipFuturePos = shipPosition + shipVelocity * (float)t;
+	//std::cout << "Posición futura nave: X: " << shipFuturePos.x << " Y: " << shipFuturePos.y << " Z: " << shipFuturePos.z << std::endl;
+	glm::vec3 asteroidDir = randomUnitVector();
+	float asteroidSpeed = 2.5f + static_cast<float>(rand()) / RAND_MAX;
+	glm::vec3 asteroidVelocity = asteroidDir * asteroidSpeed;
+	glm::vec3 asteroidInitialPos = shipFuturePos - (asteroidVelocity * (float)t);
+	//std::cout << "Posición inicial asteroide X: " << asteroidInitialPos.x << " Y: " << asteroidInitialPos.y << " Z: " << asteroidInitialPos.z << std::endl;
+	//std::cout << "Velocidad asteroide X: " << asteroidVelocity.x << " Y: " << asteroidVelocity.y << " Z: " << asteroidVelocity.z << std::endl;
+
+	Asteroide newAsteroid;
+	newAsteroid.setRadi(1.0f);
+	newAsteroid.setMassa(1.0e12);
+	newAsteroid.setPosition(asteroidInitialPos);
+	newAsteroid.setVelocitat(glm::dvec3(asteroidVelocity.x, asteroidVelocity.y, asteroidVelocity.z));
+	std::string name = "Asteroide" + std::to_string(ASTEROIDES.size());
+	newAsteroid.setName(name);
+
+	ASTEROIDES.push_back(newAsteroid);
+}
+
+
 
 void processaAsteroides()
 {
 	generarAsteroides();
 }
 
-void checkCollisions()
+bool OBBvsSphere(const OBB& obb, const glm::vec3& sphereCenter, float sphereRadius, glm::vec3& closestPointOut) {
+	// Vector del centre de l'esfera al centre de la OBB
+	glm::vec3 d = sphereCenter - obb.center;
+
+	glm::vec3 closestPoint = obb.center;
+
+	// Trobem el punt més proper de la OBB al centre de l'esfera
+	for (int i = 0; i < 3; i++) {
+		float dist = glm::dot(d, obb.axes[i]);
+
+		if (dist > obb.halfExtents[i]) dist = obb.halfExtents[i];
+		else if (dist < -obb.halfExtents[i]) dist = -obb.halfExtents[i];
+
+		closestPoint += dist * obb.axes[i];
+	}
+	// Guardem el punt més proper per utilitzar-lo en el tractament
+	// de la col·lisió
+	closestPointOut = closestPoint;
+
+	glm::vec3 difference = closestPoint - sphereCenter;
+	float distanceSquared = glm::dot(difference, difference);
+
+	// Si la distancia del punt més proper de la OBB al centre de la esfera
+	// és menor que el radi, tenim col·lisió
+	return distanceSquared <= sphereRadius * sphereRadius;
+}
+
+void checkCollisions(Nau& nau)
 {
+	bool isColliding = false;
+	// Actualitzo la hitbox
+	nau.updateOBB();
+	// Actualitzo vector de direcció + velocitat
+	nau.updateVelocity();
 	for (size_t i = 0; i < ASTEROIDES.size(); ++i)
 	{
+		Asteroide& asteroidA = ASTEROIDES[i];
+		// Col·lisions asteroide amb asteroide
+		// Si distancia del centre de cada asteroide és més petita que el radi
+		// tenim col·lisió
 		for (size_t j = i + 1; j < ASTEROIDES.size(); ++j)
 		{
-			Asteroide& asteroidA = ASTEROIDES[i];
+
 			Asteroide& asteroidB = ASTEROIDES[j];
 
 			if (asteroidA.isCollidingWith(asteroidB))
 			{
+				// Tractar col·lisió
 				asteroidA.resolveCollision(asteroidB);
-				//std::cout << "Collision!" << std::endl;
+				std::cout << "Collision!" << std::endl;
 			}
+
 		}
+		// Col·lisió asteroide amb nau (OBB)
+		glm::vec3 closestPointOut(0.0f, 0.0f, 0.0f);
+		if (OBBvsSphere(nau.getOBB(), asteroidA.getPosition(), asteroidA.getRadi() * 2.2, closestPointOut))
+		{
+			isColliding = true;
+			if (nau.getCollisionState() == Nau::NotColliding)
+			{
+				// Tractar col·lisió
+				nau.resolveCollisionWithAsteroid(asteroidA, closestPointOut);
+				nau.setCollisionState(Nau::Colliding);
+			}
+
+		}
+
+	}
+	if (!isColliding && nau.getCollisionState() == Nau::Colliding)
+	{
+		nau.setCollisionState(Nau::NotColliding);
 	}
 }
 
+/* COLISIONS DEBUG */
+
+
+std::vector<glm::vec3> getOBBCorners(const OBB& obb) {
+	std::vector<glm::vec3> corners(8);
+
+	glm::vec3 axis0 = obb.axes[0] * obb.halfExtents.x;
+	glm::vec3 axis1 = obb.axes[1] * obb.halfExtents.y;
+	glm::vec3 axis2 = obb.axes[2] * obb.halfExtents.z;
+
+	corners[0] = obb.center - axis0 - axis1 - axis2; // (-,-,-)
+	corners[1] = obb.center + axis0 - axis1 - axis2; // ( +,- -)
+	corners[2] = obb.center + axis0 + axis1 - axis2; // (+, +,-)
+	corners[3] = obb.center - axis0 + axis1 - axis2; // (-,+,-)
+	corners[4] = obb.center - axis0 - axis1 + axis2; // (-,-,+)
+	corners[5] = obb.center + axis0 - axis1 + axis2; // (+,- ,+)
+	corners[6] = obb.center + axis0 + axis1 + axis2; // (+,+,+)
+	corners[7] = obb.center - axis0 + axis1 + axis2; // (-,+,+ )
+
+	return corners;
+}
+
+void drawOBBImmediateMode(const OBB& obb) {
+	std::vector<glm::vec3> corners = getOBBCorners(obb);
+
+	glBegin(GL_LINES);
+	// Bottom
+	glVertex3fv(glm::value_ptr(corners[0])); glVertex3fv(glm::value_ptr(corners[1]));
+	glVertex3fv(glm::value_ptr(corners[1])); glVertex3fv(glm::value_ptr(corners[2]));
+	glVertex3fv(glm::value_ptr(corners[2])); glVertex3fv(glm::value_ptr(corners[3]));
+	glVertex3fv(glm::value_ptr(corners[3])); glVertex3fv(glm::value_ptr(corners[0]));
+	// Top
+	glVertex3fv(glm::value_ptr(corners[4])); glVertex3fv(glm::value_ptr(corners[5]));
+	glVertex3fv(glm::value_ptr(corners[5])); glVertex3fv(glm::value_ptr(corners[6]));
+	glVertex3fv(glm::value_ptr(corners[6])); glVertex3fv(glm::value_ptr(corners[7]));
+	glVertex3fv(glm::value_ptr(corners[7])); glVertex3fv(glm::value_ptr(corners[4]));
+	// Lados
+	glVertex3fv(glm::value_ptr(corners[0])); glVertex3fv(glm::value_ptr(corners[4]));
+	glVertex3fv(glm::value_ptr(corners[1])); glVertex3fv(glm::value_ptr(corners[5]));
+	glVertex3fv(glm::value_ptr(corners[2])); glVertex3fv(glm::value_ptr(corners[6]));
+	glVertex3fv(glm::value_ptr(corners[3])); glVertex3fv(glm::value_ptr(corners[7]));
+	glEnd();
+}
+
 void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
-	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object)
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object, Nau& nau)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -771,16 +993,42 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	}
 	double deltaTime = time - lastTime;
 	lastTime = time;
-	//int count = 0;
+	static double lastSpawnTime = 0.0;
+
+	// Inside your update/render loop:
+	if (time > 10) {
+		if (time - lastSpawnTime >= 3.0) {
+			spawnAsteroidToCollide(40.0, nau.getO(), nau.getVelocitat());
+			lastSpawnTime = time;
+		}
+	}
+	int count = 0;
+	actualitzarAsteroides(deltaTime);
+	checkCollisions(nau);
 	for (auto& asteroide : ASTEROIDES)
 	{
-		/* TESTING
-		if (count == 2) continue;
+		/*
+		if (count == 2)
+		{
+			static double lastSpawnTime2 = 0.0;
+			static vec3 oldPosition = asteroide.getPosition();
+			if (time > 20) {
+				if (time - lastSpawnTime2 >= 1.0) {
+					std::cout << "Nom: " << asteroide.getName() << std::endl;
+					std::cout << "Posicio actual aster: " << asteroide.getPosition().x << " " << asteroide.getPosition().y << " " << asteroide.getPosition().z << std::endl;
+					std::cout << "Velocitat actual aster: " << asteroide.getVelocitat().x << " " << asteroide.getVelocitat().y << " " << asteroide.getVelocitat().z << std::endl;
+					vec3 distanciaRecorrida = asteroide.getPosition() - oldPosition;
+					std::cout << "Distancia recorrida en 1 seg aster: " << distanciaRecorrida.x << " " << distanciaRecorrida.y << " " << distanciaRecorrida.z << std::endl;
+					lastSpawnTime2 = time;
+					oldPosition = asteroide.getPosition();
+				}
+			}
+		}
 		count++;
 		*/
-		actualitzarAsteroides(deltaTime);
-		checkCollisions();
+		// Si se'n va molt lluny, reset asteroide amb nous paràmetres
 		if (estaForaDelsLimits(asteroide)) resetAsteroide(asteroide, gen);
+
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, asteroide.getPosition());
 		float radi = asteroide.getRadi();
@@ -797,7 +1045,44 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrixOrbit[0][0]);
 		asteroide.agregarPosicionHistorica(asteroide.getPosition());
 		drawHistoricalPath(asteroide.getPosicionesHistoricas());
+
+		// DEBUG
+		drawOBBImmediateMode(nau.getOBB());
 	}
+
+}
+
+void renderSaturnRings(GLuint sh_programID, glm::mat4 MatriuVista, Planeta& saturn)
+{
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glUseProgram(sh_programID);
+
+	glm::mat4 ModelMatrix = glm::translate(glm::mat4(1.0f), saturn.getPosition());
+
+	float tiltAngle = 26.73f;
+	ModelMatrix = glm::rotate(ModelMatrix, glm::radians(tiltAngle), glm::vec3(1.0f, 0.0f, 0.0f));
+	float ringScale = saturn.getRadi();
+	ModelMatrix = glm::scale(ModelMatrix, glm::vec3(ringScale, ringScale, ringScale));
+
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+	glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+	std::string buf("textures/saturn_ring.png");
+	GLuint img = loadIMA_SOIL(buf.c_str());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, img);
+	glUniform1i(glGetUniformLocation(sh_programID, "texture0"), 0);
+
+	SetTextureParameters(img, true, true, false, true);
+
+	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE);
+	glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
+
+	draw_TriEBO_Object(GLU_DISK);
+
+	glDisable(GL_BLEND);
 }
 
 void actualitzarAsteroidesCinturo(double deltaTime)
@@ -1041,7 +1326,7 @@ void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 
 
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
-	GLuint texturID[NUM_MAX_TEXTURES], bool textur)
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, Nau& nau)
 {
 	// Inicialitzaci� de planetes
 	static bool inicialitzat = false;
@@ -1059,8 +1344,14 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	deltaTime *= VELOCITAT_SIMULACIO;
 	// F�sica orbites 2D de moment
 	updatePlanetesAnalytical(time);
+	//std::cout << "X: " << nau.getO().x << "Y: " << nau.getO().y << "Z: " << nau.getO().z << std::endl;
+	if (time > 17)
+	{
+		nau.updatePhysicsWithPlanets(PLANETES, deltaTime);
+	}
 	for (auto& planeta : PLANETES)
 	{
+
 		// Posici� inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 
@@ -1084,25 +1375,64 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		//Textures planetes
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, (GLint)planeta.getTextureID());
+
 		glUniform1i(glGetUniformLocation(sh_programID, "texture0"), GLint(0));
-		SetTextureParameters((GLint)planeta.getTextureID(), true, true, false, false);
+		SetTextureParameters((GLint)planeta.getTextureID(), true, true, true, true);
 		glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE); //glEnable(GL_TEXTURE_2D);
-		glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
+		//glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
 
 		draw_TriEBO_Object(3);
+
+		if (planeta.getName() == "Saturn")
+		{
+			renderSaturnRings(sh_programID, MatriuVista, planeta);
+		}
 
 		glm::mat4 ModelMatrixOrbit = glm::mat4(1.0f);
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrixOrbit[0][0]);
 		planeta.agregarPosicionHistorica(planeta.getPosition());
-		if (paintorbit){
+		if (paintorbit) {
 			drawOrbitPath(planeta);
 		}
 		else {
 			drawHistoricalPath(planeta.getPosicionesHistoricas());
 		}
-	}
-}
+		// moons
+		std::vector<Planeta>& moons = planeta.moons;
+		for (auto& moon : moons)
+		{
+			glm::mat4 MoonModelMatrix(1.0f);
+			MoonModelMatrix = glm::translate(MatriuTG, moon.getPosition());
 
+			float moonVelRot = moon.getVelocitatRotacio();
+			int moonDirRot = moon.getDireccioRotacio();
+			float moonAngle = time * moonVelRot * moonDirRot;
+			glm::vec3 moonAxis = moon.getEixosRotacioPlaneta();
+			MoonModelMatrix = glm::rotate(MoonModelMatrix, glm::radians(moonAngle), moonAxis);
+
+			float moonRadi = moon.getRadi();
+			MoonModelMatrix = glm::scale(MoonModelMatrix, glm::vec3(moonRadi, moonRadi, moonRadi));
+
+			glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &MoonModelMatrix[0][0]);
+			glm::mat4 MoonNormalMatrix = transpose(inverse(MatriuVista * MoonModelMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &MoonNormalMatrix[0][0]);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, (GLint)moon.getTextureID());
+			glUniform1i(glGetUniformLocation(sh_programID, "texture0"), GLint(0));
+			SetTextureParameters((GLint)moon.getTextureID(), true, true, true, true);
+			glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE);
+			draw_TriEBO_Object(3);
+
+			glm::mat4 MoonModelMatrixOrbit = glm::mat4(1.0f);
+			glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &MoonModelMatrixOrbit[0][0]);
+			//moon.agregarPosicionHistorica(moon.getPosition());
+			// drawOrbitPath(moon);
+			//drawHistoricalPath(moon.getPosicionesHistoricas());
+		}
+
+	}
+
+}
 
 // Variables globals
 float velocitat_satelit = 1.0f;  // Velocitat vertical del sat�l�lit

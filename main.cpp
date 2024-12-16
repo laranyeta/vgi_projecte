@@ -577,8 +577,8 @@ void OnPaint(/*GLFWwindow* window,*/ float time)
 				eixos, grid, hgrid);
 		}
 		else if (camera == CAM_NAU) {
-			Moviment_Nau();
-			//Moviment_Nau2();
+			//Moviment_Nau();
+			Moviment_Nau2();
 
 			if (Vis_Polar == POLARZ) {
 				vpv[0] = 0.0;	vpv[1] = 0.0;	vpv[2] = 1.0;
@@ -900,6 +900,8 @@ void PosicionsInicialsSistemaSolar()
 		PLANETES[i].setInclinacio(INCLINACIONS[i - 1] * DEG_A_RAD);
 		PLANETES[i].setPeriapsis(PERIAPSIS[i - 1] * DEG_A_RAD);
 
+		PLANETES[i].setNLlunes(NUMERO_DE_LLUNES[i]);
+
 		double a = PLANETES[i].getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA;
 		double e = PLANETES[i].getExcentricitat();
 		double inclinacio = PLANETES[i].getInclinacio();
@@ -1143,6 +1145,9 @@ void IniciarSimulador() {
 	Set_VAOList(GLUT_CUBE, loadglutSolidCube_EBO(1.0));
 	Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
 	Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
+
+	CVAO saturnRingsVAO = loadgluDisk_EBO(1.2, 2.0, 64, 1);
+	Set_VAOList(GLU_DISK, saturnRingsVAO);
 
 	// Nau
 	// reservar espai per a la ruta
@@ -5098,8 +5103,8 @@ int main(void)
 	INTERFICIE.inicialitzarFonts(io);
 
 	io.FontDefault = INTERFICIE.fontPrincipal(); // Assignar la font per defecte
-
-	for (int i = 0; i < 10; i++)
+	int currentIndexLlunes = 0;
+	for (int i = 0; i < 9; i++)
 	{
 		Planeta planeta;
 		planeta.setName(NAMES[i]);
@@ -5113,6 +5118,45 @@ int main(void)
 
 		img = loadIMA_SOIL(buf2.c_str());
 		planeta.setTextureIDMenuSelect(img);
+		
+
+		planeta.setNLlunes(NUMERO_DE_LLUNES[i]);
+		
+		// ISMAEL: CANVIS LLUNES
+		
+		for (int j = 0; j < planeta.getNLlunes(); j++)
+
+		{
+			Planeta lluna;
+			lluna.setPuntsOrbita(BASE_POINTS);
+			lluna.setName(NAMES_MOONS[currentIndexLlunes]);
+			lluna.setMassa(MASSES_MOONS[currentIndexLlunes]);
+
+			lluna.setAngleRotacio(ANGLES_INCLINACIO_ROTACIO_MOONS[currentIndexLlunes]);
+
+			lluna.setDireccioRotacio(DIRECCIONS_ROTACIO_MOONS[currentIndexLlunes]);
+
+			lluna.setRadi(RADIS_MOONS[currentIndexLlunes] * (1.0 / 1.496e11));
+
+			float offset = (2.0f * PI / planeta.getNLlunes()) * j;
+
+			lluna.setOffsetInicial(offset);
+
+			lluna.setRutaTextura(RUTES_TEXTURA_MOONS[currentIndexLlunes].c_str());
+
+			std::string buf("textures/moons/");
+
+			buf.append(lluna.getRutaTextura());
+
+			GLuint img = loadIMA_SOIL(buf.c_str());
+
+			lluna.setTextureID(img);
+
+			planeta.moons.push_back(lluna);
+
+			currentIndexLlunes++;
+
+		}
 		PLANETES.push_back(planeta);
 	}
 
