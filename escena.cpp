@@ -412,7 +412,7 @@ void processaFisica()
 		}
 	}
 }
-
+GLuint img_anells;
 void processaTextures()
 {
 	// Per cada planeta carreguem la seva textura
@@ -424,6 +424,11 @@ void processaTextures()
 		GLint id = loadIMA_SOIL(cstr);
 		//std::cout << id << std::endl;
 		planeta.setTextureID(id);
+		if (planeta.getName() == "Saturn")
+		{
+			std::string buf("textures/saturn_ring.png");
+			img_anells = loadIMA_SOIL(buf.c_str());
+		}
 		//std::cout << planeta.getTextureID() << std::endl;
 	}
 }
@@ -998,7 +1003,7 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	// Inside your update/render loop:
 	if (time > 10) {
 		if (time - lastSpawnTime >= 3.0) {
-			spawnAsteroidToCollide(40.0, nau.getO(), nau.getVelocitat());
+			//spawnAsteroidToCollide(40.0, nau.getO(), nau.getVelocitat());
 			lastSpawnTime = time;
 		}
 	}
@@ -1069,13 +1074,12 @@ void renderSaturnRings(GLuint sh_programID, glm::mat4 MatriuVista, Planeta& satu
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 	glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	std::string buf("textures/saturn_ring.png");
-	GLuint img = loadIMA_SOIL(buf.c_str());
+	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, img);
+	glBindTexture(GL_TEXTURE_2D, img_anells);
 	glUniform1i(glGetUniformLocation(sh_programID, "texture0"), 0);
 
-	SetTextureParameters(img, true, true, false, true);
+	SetTextureParameters(img_anells, true, true, false, true);
 
 	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE);
 	glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
