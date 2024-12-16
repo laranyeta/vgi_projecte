@@ -1503,7 +1503,7 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(angle), eixosRotacio);
 
 		float radi = planeta.getRadi();
-		ModelMatrix = glm::scale(ModelMatrix, vec3(radi, radi, radi));
+		ModelMatrix = glm::scale(ModelMatrix, (vec3(radi, radi, radi)*2.0f));
 
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
@@ -1548,7 +1548,7 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 			MoonModelMatrix = glm::rotate(MoonModelMatrix, glm::radians(moonAngle), moonAxis);
 
 			float moonRadi = moon.getRadi();
-			MoonModelMatrix = glm::scale(MoonModelMatrix, glm::vec3(moonRadi, moonRadi, moonRadi));
+			MoonModelMatrix = glm::scale(MoonModelMatrix, glm::vec3(moonRadi, moonRadi, moonRadi) * 2.0f);
 
 			glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &MoonModelMatrix[0][0]);
 			glm::mat4 MoonNormalMatrix = transpose(inverse(MatriuVista * MoonModelMatrix));
