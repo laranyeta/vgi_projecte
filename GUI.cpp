@@ -1107,7 +1107,6 @@ void GUI::MostrarPantallaSelectorD(ImVec2* screenSize, const char* descripcio) {
 	}
 
 	ImGui::End();
-
 }
 
 void GUI::MostrarPantallaCarrega(ImVec2* screenSize) {

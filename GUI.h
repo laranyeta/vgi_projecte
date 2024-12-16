@@ -10,7 +10,6 @@
 #include <ImGui/imgui_internal.h>
 #include "visualitzacio.h"
 
-
 using namespace irrklang;
 
 //#include "main.h"
@@ -67,7 +66,6 @@ public:
 	void crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimapPosition, bool abaix, float borderThickness);
 	void dibuixarOrbita2D(Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center, bool centratsol);
 	void DrawSpeedometer(float value, float maxValue, float centerX, float centerY, float radius, bool isRPM);
-
 	void DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos, ImVec2 size, float landa);
 	void MostrarMapaSistemaSolar(ImVec2* screenSize);
 

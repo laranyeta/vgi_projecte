@@ -1232,6 +1232,9 @@ void IniciarSimulador() {
 
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
+
+	nau.setPlanetaDesti(INTERFICIE.getPlanetaDesti());
+
 	free(nomOBJEstacio); 
 }
 
@@ -3916,43 +3919,47 @@ void Moviment_Nau2()
 	double fact_ang_nau = 45.0 * G_DELTA;
 	float zoom = 10.0f * G_DELTA;
 
-	nau.moveS(G_DELTA);
+	if (nau.getEnableControls())
+	{
+		nau.moveS(G_DELTA);
 
-	if (pressW)
-		nau.increaseSpeed(fact_nau / 4);
+		if (pressW)
+			nau.increaseSpeed(fact_nau / 4);
 
-	if (pressS)
-		nau.increaseSpeed(-fact_nau / 4);
+		if (pressS)
+			nau.increaseSpeed(-fact_nau / 4);
 
-	if (pressA)
-		nau.move(nau.getU() * -(float)fact_nau);
+		if (pressA)
+			nau.move(nau.getU() * -(float)fact_nau);
 
-	if (pressD)
-		nau.move(nau.getU() * (float)fact_nau);
+		if (pressD)
+			nau.move(nau.getU() * (float)fact_nau);
 
-	if (pressZ)
-		nau.move(nau.getV() * (float)fact_nau);
+		if (pressZ)
+			nau.move(nau.getV() * (float)fact_nau);
 
-	if (pressX)
-		nau.move(nau.getV() * -(float)fact_nau);
+		if (pressX)
+			nau.move(nau.getV() * -(float)fact_nau);
 
-	if (pressLEFT)
-		nau.rotV((float)fact_ang_nau);
+		if (pressLEFT)
+			nau.rotV((float)fact_ang_nau);
 
-	if (pressRIGHT)
-		nau.rotV(-(float)fact_ang_nau);
+		if (pressRIGHT)
+			nau.rotV(-(float)fact_ang_nau);
 
-	if (pressUP)
-		nau.rotU((float)fact_ang_nau);
+		if (pressUP)
+			nau.rotU((float)fact_ang_nau);
 
-	if (pressDOWN)
-		nau.rotU(-(float)fact_ang_nau);
+		if (pressDOWN)
+			nau.rotU(-(float)fact_ang_nau);
 
-	if (pressQ)
-		nau.rotN(-(float)fact_ang_nau);
+		if (pressQ)
+			nau.rotN(-(float)fact_ang_nau);
 
-	if (pressE)
-		nau.rotN((float)fact_ang_nau);
+		if (pressE)
+			nau.rotN((float)fact_ang_nau);
+	}
+	
 }
 // END MAV ----------------
 

@@ -143,7 +143,7 @@ const float MAX_DISTANCIA_ASTEROIDES = 250.0f;
 // TRAJ ORBIT ISMAEL
 const size_t BASE_POINTS = 300;
 const double AU_IN_METERS = 1.496e11;
-const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0*5.0;
+const double VELOCITAT_SIMULACIO = 60.0 * 60.0 * 24.0;
 //LCR: s'afegeixen parametres lluna //
 const std::string NAMES[10] = { u8"Sol", u8"Mercuri", u8"Venus", u8"Terra", u8"Mart", u8"Júpiter", u8"Saturn", u8"Urà", u8"Neptú", u8"Lluna" };
 const std::string RUTES_TEXTURA[10] = { "sun.jpg","mercury.jpg","venus.jpg","earth.jpg","mars.jpg","jupiter.jpg","saturn.jpg","uranus.jpg","neptune.jpg", "moon.jpg" };

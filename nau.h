@@ -58,6 +58,8 @@ private:
 	double m_massa;
 	OBB m_obb;
 	CollisionState m_collisionState;
+	int m_planetaDesti;
+	bool m_enableControls;
 
 public:
 	// BASIQUES
@@ -85,11 +87,14 @@ public:
 		m_life = 1.00;
 		m_potencia = 0.00f;
 
+
 		//Colisions
 		updateOBB();
 		m_massa = 1.0e22;
 		m_collisionState = NotColliding;
 		m_angularVelocity = glm::vec3(0.0f);
+
+		m_enableControls = false;
 	}
 
 	Nau operator=(Nau n) {
@@ -114,6 +119,8 @@ public:
 
 		m_massa = n.m_massa;
 
+		m_enableControls = false;
+
 		return *this;
 	}
 
@@ -130,7 +137,7 @@ public:
 	COBJModel* getModel() const {
 		return *m_model;
 	}
-	Camera getCam() const {
+	Camera& getCam() {
 		return m_cam;
 	}
 
@@ -139,10 +146,13 @@ public:
 		m_o = temp;
 	}
 
+
 	mat4 getR() const { return m_q; }
 
 	//MOVIMENT
-	void move(vec3 move) { m_o += move; m_cam.move(move); }
+	void move(vec3 move) { 
+		m_o += move; m_cam.move(move); 
+	}
 
 	// ROTACIÓ SOBRE SI MATEIX
 	void rotN(float angle) {
@@ -322,6 +332,10 @@ public:
 		return static_cast<float>(m_s) * m_n;
 	}
 	void updatePhysicsWithPlanets(const std::vector<Planeta>& planetas, double deltaTime);
+	void setPlanetaDesti(int planeta) { m_planetaDesti = planeta; }
+	int getPlanetaDesti() { return m_planetaDesti; }
+	void setEnableControls(bool c) { m_enableControls = c; }
+	bool getEnableControls() { return m_enableControls; }
 };
 
 #endif

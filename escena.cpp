@@ -157,6 +157,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
 		objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object);
 		estacions(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, EstacioOBJ, col_object);
+		joc(time, nau);
 		// Activar transpar�ncia
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -915,7 +916,6 @@ void checkCollisions(Nau& nau)
 			{
 				// Tractar col·lisió
 				asteroidA.resolveCollision(asteroidB);
-				std::cout << "Collision!" << std::endl;
 			}
 
 		}
@@ -1327,6 +1327,134 @@ void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	}
 }
 
+void animacioInicialPlanetaDesti(float time, Nau& nau)
+{
+	static bool init = false;
+	static float timeAtFirstExecution = 0;
+	if (!init)
+	{
+		timeAtFirstExecution = time;
+		init = true;
+	}
+	static bool cutScene = false;
+	static bool arrivedPlaneta = false;
+	static bool returning = false;
+	static bool cutScenePlayed = false;
+	static bool end = false;
+
+	static float cutSceneStartTime = 0.0f;
+	static float arrivedTimePlaneta = 0.0f;
+	static float cutSceneDuration = 5.0f;
+	static float stayDurationPlaneta = 3.0f;
+
+
+	static vec3 offsetPlaneta = vec3(8.0f, 3.0f, 8.0f);
+
+	static vec3 originPlaneta, planetaN, planetaV, planetaU, planetaP;
+	static vec3 savedCamOrigin, savedCamN, savedCamV, savedCamU, savedCamP;
+
+	float currentTime = time;
+
+	if (time - timeAtFirstExecution > 4.0f && !cutScene && !arrivedPlaneta && !returning && !cutScenePlayed)
+	{
+		cutScene = true;
+		cutSceneStartTime = currentTime;
+
+		cutScenePlayed = true;
+
+		savedCamOrigin = nau.getCam().getO();
+		savedCamN = nau.getCam().getN();
+		savedCamV = nau.getCam().getV();
+		savedCamU = nau.getCam().getU();
+		savedCamP = nau.getCam().getP();
+	}
+	if (cutScene)
+	{
+		Planeta& planetaDesti = PLANETES[nau.getPlanetaDesti()];
+		vec3 planetPos = planetaDesti.getPosition();
+
+		originPlaneta = planetPos + offsetPlaneta;
+
+		planetaN = normalize(planetPos - originPlaneta);
+
+		vec3 newUp = vec3(0.0f, 1.0f, 0.0f);
+		planetaV = normalize(cross(newUp, -planetaN));
+		planetaU = cross(planetaN, planetaV);
+		planetaP = originPlaneta + planetaN;
+
+		if (!arrivedPlaneta && !returning)
+		{
+			float t = (currentTime - cutSceneStartTime) / cutSceneDuration;
+			if (t >= 1.0f)
+			{
+				t = 1.0f;
+				arrivedPlaneta = true;
+				arrivedTimePlaneta = currentTime;
+			}
+
+			vec3 interpolatedOrigin = mix(savedCamOrigin, originPlaneta, t);
+			vec3 interpolatedN = normalize(mix(savedCamN, planetaN, t));
+			vec3 interpolatedV = normalize(mix(savedCamV, planetaV, t));
+			vec3 interpolatedU = normalize(mix(savedCamU, planetaU, t));
+			vec3 interpolatedP = mix(savedCamP, planetaP, t);
+
+			nau.getCam().setO(interpolatedOrigin);
+			nau.getCam().setN(interpolatedN);
+			nau.getCam().setV(interpolatedV);
+			nau.getCam().setU(interpolatedU);
+			nau.getCam().setP(interpolatedP);
+		}
+		else if (arrivedPlaneta && !returning)
+		{
+			float timeAtVantage = currentTime - arrivedTimePlaneta;
+			if (timeAtVantage >= stayDurationPlaneta)
+			{
+				returning = true;
+				cutSceneStartTime = currentTime;
+			}
+			else
+			{
+				nau.getCam().setO(originPlaneta);
+				nau.getCam().setN(planetaN);
+				nau.getCam().setV(planetaV);
+				nau.getCam().setU(planetaU);
+				nau.getCam().setP(planetaP);
+			}
+		}
+		else if (returning)
+		{
+			float t = (currentTime - cutSceneStartTime) / cutSceneDuration;
+			if (t >= 1.0f)
+			{
+				t = 1.0f;
+				cutScene = false;
+				arrivedPlaneta = false;
+				returning = false;
+				end = true;
+			}
+			vec3 interpolatedOrigin = mix(originPlaneta, savedCamOrigin, t);
+			vec3 interpolatedN = normalize(mix(planetaN, savedCamN, t));
+			vec3 interpolatedV = normalize(mix(planetaV, savedCamV, t));
+			vec3 interpolatedU = normalize(mix(planetaU, savedCamU, t));
+			vec3 interpolatedP = mix(planetaP, savedCamP, t);
+
+			nau.getCam().setO(interpolatedOrigin);
+			nau.getCam().setN(interpolatedN);
+			nau.getCam().setV(interpolatedV);
+			nau.getCam().setU(interpolatedU);
+			nau.getCam().setP(interpolatedP);
+		}
+	}
+	if (end)
+	{
+		nau.setEnableControls(true);
+	}
+}
+
+void joc(float time, Nau& nau)
+{
+	animacioInicialPlanetaDesti(time, nau);
+}
 
 
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
