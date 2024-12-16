@@ -41,6 +41,7 @@ public:
 	void MostrarPantallaMenu(ImVec2* screenSize);
 	void MostrarPantallaConfiguracio(ImVec2* screenSize);
 	void MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio);
+	void MostrarPantallaSelectorD(ImVec2* screenSize, const char* descripcio);
 	void MostrarPantallaJoc(ImVec2* screenSize);
 	void MostrarPantallaCarrega(ImVec2* screenSize);
 	float distanciaEuclidiana(const glm::vec3& point1, const glm::vec3& point2);
@@ -67,6 +68,7 @@ public:
 	void dibuixarOrbita2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center, bool centratsol);
 	void DrawSpeedometer(float value, float maxValue, float centerX, float centerY, float radius, bool isRPM);
 
+	void DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos, ImVec2 size, float landa);
 	void MostrarMapaSistemaSolar(ImVec2* screenSize);
 
 	//Getters
@@ -129,6 +131,8 @@ private:
 	ImFont* silkscreentitle;
 	ImFont* silkscreensubtitle;
 	ImFont* silkscreenh3;
+	ImFont* opensanstitleUp;
+	ImFont* barlowtitleDown;
 
 	int PlanetOrigen = -1;
 	int PlanetDesti = -1;
@@ -146,6 +150,7 @@ private:
 	GLuint interficie_2;
 	GLuint controls;
 	GLuint icona;
+	GLuint earth;
 
 	//Boto General de totes les interficies
 	ImVec4 ButtonGeneral = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);

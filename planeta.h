@@ -18,6 +18,7 @@ public:
 
 	const char* getRutaTexturaMenu() const { return m_rutaTexturaMenu; }
 	unsigned int  getTextureIDMenu() const { return m_textureIDMenu; }
+	unsigned int  getTextureIDMenuSelect() const { return m_textureIDMenuSelect; }
 
     size_t getPuntsOrbita() const;
     std::string getName() const;
@@ -43,6 +44,7 @@ public:
     double getExcentricitat() const;
 	// SETTERS
 	void setTextureIDMenu(unsigned int texID) { m_textureIDMenu = texID; }
+	void setTextureIDMenuSelect(unsigned int texID) { m_textureIDMenuSelect = texID; }
 	void setRutaTexturaMenu(const char* rutaTexturaMenu) { m_rutaTexturaMenu = rutaTexturaMenu; }
 
 	void setPuntsOrbita(size_t puntsOrbita);
@@ -73,6 +75,7 @@ private:
 	std::string m_name;
 	unsigned int m_textureID;
 	unsigned int m_textureIDMenu;
+	unsigned int m_textureIDMenuSelect;
 	std::string m_rutaTextura;
 	const char* m_rutaTexturaMenu;
 	glm::vec3 m_position;

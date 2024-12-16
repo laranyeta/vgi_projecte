@@ -30,6 +30,7 @@
 #include "GUI.h"
 
 const char* rutaArchivo = "./OBJFiles/ship/shipV3.obj";
+const char* rutaArchivonGlass = "./OBJFiles/ship_nGlass/ship_nGlass.obj";
 //const char* rutaArchivo = "./OBJFiles/ship_2/Ring_Ship.obj";
 //const char* rutaArchivo = "./OBJFiles/ship_3/Satellite.obj";
 const char* rutaArchivoTest = "./OBJFiles/asteroid/Asteroid_1e.obj";
@@ -1143,7 +1144,7 @@ void IniciarSimulador() {
 	Set_VAOList(GLU_SPHERE, loadgluSphere_EBO(0.5, 20, 20));
 	Set_VAOList(GLUT_TEAPOT, loadglutSolidTeapot_VAO());
 
-
+	// Nau
 	// reservar espai per a la ruta
 	nfdchar_t* nomOBJ = (nfdchar_t*)malloc((strlen(rutaArchivo) + 1) * sizeof(nfdchar_t));
 
@@ -1158,9 +1159,21 @@ void IniciarSimulador() {
 		ObOBJ->netejaTextures_OBJ();
 	}
 
+	// Nau sense vidre
+	nfdchar_t* nomOBJnGlass = (nfdchar_t*)malloc((strlen(rutaArchivonGlass) + 1) * sizeof(nfdchar_t));
+
+	strcpy(nomOBJnGlass, rutaArchivonGlass);
+
+	textura = true;		tFlag_invert_Y = false;
+
+	if (ObOBJnGlass == NULL)
+		ObOBJnGlass = ::new COBJModel;
+	else {
+		ObOBJnGlass->netejaVAOList_OBJ();
+		ObOBJnGlass->netejaTextures_OBJ();
+	}
+
 	// ISMAEL ASTEROIDES
-
-
 
 	nfdchar_t* nomOBJTest = (nfdchar_t*)malloc((strlen(rutaArchivoTest) + 1) * sizeof(nfdchar_t));
 
@@ -1210,6 +1223,7 @@ void IniciarSimulador() {
 	}
 	int error4 = EstacioOBJ->LoadModel(nomOBJEstacio);
 	int error = ObOBJ->LoadModel(nomOBJ); // Cargar el objeto OBJ
+	error = ObOBJnGlass->LoadModel(nomOBJnGlass);
 
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "textur"), textura);
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
@@ -3488,7 +3502,7 @@ void Teclat_Nau(int key, int action)
 			{
 				nau.setCamAngle(1);
 				//CAMBIAR A MODEL VIDRE TRANSPARENT
-				nau.setModel(&nullObj);
+				nau.setModel(&ObOBJnGlass);
 			}
 			break;
 		case GLFW_KEY_2: //MIRAR DIRECTAMENT A NAU
@@ -5091,9 +5105,14 @@ int main(void)
 		planeta.setName(NAMES[i]);
 		planeta.setRutaTexturaMenu(RUTES_TEXTURA_MENU[i].c_str());
 		std::string buf("textures/menu/");
+		std::string buf2("textures/menu/select/");
 		buf.append(planeta.getRutaTexturaMenu());
+		buf2.append(planeta.getRutaTexturaMenu());
 		GLuint img = loadIMA_SOIL(buf.c_str());
 		planeta.setTextureIDMenu(img);
+
+		img = loadIMA_SOIL(buf2.c_str());
+		planeta.setTextureIDMenuSelect(img);
 		PLANETES.push_back(planeta);
 	}
 

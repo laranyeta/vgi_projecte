@@ -19,6 +19,7 @@ void GUI::inicialitzarImatges() {
 	interficie_2 = loadIMA_SOIL("textures/menu/1.png");
 	controls = loadIMA_SOIL("textures/menu/3.png");
 	icona = loadIMA_SOIL("textures/menu/icon.png");
+	earth = loadIMA_SOIL("textures/menu/select/earth.png");
 }
 
 void GUI::inicialitzarFonts(ImGuiIO& io) {
@@ -28,6 +29,47 @@ void GUI::inicialitzarFonts(ImGuiIO& io) {
 	silkscreensubtitle = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 58.0f);
 	silkscreenh3 = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 36.0f);
 	rainyhearts = io.Fonts->AddFontFromFileTTF("textures/menu/rainyhearts.ttf", 18.0f);
+	opensanstitleUp = io.Fonts->AddFontFromFileTTF("textures/menu/OpenSans_Condensed-Bold.ttf", 160.0f);
+	barlowtitleDown = io.Fonts->AddFontFromFileTTF("textures/menu/BarlowCondensed-ExtraBold.ttf", 400.0f);
+}
+
+void GUI::DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos,ImVec2 size, float landa)
+{
+	static float rotation_angle = 0.0f; // Angle inicial
+	rotation_angle += ImGui::GetIO().DeltaTime * landa; // Incrementa l'angle basant-se en el temps
+
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x*pos.x, screenSize->y * pos.y));
+	ImGui::SetNextWindowSize(ImVec2(1920, 1080));
+	ImGui::Begin("Imatge Terra rot", &show_user_windows, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar);
+
+	// Calcula el centre de la imatge dins la finestra
+	ImVec2 window_pos = ImGui::GetWindowPos();
+	ImVec2 window_size = ImGui::GetWindowSize();
+	ImVec2 center = ImVec2(window_pos.x + window_size.x / 2, window_pos.y + window_size.y / 2); // posicio imatge
+
+	// Dibuixa la imatge rotada
+	// Defineix els quatre punts inicials de la imatge
+	ImVec2 points[4] = {
+		ImVec2(-size.x, -size.y),
+		ImVec2(size.x, -size.y),
+		ImVec2(size.x, size.y),
+		ImVec2(-size.x, size.y)
+	};
+	for (int i = 0; i < 4; ++i) {
+		float x_new = points[i].x * cos(rotation_angle) - points[i].y * sin(rotation_angle);
+		float y_new = points[i].x * sin(rotation_angle) + points[i].y * cos(rotation_angle);
+		points[i].x = x_new + center.x;
+		points[i].y = y_new + center.y;
+	}
+
+	// Dibuixa la imatge rotada
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	draw_list->AddImageQuad(
+		texture,
+		points[0], points[1], points[2], points[3]
+	);
+	
+	ImGui::End();
 }
 
 ImFont* GUI::fontPrincipal() {
@@ -102,7 +144,7 @@ void GUI::inicalitzarInterficieGrafica(ImVec2* screenSize) {
 	}
 
 	if (show_selector_planeta_desti && !show_selector_planeta_origen) {
-		MostrarPantallaSelector(screenSize, "Selecciona Destinació");
+		MostrarPantallaSelectorD(screenSize, "Selecciona Destinació");
 	}
 
 	if (show_game_window) {
@@ -174,19 +216,30 @@ void GUI::MostrarPantallaInicial(ImVec2* screenSize) {
 	ImGui::Image((ImTextureID)(intptr_t)cometa, ImVec2(250, 200)); // Adjust size as needed
 	ImGui::End();
 	*/
-	float windowX = screenSize->x * 0.5f - 550;  // Acomoda el desplaçament lateral (325)
-	float windowY = screenSize->y * 0.15f;  // Centrar verticalment a la posició 20% de l'altura de la pantalla
-	ImGui::SetNextWindowPos(ImVec2(windowX, windowY));
-	ImGui::SetNextWindowSize(ImVec2(1200, 150));
-	ImGui::Begin("Titol", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
-	ImGui::PushFont(silkscreentitle);
+	// terra rotatoria menu
+	DrawRotatedImage(screenSize, (ImTextureID)(intptr_t)earth, ImVec2(0.0, 0.6), ImVec2(970, 550), 0.15);
+
+	float windowX = screenSize->x * 0.5f - 450;  // Acomoda el desplaçament lateral (325)
+	float windowY = screenSize->y * 0.2f;  // Centrar verticalment a la posició 20% de l'altura de la pantalla
+	ImGui::SetNextWindowPos(ImVec2(windowX + 160, windowY - 40));
+	ImGui::SetNextWindowSize(ImVec2(700, 200));
+	ImGui::Begin("TitolUp", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(opensanstitleUp);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
-	ImGui::Text("Solar Sprint");
+	ImGui::Text("S   O   L   A   R");
 	ImGui::PopStyleColor();
 	ImGui::PopFont();
 	ImGui::End();
 
-
+	ImGui::SetNextWindowPos(ImVec2(windowX, windowY));
+	ImGui::SetNextWindowSize(ImVec2(900, 400));
+	ImGui::Begin("TitolDown", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(barlowtitleDown);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("SPRINT");
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::End();
 
 	ImGui::SetNextWindowPos(ImVec2(10, 200));
 	ImGui::SetNextWindowSize(ImVec2(250, 100));
@@ -290,6 +343,9 @@ void GUI::MostrarPantallaMenu(ImVec2* screenSize) {
 	ImGui::PopStyleColor();
 	ImGui::PopFont();
 	ImGui::End();
+
+	//terra rotatoria menu
+	DrawRotatedImage(screenSize, (ImTextureID)(intptr_t)earth, ImVec2(0.0, 0.6), ImVec2(970, 550), 0.15);
 
 	// Calcula la posició per centrar la finestra a la pantalla
 	ImVec2 windowPos = ImVec2(
@@ -877,6 +933,7 @@ void GUI::MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio) {
 	}
 
 
+
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
 	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
@@ -900,6 +957,10 @@ void GUI::MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio) {
 	ImGui::PopStyleColor();
 	ImGui::PopFont();
 	ImGui::End();
+
+	//terra rotatoria menu
+	DrawRotatedImage(screenSize, (ImTextureID)(intptr_t)earth, ImVec2(0.0, 0.6), ImVec2(970, 550), 0.15);
+
 	int padding = 15;
 	ImVec2 buttonSize(150, 150);
 	ImVec2 windowSize((buttonSize.x + padding) * PLANETES.size(), buttonSize.y + 50);
@@ -912,6 +973,7 @@ void GUI::MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio) {
 	ImGui::Begin(descripcio, &show_selector_planeta_origen, window_flags | ImGuiWindowFlags_NoBackground);
 
 	for (int i = 0; i < PLANETES.size(); i++) {
+
 		// Calcula la posició del botó basant-te en l'índex
 		ImVec2 buttonPos = ImVec2(
 			i * (buttonSize.x + padding),
@@ -921,30 +983,18 @@ void GUI::MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio) {
 
 		// Aplica els estils
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));  // Fons transparent
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0, 0, 0, 0));  // Fons transparent en hover
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));  // Fons semi-transparent en hover
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));  // Fons transparent actiu
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));  // Text blanc
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f);  // Arrodoniment
 
 		// Crea el botó d'imatge
 		if (ImGui::ImageButton((void*)(intptr_t)PLANETES[i].getTextureIDMenu(), buttonSize)) {
-			if (show_selector_planeta_origen) {
-				show_selector_planeta_origen = false;
-				show_selector_planeta_desti = true;
-				PlanetOrigen = i;
-				/*std::cout << "show_selector_planeta_origen ->" << show_selector_planeta_origen << std::endl;
-				std::cout << "show_selector_planeta_desti ->" << show_selector_planeta_desti << std::endl;*/
-			}
-			else if (show_selector_planeta_desti && PlanetOrigen != -1 && PlanetDesti == -1) {
-				show_selector_planeta_desti = false;
-				show_pantalla_carrega = true;
-				PlanetDesti = i;
-				/*std::cout << "---------------------------------------------------------------" << std::endl;
-				std::cout << "show_selector_planeta_origen ->" << show_selector_planeta_origen << std::endl;
-				std::cout << "show_selector_planeta_desti ->" << show_selector_planeta_desti << std::endl;
-				std::cout << "..............................................................................................." << std::endl;*/
-
-			}
+			show_selector_planeta_origen = false;
+			show_selector_planeta_desti = true;
+			PlanetOrigen = i;
+			/*std::cout << "show_selector_planeta_origen ->" << show_selector_planeta_origen << std::endl;
+			std::cout << "show_selector_planeta_desti ->" << show_selector_planeta_desti << std::endl;*/
 		}
 
 		// Calcula la posició del text
@@ -965,6 +1015,100 @@ void GUI::MostrarPantallaSelector(ImVec2* screenSize, const char* descripcio) {
 
 }
 
+void GUI::MostrarPantallaSelectorD(ImVec2* screenSize, const char* descripcio) {
+
+	if (musica_menu) {
+		musica_menu->setIsPaused(false); // Pausa el sonido
+		musica_menu->setVolume(*volum_menu);  // Cambia el volumen (0.0 a 1.0)
+		//musica->setPlaybackSpeed(1.5f); // Cambia la velocidad de reproducción
+	}
+
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5 - 400, screenSize->y * 0.2));
+	ImGui::SetNextWindowSize(ImVec2(1200, 150));
+	ImGui::Begin("Titol", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground);
+	ImGui::PushFont(silkscreensubtitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text(descripcio);
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::End();
+
+	//origen rotatori menu
+	DrawRotatedImage(screenSize, (ImTextureID)(intptr_t)PLANETES[PlanetOrigen].getTextureIDMenuSelect(), ImVec2(0.0, 0.6), ImVec2(970, 550), 0.15);
+
+	int padding = 15;
+	ImVec2 buttonSize(150, 150);
+	ImVec2 windowSize((buttonSize.x + padding) * PLANETES.size(), buttonSize.y + 50);
+	ImVec2 windowPos = ImVec2(
+		(screenSize->x - windowSize.x) * 0.5f + 100,
+		(screenSize->y - windowSize.y) * 0.5f
+	);
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(windowSize);
+	ImGui::Begin(descripcio, &show_selector_planeta_origen, window_flags | ImGuiWindowFlags_NoBackground);
+	int continuiti = 0;
+	for (int i = 0; i < PLANETES.size(); i++) {
+
+		if (i == PlanetOrigen)
+			continue; // Salta aquest planeta
+
+		// Calcula la posició del botó basant-te en l'índex
+		ImVec2 buttonPos = ImVec2(
+			continuiti * (buttonSize.x + padding),
+			0  // Tots els botons estan en la mateixa fila
+		);
+		ImGui::SetCursorPos(buttonPos);  // Ajusta la posició del botó
+
+		// Aplica els estils
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));  // Fons transparent
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));  // Fons semi-transparent en hover
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));  // Fons transparent actiu
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));  // Text blanc
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f);  // Arrodoniment
+
+		// Crea el botó d'imatge
+		if (ImGui::ImageButton((void*)(intptr_t)PLANETES[i].getTextureIDMenu(), buttonSize)) {
+			show_selector_planeta_desti = false;
+			show_pantalla_carrega = true;
+			PlanetDesti = i;
+			/*std::cout << "---------------------------------------------------------------" << std::endl;
+			std::cout << "show_selector_planeta_origen ->" << show_selector_planeta_origen << std::endl;
+			std::cout << "show_selector_planeta_desti ->" << show_selector_planeta_desti << std::endl;
+			std::cout << "..............................................................................................." << std::endl;*/
+		}
+
+		// Calcula la posició del text
+		ImVec2 textSize = ImGui::CalcTextSize(PLANETES[i].getName().c_str());
+		ImVec2 textPos = ImVec2(
+			buttonPos.x + (buttonSize.x - textSize.x) * 0.5f,  // Centrat horitzontalment respecte al botó
+			buttonSize.y + 10  // Per sota del botó
+		);
+		ImGui::SetCursorPos(textPos);
+		ImGui::Text(PLANETES[i].getName().c_str());
+
+		// Finalitza l'estil
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(4);
+		continuiti++;
+	}
+
+	ImGui::End();
+
+}
 
 void GUI::MostrarPantallaCarrega(ImVec2* screenSize) {
 
