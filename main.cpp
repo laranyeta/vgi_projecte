@@ -935,10 +935,123 @@ void draw_Menu_ImGui()
 	ImGui::NewFrame();
 	ImGuiIO& io = ImGui::GetIO();
 	ImVec2* screenSize = &io.DisplaySize;
-	//io.KeyMap[ImGuiKey_Escape] = -1; // Desactiva la tecla ESC
+
 	INTERFICIE.inicalitzarInterficieGrafica(screenSize);
 
 	ImGui::Render();
+}
+
+void MostrarMenuDebug(ImVec2* screenSize) {
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowBorderSize = 0.0f;
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));  // Aplica padding de 20 píxels en totes les direccions
+
+	static float f = 0.0f;
+	static int counter = 0;
+	static float PV[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	ImGui::PushFont(INTERFICIE.fontDroidsans());
+
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(200, 600));
+	ImGui::Begin("Menu Estat", INTERFICIE.getDebugWindow(), window_flags);                          // Create a window called "Status Menu" and append into it.
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+
+	// Transformació PV de Coord. esfèriques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
+	if (camera == CAM_NAVEGA) { PV[0] = opvN.x; PV[1] = opvN.y; PV[2] = opvN.z; }
+	else {
+		cam_Esferica[0] = OPV.R;	cam_Esferica[1] = OPV.alfa; cam_Esferica[2] = OPV.beta;
+		if (Vis_Polar == POLARZ)
+		{
+			PV[0] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[1] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[2] = OPV.R * sin(OPV.alfa * PI / 180);
+		}
+		else if (Vis_Polar == POLARY)
+		{
+			PV[0] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[1] = OPV.R * sin(OPV.alfa * PI / 180);
+			PV[2] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+		}
+		else {
+			PV[0] = OPV.R * sin(OPV.alfa * PI / 180);
+			PV[1] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+			PV[2] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
+		}
+	}
+
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("CAMERA:");
+	ImGui::PopStyleColor();
+
+	ImGui::Text("Traslacio (Tx, Ty, Tz):");
+	ImGui::InputFloat3("", cam_Esferica);
+	ImGui::Text("Cartesianes (PVx,PVy,PVz)");
+	ImGui::InputFloat3("", PV);
+
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("COLORS:");
+	ImGui::PopStyleColor();
+	ImGui::Text("Color de Fons");
+	ImGui::ColorEdit3("", (float*)&clear_colorB); // Edit 3 floats representing a background color
+	ImGui::Text("Color d'Objecte");
+	ImGui::ColorEdit3("", (float*)&clear_colorO); // Edit 3 floats representing a object color
+	c_fons.r = clear_colorB.x;	c_fons.g = clear_colorB.y;	c_fons.b = clear_colorB.z;	c_fons.a = clear_colorB.w;
+	col_obj.r = clear_colorO.x;	col_obj.g = clear_colorO.y;	col_obj.b = clear_colorO.z;		col_obj.a = clear_colorO.w;
+	ImGui::Separator();
+
+
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("TRANSFORMA:");
+	ImGui::PopStyleColor();
+	float tras_ImGui[3] = { (float)TG.VTras.x,(float)TG.VTras.y,(float)TG.VTras.z };
+	ImGui::Text("Traslacio (Tx, Ty, Tz):");
+	ImGui::InputFloat3("", tras_ImGui);
+	float rota_ImGui[3] = { (float)TG.VRota.x,(float)TG.VRota.y,(float)TG.VRota.z };
+	ImGui::Text("Rotacio (Rx,Ry,Rz)");
+	ImGui::InputFloat3("", rota_ImGui);
+	float scal_ImGui[3] = { (float)TG.VScal.x,(float)TG.VScal.y,(float)TG.VScal.z };
+	ImGui::Text("Escala (Sx, Sy, Sz)");
+	ImGui::InputFloat3("", scal_ImGui);
+	
+
+		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::SeparatorText("ImGui:");               // Display some text (you can use a format strings too)
+	ImGui::PopStyleColor();
+	ImGui::Checkbox("Demo ImGui Window", INTERFICIE.getDemoWindow());      // Edit bools storing our window open/close state
+
+
+	ImGui::Text("imgui versions: (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+	ImGui::Spacing();
+
+	ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	ImGui::PopItemWidth();
+	ImGui::End();
+
+	ImGui::SetNextWindowPos(ImVec2(200, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(1220, 50));
+	ImGui::Begin("Bottons", INTERFICIE.getDebugWindow(), window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+
+	if (ImGui::Button("Reset time")) //G_TIME = 0.0;
+		//ImGui::SameLine();
+		//if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
+
+		ShowEntornVGIWindow(INTERFICIE.getDebugWindow(), 1420, 0, 500, 1080, window_flags);//550, 680
+	ImGui::PopFont();
+	ImGui::PopStyleVar();
 }
 
 
@@ -2410,6 +2523,9 @@ void OnKeyUp(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		switch (key)
 		{
+		case GLFW_KEY_M:
+			pressM = false;
+			break;
 			// Tecla cursor amunt
 		case GLFW_KEY_W:
 			pressW = false;
@@ -2620,6 +2736,7 @@ void Teclat_Shift(int key, GLFWwindow* window)
 		// 
 				// Tecla Full Screen?
 	case GLFW_KEY_F:
+		//INTERFICIE.OnFull_Screen(primary, window);
 		OnFull_Screen(primary, window);
 		break;
 
@@ -3363,6 +3480,7 @@ void Teclat_Nau(int key, int action)
 		Nau newNau;
 		//newNau.setModel(nau.getModel());
 		nau = newNau;
+		INTERFICIE.inicialitzarWindow(primary,window,&newNau);
 	}
 
 	if (press || release)
@@ -3405,6 +3523,12 @@ void Teclat_Nau(int key, int action)
 		// 
 		// 
 		// 
+		case GLFW_KEY_M:
+			//pressM = status;
+			if (press) {
+				INTERFICIE.switchMapaWindow();
+			}
+			break;
 			// Tecla cursor amunt
 		case GLFW_KEY_W:
 			pressW = status;
@@ -3577,6 +3701,8 @@ void Moviment_Nau()
 		nau.incPotencia();
 		nau.decFuel();
 	}
+	//if (pressM)
+
 	if (pressA)
 		nau.move(nau.getU() * -(float)fact_nau);
 
@@ -4716,7 +4842,7 @@ void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow* window)
 		glfwSetWindowMonitor(window, monitor, 0, 0, 1920, 1080, mode->refreshRate);
 	}
 	else {	// Restore last window size and position
-		glfwSetWindowMonitor(window, nullptr, 216, 239, 1920, 1080, mode->refreshRate);
+		glfwSetWindowMonitor(window, nullptr, 0, 0, 1920, 1080, mode->refreshRate);
 	}
 }
 
@@ -4846,7 +4972,6 @@ int main(void)
 	// To get current video mode of a monitor
 	mode = glfwGetVideoMode(primary);
 
-	INTERFICIE.inicialitzarWindow(primary, window,&nau);
 	// Retrieving monitors
 	//    int countM;
 	//   GLFWmonitor** monitors = glfwGetMonitors(&countM);
@@ -4872,6 +4997,8 @@ int main(void)
 		glfwTerminate();
 		return -1;
 	}
+	INTERFICIE.inicialitzarWindow(primary, window, &nau);
+
 	SetWindowIcon(window, "textures/menu/icon.png");
 
 	// Make the window's context current

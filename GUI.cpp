@@ -1,4 +1,4 @@
-﻿#include "GUI.h"
+#include "GUI.h"
 
 void GUI::inicialitzarWindow(GLFWmonitor* temp_primary,GLFWwindow* temp_window, Nau* temp_nau) {
 	primary = temp_primary;
@@ -32,6 +32,11 @@ void GUI::inicialitzarFonts(ImGuiIO& io) {
 
 ImFont* GUI::fontPrincipal() {
 	return silkscreen;
+}
+
+
+ImFont* GUI::fontDroidsans() {
+	return droidsans;
 }
 
 void GUI::inicialitzarSons(irrklang::ISoundEngine* temp_engine, irrklang::ISound* temp_so_alerta, irrklang::ISound* temp_so_nau, irrklang::ISound* temp_musica_menu, irrklang::ISound* temp_musica_partida,float* temp_volum_nau,float* temp_volum_menu,float* temp_volum_alerta,float* temp_volum_partida) {
@@ -102,6 +107,10 @@ void GUI::inicalitzarInterficieGrafica(ImVec2* screenSize) {
 
 	if (show_game_window) {
 		MostrarPantallaJoc(screenSize);
+	}
+
+	if (show_mapa_windows) {
+		MostrarMapaSistemaSolar(screenSize);
 	}
 
 	if (show_game_settings) {
@@ -406,6 +415,7 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 		show_config_grafics = true;
 		show_config_so = false;
 		show_config_controladors = false;
+		show_config_credits = false;
 	}
 
 	ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
@@ -413,13 +423,23 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 		show_config_grafics = false;
 		show_config_so = true;
 		show_config_controladors = false;
+		show_config_credits = false;
 	}
 
 	ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
 	if (ImGui::Button("Controladors", tamany_buttons)) {
 		show_config_grafics = false;
 		show_config_so = false;
+		show_config_credits = false;
 		show_config_controladors = true;
+	}
+
+	ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
+	if (ImGui::Button("Credits", tamany_buttons)) {
+		show_config_grafics = false;
+		show_config_so = false;
+		show_config_controladors = false;
+		show_config_credits = true;
 	}
 
 	ImGui::PopStyleVar();
@@ -513,6 +533,7 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 		ImGui::SameLine();
 		if (ImGui::Button("Pantalla Completa", tamany_buttons_dins_config)) {
 			OnFull_Screen(primary, window);
+			//fullscreen = true;
 		}
 
 
@@ -1082,7 +1103,7 @@ void GUI::MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 }
 
-void GUI::drawOrbitPath2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center) {
+void GUI::dibuixarOrbita2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center,bool centratsol) {
 	const int numPoints = 100;
 	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
 	double e = planeta.getExcentricitat(); // Excentricidad
@@ -1099,52 +1120,54 @@ void GUI::drawOrbitPath2D(const Planeta& planeta, ImVec2 minimapSize, ImVec2 min
 	// Contenidor per als punts de l'òrbita
 	std::vector<ImVec2> orbitPoints;
 	// Comenzar a dibujar la órbita
+	std::vector<std::vector<ImVec2>> orbitSegments; // Conté segments vàlids
+	std::vector<ImVec2> currentSegment;
+
 	for (int i = 0; i < numPoints; ++i) {
-		// Anomalía verdadera (ángulo alrededor de la órbita)
+		// Càlcul de coordenades
 		double nu = 2.0 * PI * i / numPoints;
-
-		// Radio para este punto en la órbita
 		double r = a * (1 - e * e) / (1 + e * cos(nu));
-
-		// Posición en el plano orbital
 		double x_orb = r * cos(nu);
 		double y_orb = r * sin(nu);
 		double z_orb = 0.0;
-
-		// Transformar del plano orbital al espacio 3D
-		glm::dvec3 posicion_orb(x_orb, y_orb, z_orb);
-		glm::dvec3 posicion_3D = R * posicion_orb;
-
-		// Dibujar el punto en la órbita
-
-		// Convertir a coordenades del mini mapa
-		ImVec2 minimapPoint = convertirAPosicioMiniMapa(
-			glm::vec3(x_orb, y_orb, z_orb),
-			glm::vec3(tamanySS, tamanySS, 0), // Escala del món
-			minimapSize,
-			minimapPosition
-		);
-		//std::cout << minimapPoint.x << " - " << minimapPoint.y << std::endl;
-		//drawList->AddCircleFilled(minimapPoint, 4.0f, colorPlanetes);
-		if (circular) {
-			if (distanciaEntrePunts(minimapPoint, center) <= radius) {
-				orbitPoints.push_back(minimapPoint);
-			}
+		glm::dvec3 posicion_orb(x_orb, y_orb, 0.0);
+		ImVec2 minimapPoint;
+		if (centratsol) {
+			minimapPoint = convertirAPosicioMiniMapa(glm::vec3(x_orb, y_orb, z_orb), glm::vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition);
 		}
 		else {
-			orbitPoints.push_back(minimapPoint);
+			minimapPoint = convertirAPosicioMiniMapaDesdeJugador(glm::vec3(x_orb, y_orb, z_orb), glm::vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition, nau->getO());
+		}
+		// Filtrat circular
+		bool insideCircle = (circular) ? distanciaEntrePunts(minimapPoint, center) <= radius : true;
+
+		if (insideCircle) {
+			currentSegment.push_back(minimapPoint);
+		}
+		else if (!currentSegment.empty()) {
+			// Si el punt està fora i el segment actual no està buit, emmagatzema'l
+			orbitSegments.push_back(currentSegment);
+			currentSegment.clear();
 		}
 	}
-	//Per fusuonar amb
-	// 
-	if (orbitPoints.size() > 1) {
-		orbitPoints.push_back(orbitPoints[0]);
+
+	// Guarda l'últim segment
+	if (!currentSegment.empty()) {
+		orbitSegments.push_back(currentSegment);
 	}
 
-	// Dibuixar l'òrbita
-	drawList->AddPolyline(orbitPoints.data(), orbitPoints.size(), IM_COL32(200, 200, 200, 255), false, 1.0f);
+	if (orbitSegments.size() >= 1) {
+		orbitSegments[orbitSegments.size()-1].push_back(orbitSegments[0][0]);
+	}
 
+	// Dibuixar tots els segments
+	for (const auto& segment : orbitSegments) {
+		if (segment.size() > 1) {
+			drawList->AddPolyline(segment.data(), segment.size(), IM_COL32(200, 200, 200, 255), false, 1.0f);
+		}
+	}
 }
+
 void GUI::DrawSpeedometer(float value, float maxValue, float centerX, float centerY, float radius, bool isRPM) {
 	float startAngle = 0; // Starting angle (90 degrees)
 
@@ -1198,6 +1221,106 @@ void GUI::DrawSpeedometer(float value, float maxValue, float centerX, float cent
 	// Draw the current value text in the center
 	ImGui::SetCursorPos(ImVec2(centerX - 20, centerY - 10));
 	ImGui::Text("%.0f", value);
+}
+
+void GUI::MostrarMapaSistemaSolar(ImVec2* screenSize) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoCollapse;
+	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
+	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
+	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
+	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
+	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
+	*/
+
+	ImVec2 windowMapaSize(1600, 880);
+
+	// Definir proporció de la llegenda i del mapa (ex: 20% llegenda, 80% mapa)
+	float llegendaRatio = 0.2f;
+	float mapaRatio = 1.0f - llegendaRatio;
+	float marge = 20.0f;
+
+	// Calcular les mides de la llegenda i del mapa
+	ImVec2 TitleSize(windowMapaSize.x, 80);
+	ImVec2 LlegendaSize(windowMapaSize.x * llegendaRatio, windowMapaSize.y- TitleSize.y- marge);
+	ImVec2 MapaSize(windowMapaSize.x * mapaRatio - marge, windowMapaSize.y- TitleSize.y- marge);
+
+	// Posició de la finestra principal
+	ImVec2 windowMapaPosition = ImVec2((screenSize->x - windowMapaSize.x) / 2, (screenSize->y - windowMapaSize.y) / 2);
+
+	// Posicions relatives dins de la finestra
+	ImVec2 LlegendaPosition = ImVec2(marge, TitleSize.y);
+	ImVec2 MapaPosition = ImVec2(LlegendaSize.x + marge, TitleSize.y); // El mapa comença després de la llegenda
+
+	// Configurar la finestra principal
+	ImGui::SetNextWindowSize(windowMapaSize);
+	ImGui::SetNextWindowPos(windowMapaPosition);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(marge, marge));
+	// Establir el color de fons de la finestra a blanc
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 0.9f));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 15.0f);   // Arrodoniment del borde
+
+	if (ImGui::Begin("Mapa Gran", nullptr, window_flags)) {
+		//Titol
+		ImGui::SetCursorPos(ImVec2(0,0));
+		ImGui::BeginChild("Titol mapa", TitleSize, true, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
+		ImGui::PushFont(silkscreensubtitle);
+		ImGui::PushStyleColor(ImGuiCol_Text, ButtonMenuPausa); // Color blanc
+		ImGui::Text("Mapa Sistema Solar");
+		ImGui::PopStyleColor();
+		ImGui::PopFont();
+		ImGui::EndChild();
+
+		// Configura els colors i l'estil
+		ImGui::PushStyleColor(ImGuiCol_Button, ButtonMenuPausa);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HoverButtonMenuPausa);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ActiveButtonMenuPausa);
+		ImGui::PushStyleColor(ImGuiCol_Text, TextMenuPausa);
+
+		// Arrodoniment
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
+		ImVec2 tamany_botons(LlegendaSize.x-marge*2, 40);
+		// Dibuixar la llegenda
+		ImGui::SetCursorPos(LlegendaPosition);
+		ImGui::BeginChild("Llegenda", LlegendaSize, false, ImGuiWindowFlags_NoBackground);
+		if (ImGui::Button("On/Off Asteroides", tamany_botons)) {
+			asteroides_minimapa = !asteroides_minimapa;
+		}
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // Espai vertical entre botons
+		if (ImGui::Button("On/Off Estacions", tamany_botons)) {
+			estacions_minimapa = !estacions_minimapa;
+		}
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // Espai vertical entre botons
+		if (ImGui::Button("On/Off Diposits", tamany_botons)) {
+			diposits_minimapa = !diposits_minimapa;
+		}
+		ImGui::Dummy(ImVec2(0.0f, 10.0f)); // Espai vertical entre botons
+		if (ImGui::Button("On/Off Orbites", tamany_botons)) {
+			orbites_minimapa = !orbites_minimapa;
+		}
+		ImGui::EndChild();
+		ImGui::PopStyleColor(4);
+		ImGui::PopStyleVar();
+
+		// Dibuixar el mapa del sistema solar
+		ImGui::SetCursorPos(MapaPosition);
+		ImGui::BeginChild("Mapa Sistema Solar", MapaSize, false, ImGuiWindowFlags_NoBackground);
+		float temp = tamanySS;
+		tamanySS = tamanySS * 10;
+		crearMiniMapaCentratSol(MapaSize, MapaPosition);
+		tamanySS = temp;
+		ImGui::EndChild();
+
+	}
+	ImGui::End();
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor();
 }
 
 void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
@@ -1266,7 +1389,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PopStyleVar();
 
 	//std::cout << std::endl;
-	vec3 posnau = nau->getCam().getO();
+	vec3 posnau = nau->getO();
 
 	//std::cout << " x :" << posnau.x << "  y :" << posnau.y << "  z :" << posnau.z << std::endl;
 	//bool isNearAnyPlanet = false;
@@ -1368,8 +1491,8 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 
 
 
-	DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 300.0f, 300.0f, 150.0f, true); // RPM speedometer (3000 RPM)
-	DrawSpeedometer(120.0f, 280.0f, 600.0f, 150.0f, 150.0f, false); // km/h speedometer (120 km/h)
+	//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 300.0f, 300.0f, 150.0f, true); // RPM speedometer (3000 RPM)
+	//DrawSpeedometer(120.0f, 280.0f, 600.0f, 150.0f, 150.0f, false); // km/h speedometer (120 km/h)
 
 	ImVec2 windowSizeVelocimetres(800, 180);
 	ImVec2 windowPosVelocimetres = ImVec2(20, screenSize->y - windowSizeVelocimetres.y);
@@ -1378,14 +1501,12 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 0));
 
 	if (ImGui::Begin("Velocimetres", nullptr, window_flags)) {
-		DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 300.0f, 300.0f, 150.0f, true); // RPM speedometer (3000 RPM)
-		DrawSpeedometer(120.0f, 280.0f, 600.0f, 150.0f, 150.0f, false); // km/h speedometer (120 km/h)
+		//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 0.0f, 150.0f, 150.0f, true); // RPM speedometer (3000 RPM)
+		//DrawSpeedometer(120.0f, 280.0f, 600.0f, 150.0f, 150.0f, false); // km/h speedometer (120 km/h)
 	}
 
 	ImGui::End();
 	ImGui::PopStyleVar();
-
-
 
 
 	ImVec2 espai(0.0f, 30.0f);
@@ -1494,7 +1615,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
 		if (ImGui::Begin("Radar", nullptr, window_flags)) {
-			crearMiniMapaCentratSol(radarSize, radarPosition);
+			crearRadarVerticalQuadrat(radarSize, radarPosition, false, 0.0f);
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
@@ -1567,7 +1688,7 @@ void GUI::crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosi
 		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if (orbites_minimapa) {
-			drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center);
+			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center,true);
 		}
 		if (distanciaEntrePunts(planetaPos, center) <= radius) {
 			if (planeta.getName() == "Sol") {
@@ -1653,7 +1774,7 @@ void GUI::crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosi
 		// Radi del triangle i orientació
 		float puntaLlargada = 8.0f; // Longitud de la punta
 		float baseAmple = 5.0f;    // Ample de la base del triangle
-		float orientacio = nau->getCam().getAngle(); // Orientació en radians
+		float orientacio = nau->getAngle(); // Orientació en radians
 		//std::cout << orientacio << std::endl;
 
 		// Calcular els vèrtexs del triangle
@@ -1691,7 +1812,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 	// INICI jugadorPos Comprovacio
 
 	// Convertir la posició del jugador al mini mapa
-	ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapa(nau->getCam().getO(), worldSize, minimapSize, minimapPosition);
+	ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapaDesdeJugador(nau->getO(), worldSize, minimapSize, minimapPosition, nau->getO());
 
 	// Centre i radi del mini mapa
 	ImVec2 center = ImVec2(minimapPosition.x + minimapSize.x / 2, minimapPosition.y + minimapSize.y / 2);
@@ -1714,10 +1835,10 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 
 	// Dibuixa els planetes
 	for (const auto& planeta : PLANETES) {
-		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
+		ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, p, nau->getO());
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
 		if (orbites_minimapa) {
-			drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center);
+			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, true, radius, center,false);
 		}
 		if (distanciaEntrePunts(planetaPos, center) <= radius) {
 			if (planeta.getName() == "Sol") {
@@ -1745,7 +1866,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 	// Dibuixar els asteroides
 	if (asteroides_minimapa) {
 		for (const auto& asteroide : ASTEROIDES) {
-			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
+			ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugador(asteroide.getPosition(), worldSize, minimapSize, p, nau->getO());
 			if (distanciaEntrePunts(asteroidePos, center) <= radius) {
 				drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);
 			}
@@ -1753,7 +1874,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 	}
 
 	for (const auto& asteroide : ASTEROIDESCINTURO) {
-		ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, minimapSize, p);
+		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugador(asteroide.getPosition(), worldSize, minimapSize, p, nau->getO());
 		if (distanciaEntrePunts(asteroidePos, center) <= radius) {
 			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
 		}
@@ -1762,7 +1883,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 	if (diposits_minimapa) {
 		for (const auto& Objjoc : DIPOSITS) {
 			// Converteix la posició del dipòsit al mini mapa
-			ImVec2 objEspaiPos = convertirAPosicioMiniMapa(Objjoc.getPosition(), worldSize, minimapSize, p);
+			ImVec2 objEspaiPos = convertirAPosicioMiniMapaDesdeJugador(Objjoc.getPosition(), worldSize, minimapSize, p, nau->getO());
 			if (distanciaEntrePunts(objEspaiPos, center) <= radius) {
 				// Dimensions de la pastilla
 				float pillWidth = 4.0f;   // Amplada de la pastilla
@@ -1779,7 +1900,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 
 	if (estacions_minimapa) {
 		for (const auto& estacions : ESTACIONS) {
-			ImVec2 estacionsPos = convertirAPosicioMiniMapa(estacions.getPosition(), worldSize, minimapSize, p);
+			ImVec2 estacionsPos = convertirAPosicioMiniMapaDesdeJugador(estacions.getPosition(), worldSize, minimapSize, p, nau->getO());
 			if (distanciaEntrePunts(estacionsPos, center) <= radius) {
 
 				// Dimensions de la creu
@@ -1797,13 +1918,13 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 		}
 	}
 
-	ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau->getCam().getO(), worldSize, minimapSize, p);
+	ImVec2 jugadorPos = convertirAPosicioMiniMapaDesdeJugador(nau->getO(), worldSize, minimapSize, p, nau->getO());
 	if (distanciaEntrePunts(jugadorPos, center) <= radius) {
 
 		// Radi del triangle i orientació
 		float puntaLlargada = 8.0f; // Longitud de la punta
 		float baseAmple = 5.0f;    // Ample de la base del triangle
-		float orientacio = nau->getCam().getAngle(); // Orientació en radians
+		float orientacio = nau->getAngle(); // Orientació en radians
 		//std::cout << orientacio << std::endl;
 
 		// Calcular els vèrtexs del triangle
@@ -1834,7 +1955,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 
 void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness) {
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
-	//ImVec2 p = ImGui::GetCursorScreenPos();
+	ImVec2 p = ImGui::GetCursorScreenPos();
 	vec3 worldSize(tamanySS, tamanySS, 0);
 
 	// Centre del radar i radi
@@ -1846,61 +1967,163 @@ void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix,
 	}
 	// Dibuixar el fons del radar
 	drawList->AddCircleFilled(center, radius, IM_COL32(20, 20, 20, 255)); // Color de fons
-
 	// Dibuixar la línia horitzontal per indicar l'orientació
+	float orientacio = nau->getAngleV(); // Orientació en radians
+
+	// Coordenades de la línia abans de rotar
+	ImVec2 start(center.x - radius, center.y); // Part esquerra
+	ImVec2 end(center.x + radius, center.y);   // Part dreta
+
+	// Rotar els punts de la línia al voltant del centre
+	float cosAngle = cos(orientacio);
+	float sinAngle = sin(orientacio);
+
+	auto rotatePoint = [&](ImVec2 point) {
+		float x = point.x - center.x;
+		float y = point.y - center.y;
+		return ImVec2(
+			center.x + x * cosAngle - y * sinAngle,
+			center.y + x * sinAngle + y * cosAngle
+		);
+		};
+
+	ImVec2 rotatedStart = rotatePoint(start);
+	ImVec2 rotatedEnd = rotatePoint(end);
+
+	// Dibuixar la línia amb l'angle especificat
 	drawList->AddLine(
-		ImVec2(center.x - radius, center.y), // Inici de la línia (part esquerra)
-		ImVec2(center.x + radius, center.y), // Final de la línia (part dreta)
-		IM_COL32(255, 255, 255, 255),       // Color blanc
-		2.0f                                // Gruix de la línia
+		rotatedStart,  // Inici de la línia
+		rotatedEnd,    // Final de la línia
+		IM_COL32(255, 255, 255, 255), // Color blanc
+		2.0f            // Gruix de la línia
 	);
 
-	if (asteroides_minimapa) {
-		// Dibuixar asteroides
-		for (const auto& asteroide : ASTEROIDES) {
-			ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, radarSize, radarPosition);
+
+	// Dibuixar asteroides que estan a 20 unitats davant o darrere
+	for (const auto& asteroide : ASTEROIDES) {
+		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugadorVertical(asteroide.getPosition(), worldSize, radarSize, radarPosition, nau->getO());
+
+		// Comparar l'altura de l'asteroide amb la del jugador
+		float diferenciaAltura = asteroide.getPosition().z - nau->getO().z;
+
+		if (distanciaEntrePunts(asteroidePos, center) <= radius) {
+			// Diferenciar visualment si està per sobre o per sota
+			ImU32 colorAsteroide = diferenciaAltura > 0
+				? IM_COL32(0, 255, 0, 255) // Verd (per sobre)
+				: IM_COL32(255, 0, 0, 255); // Vermell (per sota)
+
+			// Dibuixar asteroide
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroide);
+		}
+	}
+	/*
+	for (const auto& asteroide : ASTEROIDESCINTURO) {
+		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugadorVertical(
+			asteroide.getPosition(), worldSize, radarSize, radarPosition, nau->getO());
+
+		// Comparar la distància en l'eix Z (profunditat)
+		float diferenciaProfunditat = asteroide.getPosition().z - nau->getO().z;
+
+		// Només mostrar els asteroides dins del rang [-20, 20] en l'eix Z
+		if (fabs(diferenciaProfunditat) <= 20.0f) {
+			// Diferenciar visualment segons si estan davant o darrere
+			ImU32 colorAsteroide = diferenciaProfunditat > 0
+				? IM_COL32(0, 255, 255, 255) // Blau clar (davant)
+				: IM_COL32(255, 165, 0, 255); // Taronja (darrere)
+
+			// Dibuixar l'asteroide si està dins del radi del radar
 			if (distanciaEntrePunts(asteroidePos, center) <= radius) {
-				drawList->AddCircleFilled(asteroidePos, 2.0f, IM_COL32(255, 0, 0, 255)); // Asteroides
+				drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroide);
 			}
 		}
 	}
 
-	for (const auto& asteroide : ASTEROIDESCINTURO) {
-		ImVec2 asteroidePos = convertirAPosicioMiniMapa(asteroide.getPosition(), worldSize, radarSize, radarPosition);
-		if (distanciaEntrePunts(asteroidePos, center) <= radius) {
-			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
+
+	if (diposits_minimapa) {
+		for (const auto& Objjoc : DIPOSITS) {
+			// Converteix la posició del dipòsit al mini mapa
+			ImVec2 objEspaiPos = convertirAPosicioMiniMapaDesdeJugadorVertical(Objjoc.getPosition(), worldSize, radarSize, radarPosition, nau->getO());
+			// Comparar la distància en l'eix Z (profunditat)
+
+			if (distanciaEntrePunts(objEspaiPos, center) <= radius) {
+				// Dimensions de la pastilla
+				float pillWidth = 4.0f;   // Amplada de la pastilla
+				float pillHeight = 4.0f;  // Alçada de la pastilla
+				float cornerRadius = 0.0f; // Radi de les vores arrodonides
+
+				// Dibuixa la pastilla com un rectangle arrodonit
+				drawList->AddRectFilled(ImVec2(objEspaiPos.x - pillWidth / 2, objEspaiPos.y - pillHeight / 2),
+					ImVec2(objEspaiPos.x + pillWidth / 2, objEspaiPos.y + pillHeight / 2),
+					colorDiposits, cornerRadius);
+			}
+			
 		}
 	}
 
-	// Dibuixar el jugador (triangle)
-	ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau->getCam().getO(), worldSize, radarSize, radarPosition);
-	if (distanciaEntrePunts(jugadorPos, center) <= radius) {
-		float puntaLlargada = 8.0f; // Longitud de la punta
-		float baseAmple = 5.0f;    // Ample de la base del triangle
-		float orientacio = nau->getCam().getAngle(); // Orientació en radians
+	if (estacions_minimapa) {
+		for (const auto& estacions : ESTACIONS) {
+			ImVec2 estacionsPos = convertirAPosicioMiniMapaDesdeJugadorVertical(estacions.getPosition(), worldSize, radarSize, radarPosition, nau->getO());
+			// Comparar la distància en l'eix Z (profunditat)
+			float diferenciaProfunditat = estacions.getPosition().z - nau->getO().z;
 
-		// Calcular els vèrtexs del triangle
-		ImVec2 p1 = ImVec2(
-			jugadorPos.x + cos(orientacio) * puntaLlargada,
-			jugadorPos.y + sin(orientacio) * puntaLlargada
-		);
+			// Només mostrar els asteroides dins del rang [-20, 20] en l'eix Z
+			if (fabs(diferenciaProfunditat) <= 20.0f) {
+				if (distanciaEntrePunts(estacionsPos, center) <= radius) {
 
-		ImVec2 p2 = ImVec2(
-			jugadorPos.x + cos(orientacio + IM_PI * 0.75f) * baseAmple,
-			jugadorPos.y + sin(orientacio + IM_PI * 0.75f) * baseAmple
-		);
+					// Dimensions de la creu
+					float crossSize = 4.0f; // Mida de la creu (ajustable)
 
-		ImVec2 p3 = ImVec2(
-			jugadorPos.x + cos(orientacio - IM_PI * 0.75f) * baseAmple,
-			jugadorPos.y + sin(orientacio - IM_PI * 0.75f) * baseAmple
-		);
+					// Dibuixa les dues línies de la creu
+					drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
+						ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
+						colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
 
-		// Dibuixar el triangle del jugador
-		drawList->AddTriangleFilled(p1, p2, p3, IM_COL32(255, 255, 0, 255)); // Color groc
-	}
+					drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
+						ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
+						colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+				}
+			}
+		}
+	}*/
 
-	// Dibuixar el border circular
+	// Calcula la posició del jugador al radar
+	/*ImVec2 jugadorPos = convertirAPosicioMiniMapaDesdeJugador(nau->getO(), worldSize, radarSize, p, nau->getO());
+
+	// Configuració del triangle rectangular
+	float baseAmple = 8.0f;    // Ample de la base del triangle
+	float orientacio_2 = nau->getAngle(); // Orientació en radians
+
+	// Càlcul del vèrtex de la punta (a la direcció del jugador)
+	ImVec2 p1 = ImVec2(
+		jugadorPos.x + cos(orientacio_2) * baseAmple,
+		jugadorPos.y + sin(orientacio_2) * baseAmple
+	);
+
+	// Càlcul del primer vèrtex de la base (esquerra)
+	ImVec2 p2 = ImVec2(
+		jugadorPos.x + cos(orientacio_2 + IM_PI / 2.0f) * baseAmple,
+		jugadorPos.y + sin(orientacio_2 + IM_PI / 2.0f) * baseAmple
+	);
+
+	// Càlcul del segon vèrtex de la base (dreta)
+	ImVec2 p3 = ImVec2(
+		jugadorPos.x + cos(orientacio_2 - IM_PI / 2.0f) * baseAmple,
+		jugadorPos.y + sin(orientacio_2 - IM_PI / 2.0f) * baseAmple
+	);
+
+	// Dibuixar el triangle al radar
+	drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
+	*/
+	
+
+	// Border del radar
 	drawList->AddCircle(center, radius + (borderThickness / 2), color_interficie, 64, borderThickness);
+}
+
+
+void GUI::crearRadarVerticalQuadrat(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness)
+{
+
 }
 
 
@@ -1953,7 +2176,7 @@ void GUI::crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
 	//INICI jugadorPos Comprovacio
 
 	// Convertir la posició del jugador al mini mapa
-	ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapa(nau->getCam().getO(), vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition);
+	ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapa(nau->getO(), vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition);
 
 	// Comprovar si el jugador està fora dels límits del mini mapa
 	if (jugadorPosComprovacio.x < minimapPosition.x || jugadorPosComprovacio.x > minimapPosition.x + minimapSize.x ||
@@ -1972,7 +2195,9 @@ void GUI::crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
 	for (const auto& planeta : PLANETES) {
 		ImVec2 planetaPos = convertirAPosicioMiniMapa(planeta.getPosition(), worldSize, minimapSize, p);
 		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
-		drawOrbitPath2D(planeta, minimapSize, minimapPosition, drawList, false, 0.0, ImVec2(0, 0));
+		if(orbites_minimapa){
+			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, false, 0.0, ImVec2(0, 0), true);
+		}
 
 		//FI PROVA
 		if (planeta.getName() == "Sol") {
@@ -2049,12 +2274,12 @@ void GUI::crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
 	//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
 	//drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
 
-	ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau->getCam().getO(), worldSize, minimapSize, p);
+	ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau->getO(), worldSize, minimapSize, p);
 
 	// Radi del triangle i orientació
 	float puntaLlargada = 8.0f; // Longitud de la punta
 	float baseAmple = 5.0f;    // Ample de la base del triangle
-	float orientacio = nau->getCam().getAngle(); // Orientació en radians
+	float orientacio = nau->getAngle(); // Orientació en radians
 	//std::cout << orientacio << std::endl;
 
 	// Calcular els vèrtexs del triangle
@@ -2078,6 +2303,139 @@ void GUI::crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
 }
 
 void GUI::crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition) {
+
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	ImVec2 p = ImGui::GetCursorScreenPos();
+
+	//INICI jugadorPos Comprovacio
+
+	// Convertir la posició del jugador al mini mapa
+	ImVec2 jugadorPosComprovacio = convertirAPosicioMiniMapaDesdeJugador(nau->getO(), vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition, nau->getO());
+
+	// Comprovar si el jugador està fora dels límits del mini mapa
+	if (jugadorPosComprovacio.x < minimapPosition.x || jugadorPosComprovacio.x > minimapPosition.x + minimapSize.x ||
+		jugadorPosComprovacio.y < minimapPosition.y || jugadorPosComprovacio.y > minimapPosition.y + minimapSize.y) {
+		// Augmentar la mida del mini mapa
+		tamanySS += tamanySS * 0.5f;  // Augmenta la mida horitzontal
+	}
+	//FI jugadorPos Comprovacio
+
+	vec3 worldSize(tamanySS, tamanySS, 0);
+
+	// Fons del mini mapa
+	drawList->AddRectFilled(p, ImVec2(p.x + minimapSize.x, p.y + minimapSize.y), IM_COL32(20, 20, 20, 255));
+
+	// Dibuixa els planetes
+	for (const auto& planeta : PLANETES) {
+		ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, p, nau->getO());
+		//std::cout << PLANETES[PlanetOrigen].getName()  << std::endl;
+		if (orbites_minimapa) {
+			dibuixarOrbita2D(planeta, minimapSize, minimapPosition, drawList, false, 0.0, ImVec2(0, 0), false);
+		}
+		//FI PROVA
+		if (planeta.getName() == "Sol") {
+			drawList->AddCircleFilled(planetaPos, 12.0f, colorSol);
+
+		}
+		else if (PlanetOrigen != -1 && PlanetDesti != -1) {
+			if (PLANETES[PlanetOrigen].getName() == planeta.getName()) {
+				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaOrigen);
+
+			}
+			else if (PLANETES[PlanetDesti].getName() == planeta.getName()) {
+				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetaDesti);
+			}
+			else {
+				drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
+			}
+		}
+		else {
+			drawList->AddCircleFilled(planetaPos, 5.0f, colorPlanetes);
+		}
+
+	}
+
+	// Dibuixar els asteroides
+	if (asteroides_minimapa) {
+		for (const auto& asteroide : ASTEROIDES) {
+			ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugador(asteroide.getPosition(), worldSize, minimapSize, p, nau->getO());
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroides);
+		}
+	}
+
+	for (const auto& asteroide : ASTEROIDESCINTURO) {
+		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugador(asteroide.getPosition(), worldSize, minimapSize, p, nau->getO());
+		drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroidescinturons);  // Vermell
+	}
+
+	if (diposits_minimapa) {
+		for (const auto& Objjoc : DIPOSITS) {
+			// Converteix la posició del dipòsit al mini mapa
+			ImVec2 objEspaiPos = convertirAPosicioMiniMapaDesdeJugador(Objjoc.getPosition(), worldSize, minimapSize, p, nau->getO());
+
+			// Dimensions de la pastilla
+			float pillWidth = 8.0f;   // Amplada de la pastilla
+			float pillHeight = 4.0f;  // Alçada de la pastilla
+			float cornerRadius = 2.0f; // Radi de les vores arrodonides
+
+			// Dibuixa la pastilla com un rectangle arrodonit
+			drawList->AddRectFilled(ImVec2(objEspaiPos.x - pillWidth / 2, objEspaiPos.y - pillHeight / 2),
+				ImVec2(objEspaiPos.x + pillWidth / 2, objEspaiPos.y + pillHeight / 2),
+				colorDiposits, cornerRadius);
+		}
+	}
+
+	if (estacions_minimapa) {
+		for (const auto& estacions : ESTACIONS) {
+			ImVec2 estacionsPos = convertirAPosicioMiniMapaDesdeJugador(estacions.getPosition(), worldSize, minimapSize, p, nau->getO());
+
+			// Dimensions de la creu
+			float crossSize = 4.0f; // Mida de la creu (ajustable)
+
+			// Dibuixa les dues línies de la creu
+			drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
+				ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
+				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+
+			drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
+				ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
+				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+		}
+	}
+
+	// Dibuixa el jugador
+	//ImVec2 jugadorPos = convertirAPosicioMiniMapa(nau.getCam().getO(), worldSize, minimapSize, p);
+	//drawList->AddCircleFilled(jugadorPos, 5.0f, colorJugador);  // Groc
+
+	ImVec2 jugadorPos = convertirAPosicioMiniMapaDesdeJugador(nau->getO(), worldSize, minimapSize, p, nau->getO());
+
+	// Radi del triangle i orientació
+	float puntaLlargada = 8.0f; // Longitud de la punta
+	float baseAmple = 5.0f;    // Ample de la base del triangle
+	float orientacio = nau->getAngle(); // Orientació en radians
+	//std::cout << orientacio << std::endl;
+
+	// Calcular els vèrtexs del triangle
+	ImVec2 p1 = ImVec2(
+		jugadorPos.x + cos(orientacio) * puntaLlargada,
+		jugadorPos.y + sin(orientacio) * puntaLlargada
+	);
+
+	ImVec2 p2 = ImVec2(
+		jugadorPos.x + cos(orientacio + IM_PI * 0.75f) * baseAmple,
+		jugadorPos.y + sin(orientacio + IM_PI * 0.75f) * baseAmple
+	);
+
+	ImVec2 p3 = ImVec2(
+		jugadorPos.x + cos(orientacio - IM_PI * 0.75f) * baseAmple,
+		jugadorPos.y + sin(orientacio - IM_PI * 0.75f) * baseAmple
+	);
+
+	// Dibuixar el triangle
+	drawList->AddTriangleFilled(p1, p2, p3, colorJugador);
+
+
+
 	// Dibuixa els planetes
 	/*for (const auto& planeta : PLANETES) {
 		ImVec2 planetaPos = convertirAPosicioMiniMapaDesdeJugador(planeta.getPosition(), worldSize, minimapSize, nau.getCam().getO());
@@ -2141,24 +2499,43 @@ ImVec2 GUI::convertirAPosicioMiniMapa(const glm::vec3& posicioMon,
 ImVec2 GUI::convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon,
 	const glm::vec3& worldSize,
 	const ImVec2& minimapSize,
+	const ImVec2& minimapPosition,
 	const glm::vec3& posicioJugador) {
 
-	// Desplaçar les coordenades del món perquè el jugador estigui al centre
+	// Desplaçar les coordenades del món perquè el centre sigui la posició del jugador
 	glm::vec3 posicioDesplacada = posicioMon - posicioJugador;
 
 	// Calcular l'escala per als eixos X i Y
-// Calcular l'escala per als eixos X i Y
 	float scaleX = minimapSize.x / worldSize.x;
 	float scaleY = minimapSize.y / worldSize.y;
 
-	std::cout << "Escala X: " << scaleX << ", Escala Y: " << scaleY << std::endl;  // Depuració
-
-	// Convertir a coordenades 2D del mini mapa, assegurant-nos que el jugador estigui al centre
-	float posX = minimapSize.x / 2.0f + (posicioDesplacada.x * scaleX);
-	float posY = minimapSize.y / 2.0f + (posicioDesplacada.z * scaleY);  // Z utilitzat per Y en el mini mapa
+	// Convertir a coordenades 2D del mini mapa
+	float posX = minimapPosition.x + (posicioDesplacada.x * scaleX) + (minimapSize.x / 2.0f);
+	float posY = minimapPosition.y + (posicioDesplacada.y * scaleY) + (minimapSize.y / 2.0f);
 
 	return ImVec2(posX, posY);
 }
+
+ImVec2 GUI::convertirAPosicioMiniMapaDesdeJugadorVertical(const glm::vec3& posicioMon,
+	const glm::vec3& worldSize,
+	const ImVec2& minimapSize,
+	const ImVec2& minimapPosition,
+	const glm::vec3& posicioJugador) {
+
+	// Desplaçar les coordenades del món perquè el centre sigui la posició del jugador
+	glm::vec3 posicioDesplacada = posicioMon - posicioJugador;
+
+	// Calcular l'escala per als eixos X i Y
+	float scaleX = minimapSize.x / worldSize.x; // Amplada del radar (eix X del món)
+	float scaleY = minimapSize.y / worldSize.y; // Alçada del radar (eix Y del món)
+
+	// Convertir a coordenades 2D del radar vertical
+	float posX = minimapPosition.x + (posicioDesplacada.x * scaleX) + (minimapSize.x / 2.0f);
+	float posY = minimapPosition.y + (posicioDesplacada.y * scaleY) + (minimapSize.y / 2.0f);
+
+	return ImVec2(posX, posY);
+}
+
 
 
 
@@ -2199,119 +2576,6 @@ void GUI::Alerta(ImVec2* screenSize, ImVec4* color, const char* text) {
 }
 
 
-void GUI::MostrarMenuDebug(ImVec2* screenSize) {
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.WindowBorderSize = 0.0f;
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));  // Aplica padding de 20 píxels en totes les direccions
-
-	static float f = 0.0f;
-	static int counter = 0;
-	static float PV[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	ImGui::PushFont(droidsans);
-
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
-	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
-	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
-	*/
-	/*
-	ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(200, 600));
-	ImGui::Begin("Menu Estat", &show_debug_windows, window_flags);                          // Create a window called "Status Menu" and append into it.
-	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-
-	// Transformació PV de Coord. esfèriques (R,anglev,angleh) --> Coord. cartesianes (PVx,PVy,PVz)
-	if (camera == CAM_NAVEGA) { PV[0] = opvN.x; PV[1] = opvN.y; PV[2] = opvN.z; }
-	else {
-		cam_Esferica[0] = OPV.R;	cam_Esferica[1] = OPV.alfa; cam_Esferica[2] = OPV.beta;
-		if (Vis_Polar == POLARZ)
-		{
-			PV[0] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-			PV[1] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-			PV[2] = OPV.R * sin(OPV.alfa * PI / 180);
-		}
-		else if (Vis_Polar == POLARY)
-		{
-			PV[0] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-			PV[1] = OPV.R * sin(OPV.alfa * PI / 180);
-			PV[2] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-		}
-		else {
-			PV[0] = OPV.R * sin(OPV.alfa * PI / 180);
-			PV[1] = OPV.R * cos(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-			PV[2] = OPV.R * sin(OPV.beta * PI / 180) * cos(OPV.alfa * PI / 180);
-		}
-	}
-
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-	ImGui::SeparatorText("CAMERA:");
-	ImGui::PopStyleColor();
-
-	ImGui::Text("Traslacio (Tx, Ty, Tz):");
-	ImGui::InputFloat3("", cam_Esferica);
-	ImGui::Text("Cartesianes (PVx,PVy,PVz)");
-	ImGui::InputFloat3("", PV);
-
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-	ImGui::SeparatorText("COLORS:");
-	ImGui::PopStyleColor();
-	ImGui::Text("Color de Fons");
-	ImGui::ColorEdit3("", (float*)&clear_colorB); // Edit 3 floats representing a background color
-	ImGui::Text("Color d'Objecte");
-	ImGui::ColorEdit3("", (float*)&clear_colorO); // Edit 3 floats representing a object color
-	c_fons.r = clear_colorB.x;	c_fons.g = clear_colorB.y;	c_fons.b = clear_colorB.z;	c_fons.a = clear_colorB.w;
-	col_obj.r = clear_colorO.x;	col_obj.g = clear_colorO.y;	col_obj.b = clear_colorO.z;		col_obj.a = clear_colorO.w;
-	ImGui::Separator();
-
-
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-	ImGui::SeparatorText("TRANSFORMA:");
-	ImGui::PopStyleColor();
-	float tras_ImGui[3] = { (float)TG.VTras.x,(float)TG.VTras.y,(float)TG.VTras.z };
-	ImGui::Text("Traslacio (Tx, Ty, Tz):");
-	ImGui::InputFloat3("", tras_ImGui);
-	float rota_ImGui[3] = { (float)TG.VRota.x,(float)TG.VRota.y,(float)TG.VRota.z };
-	ImGui::Text("Rotacio (Rx,Ry,Rz)");
-	ImGui::InputFloat3("", rota_ImGui);
-	float scal_ImGui[3] = { (float)TG.VScal.x,(float)TG.VScal.y,(float)TG.VScal.z };
-	ImGui::Text("Escala (Sx, Sy, Sz)");
-	ImGui::InputFloat3("", scal_ImGui);
-
-
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-	ImGui::SeparatorText("ImGui:");               // Display some text (you can use a format strings too)
-	ImGui::PopStyleColor();
-	ImGui::Checkbox("Demo ImGui Window", &show_demo_window);      // Edit bools storing our window open/close state
-
-
-	ImGui::Text("imgui versions: (%s) (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
-	ImGui::Spacing();
-
-	ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	ImGui::PopItemWidth();
-	ImGui::End();
-
-	ImGui::SetNextWindowPos(ImVec2(200, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(1220, 50));
-	ImGui::Begin("Bottons", &show_debug_windows, window_flags);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-
-	if (ImGui::Button("Reset time")) G_TIME = 0.0;
-	ImGui::SameLine();
-	if (ImGui::Button("Propulsar")) PROPULSIO_NAU = true;
-
-	ShowEntornVGIWindow(&show_debug_windows, 1420, 0, 500, 1080, window_flags);//550, 680
-	ImGui::PopFont();
-	ImGui::PopStyleVar();*/
-}
-
 
 
 
@@ -2336,7 +2600,16 @@ bool* GUI::getWindowAbout(){
 bool GUI::getPause() {
 	return pause;
 }
+bool* GUI::getDebugWindow() {
+	return &show_debug_windows;
+}
+bool* GUI::getDemoWindow() {
+	return &show_demo_window;
+}
 
+bool* GUI::getMapaWindow() {
+	return &show_mapa_windows;
+}
 
 //Setters
 void GUI::switchMenuJugadorConfig() {
@@ -2345,5 +2618,8 @@ void GUI::switchMenuJugadorConfig() {
 void GUI::switchPause() {
 	pause = !pause;
 }
-
+void GUI::switchMapaWindow() {
+	show_mapa_windows = !show_mapa_windows;
+	show_game_window = !show_game_window;
+}
 

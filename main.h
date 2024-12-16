@@ -196,7 +196,7 @@ double angleA, angleB, angleC;
 static const double vdir_ini[3] = { -1, 0, 0 }, vright_ini[3] = { 0, 1, 0 }, vup_ini[3] = { 0, 0, 1 };
 double v[3]; //direccio vertical
 double u[3]; //direccio derecha
-bool pressW, pressS, pressA, pressD, pressZ, pressX, pressUP, pressDOWN, pressLEFT, pressRIGHT, pressQ, pressE, pressR;
+bool pressW, pressS, pressA, pressD, pressZ, pressX, pressUP, pressDOWN, pressLEFT, pressRIGHT, pressQ, pressE, pressR, pressM;
 bool mouseControl;
 COBJModel* TestOBJ;
 COBJModel* CombustibleOBJ;
@@ -243,7 +243,6 @@ int shortCut_Projeccio();
 int shortCut_Objecte();
 int shortCut_Iluminacio();
 //void ShowEntornVGIWindow(bool* p_open);
-void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int size_y, ImGuiWindowFlags window_flags);
 
 // EntornVGI: Funcions de les opcions de Men� Shader.
 void Menu_Shaders_Opcio_CarregarVSFS();
