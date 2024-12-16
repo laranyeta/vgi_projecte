@@ -159,7 +159,7 @@ ImVec4 clear_colorO = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);	// ImGui: Color de l'obje
 // Entorn VGI: Objecte OBJ:
 COBJModel* ObOBJ;		// Variable d'objecte format OBJ (*.OBJ)
 CVAO vao_OBJ;			// Identificador VAO per a objecte OBJ
-
+COBJModel* ObOBJnGlass;
 // Entorn VGI: OBJECTE --> Corbes Bezier i BSpline
 int npts_T;							// N�mero de punts de control de la corba en el Vector corbaSpline (<=MAX_PATH_SPLINE)
 CPunt3D PC_t[MAX_PATCH_CORBA];		// Vector que enmagatzema Punts de Control Corba Spline
