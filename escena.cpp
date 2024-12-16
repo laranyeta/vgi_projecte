@@ -1346,9 +1346,14 @@ void animacioInicialPlanetaDesti(float time, Nau& nau)
 	static float arrivedTimePlaneta = 0.0f;
 	static float cutSceneDuration = 5.0f;
 	static float stayDurationPlaneta = 3.0f;
+	Planeta& planetaDesti = PLANETES[nau.getPlanetaDesti()];
 
-
+	
 	static vec3 offsetPlaneta = vec3(8.0f, 3.0f, 8.0f);
+	if (nau.getPlanetaDesti() > 4)
+	{
+		offsetPlaneta = vec3(20.0f, 8.0f, 20.0f);
+	}
 
 	static vec3 originPlaneta, planetaN, planetaV, planetaU, planetaP;
 	static vec3 savedCamOrigin, savedCamN, savedCamV, savedCamU, savedCamP;
@@ -1370,14 +1375,14 @@ void animacioInicialPlanetaDesti(float time, Nau& nau)
 	}
 	if (cutScene)
 	{
-		Planeta& planetaDesti = PLANETES[nau.getPlanetaDesti()];
+		
 		vec3 planetPos = planetaDesti.getPosition();
 
 		originPlaneta = planetPos + offsetPlaneta;
 
 		planetaN = normalize(planetPos - originPlaneta);
 
-		vec3 newUp = vec3(0.0f, 1.0f, 0.0f);
+		vec3 newUp = vec3(1.0f, 1.0f, 0.0f);
 		planetaV = normalize(cross(newUp, -planetaN));
 		planetaU = cross(planetaN, planetaV);
 		planetaP = originPlaneta + planetaN;
