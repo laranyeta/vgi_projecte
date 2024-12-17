@@ -3101,17 +3101,6 @@ void GUI::MostrarPantallaPerdedor(ImVec2* screenSize) {
 	ImGui::PopFont();
 	ImGui::EndChild();
 
-	// --- Segon Child: Missatge de puntuació ---
-
-	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + child_height + spacing));  // Centrar el text
-	ImGui::BeginChild("TitolDown_G_Punts", ImVec2(child_width, child_height), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
-	ImGui::PushFont(silkscreensubtitle);
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
-	ImGui::Text("Has obtingut 4000 Punts");
-	ImGui::PopStyleColor();
-	ImGui::PopFont();
-	ImGui::EndChild();
-
 	// --- Tercer Child: Resultats finals ---
 
 	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + 2 * (child_height + spacing)));  // Centrar el text
