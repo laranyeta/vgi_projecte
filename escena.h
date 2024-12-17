@@ -37,8 +37,9 @@ void drawOrbitPath(Planeta& planeta);
 /* MODIFIED*/
 void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES],bool textur, Nau& nau);
 void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object, Nau& nau);
-void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object);
-void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* CombustibleOBJ, CColor col_object);
-void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object);
+void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object, Nau& nau);
+void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* CombustibleOBJ, CColor col_object, Nau& nau);
+void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object, Nau& nau);
+std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);
 void joc(float time, Nau& nau);
 #endif

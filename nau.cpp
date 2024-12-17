@@ -33,7 +33,6 @@ void Nau::resolveCollisionWithAsteroid(Asteroide& asteroid, const glm::vec3& col
     float j = -(1 + e) * velocityAlongNormal;
     j /= (1 / static_cast<float>(scaledShipMass)) + (1 / static_cast<float>(scaledAsteroidMass));
 
-
     glm::vec3 impulse = j * normal;
     m_velocitat += impulse / static_cast<float>(scaledShipMass);
     glm::dvec3 asteroidVelocity = asteroid.getVelocitat() - (glm::dvec3)impulse / scaledAsteroidMass;

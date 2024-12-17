@@ -1,5 +1,5 @@
 #include "asteroide.h"
-#include <glm/gtx/norm.hpp> // For distance calculations
+#include <glm/gtx/norm.hpp> 
 #include <cmath>
 #include<iostream> //luis
 using namespace std;//luis
@@ -100,21 +100,17 @@ bool Asteroide::isCollidingWith(const Asteroide& other) { //li vaig treure el co
 }
 
 void Asteroide::resolveCollision(Asteroide& other) {
-    // Calculate the normal vector
     glm::dvec3 normal = other.m_velocitat - this->m_velocitat;
     double distance = glm::length(normal);
     if (distance == 0.0) {
-        // Prevent division by zero
         normal = glm::dvec3(1.0, 0.0, 0.0);
         distance = 1.0;
     }
     normal /= distance;
 
-    // Relative velocity
     glm::dvec3 relativeVelocity = this->m_velocitat - other.m_velocitat;
     double velocityAlongNormal = glm::dot(relativeVelocity, normal);
 
-    // Do not resolve if velocities are separating
     if (velocityAlongNormal > 0)
         return;
     /*
@@ -135,19 +131,15 @@ void Asteroide::resolveCollision(Asteroide& other) {
 
     }
     */
-    // Coefficient of restitution (1.0 for elastic collision)
     double e = 1.0;
 
-    // Calculate impulse scalar
     double j = -(1 + e) * velocityAlongNormal;
     j /= (1 / this->m_massa) + (1 / other.m_massa);
 
-    // Apply impulse
     glm::dvec3 impulse = j * normal;
     this->m_velocitat += impulse / this->m_massa;
     other.m_velocitat -= impulse / other.m_massa;
 
-    // Optional: Adjust positions to prevent overlapping
     double overlap = (static_cast<double>(m_radi*2.2) + static_cast<double>(other.m_radi*2.2)) - distance;
     if (overlap > 0) {
         glm::dvec3 correction = (overlap / (this->m_massa + other.m_massa)) * normal;
