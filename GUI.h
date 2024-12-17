@@ -15,13 +15,19 @@ using namespace irrklang;
 //#include "main.h"
 #include <iostream>
 
+struct Alerta {
+	int tipus;               // Tipus de l'alerta (1, 2, 3, 4, etc.)
+	const char* text;        // Text que es mostrarà a l'alerta
+	float temps;             // Temps en segons durant el qual l'alerta serà visible
+};
+
 class GUI
 {
 public:
 	void inicialitzarWindow(GLFWmonitor* temp_primary, GLFWwindow* temp_window, Nau* temp_nau);
 	void inicialitzarImatges();
 	void inicialitzarFonts(ImGuiIO& io);
-	void inicialitzarTime(double* temp);
+	void inicialitzarTime(float temp);
 	ImFont* fontPrincipal();
 	ImFont* fontDroidsans();
 	void inicialitzarSons(irrklang::ISoundEngine* temp_engine,irrklang::ISound* temp_so_alerta,
@@ -46,7 +52,7 @@ public:
 	void MostrarPantallaCarrega(ImVec2* screenSize);
 	float distanciaEuclidiana(const glm::vec3& point1, const glm::vec3& point2);
 	void CircularProgressBar(const char* label, float progress, const ImVec2& size, const ImVec4& color);
-	void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
+	//void Alerta(ImVec2* screenSize, ImVec4* color, const char* text);
 	ImVec2 convertirAPosicioMiniMapa(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition);
 	ImVec2 convertirAPosicioMiniMapaDesdeJugador(const glm::vec3& posicioMon, 
 		const glm::vec3& worldSize, 
@@ -54,8 +60,11 @@ public:
 		const ImVec2& minimapPosition, 
 		const glm::vec3& posicioJugador);
 	ImVec2 convertirAPosicioMiniMapaDesdeJugadorVertical(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition, const glm::vec3& posicioJugador);
+	void MostrarAlerta(ImVec2* screenSize, const Alerta& alerta, float posY);
+	void GestionarAlertes(ImVec2* screenSize);
+	void AfegirAlerta(int tipus, const char* text, float temps);
 	void MostrarPantallaMenuJugador(ImVec2* screenSize);
-	void DibuixarBarraDistanciaPlaneta(float distancePercentage);
+	void DibuixarBarraDistanciaPlaneta(float distancePercentage, ImVec2 bar, ImVec2 position);
 	float distanciaEntrePunts(const ImVec2& a, const ImVec2& b);
 	void crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition);
 	void crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition);
@@ -104,6 +113,7 @@ private:
 	bool show_pantalla_carrega = false;
 	bool show_menu_jugador_config = false;
 	bool show_mapa_windows = false;
+	bool show_alerta = false;
 
 	bool show_config_grafics = true;
 	bool show_config_so = false;
@@ -161,6 +171,7 @@ private:
 	ImVec4 colorVerd = ImVec4(0.0f, 0.749f, 0.388f, 1.0f);
 	ImVec4 colorVermell = ImVec4(1.0f, 0.192f, 0.192f, 1.0f);
 	ImVec4 colorTaronja = ImVec4(1.0f, 0.569f, 0.302f, 1.0f);
+	ImVec4 colortransparentalerta = ImVec4(0.0f, 0.0f, 1.0f, 0.7f); // Blau amb 70% de transparència
 
 	// Color per als planetes
 	ImU32 colorPlanetes = IM_COL32(255, 255, 255, 255);  // Blanc
@@ -210,9 +221,11 @@ private:
 	GLFWmonitor* primary;
 	//const GLFWvidmode* mode;
 	GLFWwindow* window;
-	double* m_time;
+	float m_time;
 	Nau* nau;
+	vector<Alerta> alertes;
 };
+
 
 void IniciarSimulador();
 void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow* window);

@@ -57,7 +57,7 @@ float volum_menu = 1;
 float volum_alerta = 1;
 float volum_partida = 1;
 
-
+bool gamepad_conect = false;
 
 /*-----------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -661,7 +661,7 @@ void dibuixa_Escena(float time) {
 	if (SkyBoxCube) dibuixa_Skybox(skC_programID, cubemapTexture, Vis_Polar, ProjectionMatrix, ViewMatrix);
 
 	//	Dibuix Coordenades Món i Reixes.
-	dibuixa_Eixos(eixos_programID, eixos, eixos_Id, grid, hgrid, ProjectionMatrix, ViewMatrix);
+	//dibuixa_Eixos(eixos_programID, eixos, eixos_Id, grid, hgrid, ProjectionMatrix, ViewMatrix);
 
 	// Escalat d'objectes, per adequar-los a les vistes ortogràfiques (Pràctica 2)
 	//	GTMatrix = glm::scale();
@@ -929,6 +929,22 @@ void draw_Menu_ImGui()
 	ImVec2* screenSize = &io.DisplaySize;
 
 	INTERFICIE.inicalitzarInterficieGrafica(screenSize);
+
+	if (glfwJoystickPresent(GLFW_JOYSTICK_1) && !gamepad_conect) {
+		const char* joystickName = glfwGetJoystickName(GLFW_JOYSTICK_1);
+		if (joystickName != nullptr) {
+			// Si el joystick està connectat, mostra el nom
+			std::cout << "Gamepad connectat: " << joystickName << std::endl;
+
+			// Convertir el nom del joystick a un std::string i concatenar-lo
+			std::string alertText = "Gamepad connectat: " + std::string(joystickName);
+			//INTERFICIE.Alerta(screenSize, 4, alertText.c_str());  // Usar c_str() per passar un const char*
+			INTERFICIE.AfegirAlerta(4, alertText.c_str(), 8.0f);
+		}
+		gamepad_conect = true;
+	}
+	INTERFICIE.GestionarAlertes(screenSize);  // Usar c_str() per passar un const char*
+
 
 	ImGui::Render();
 }
@@ -5126,10 +5142,6 @@ int main(void)
 	glfwSetErrorCallback(error_callback);											// Error callback
 	glfwSetWindowRefreshCallback(window, (GLFWwindowrefreshfun)OnPaint);			// - Callback to refresh the screen
 
-	if (glfwJoystickPresent(GLFW_JOYSTICK_1)) {
-		std::cout << "Gamepad connectat!" << std::endl;
-	}
-
 	// Entorn VGI; Timer: Lectura temps
 	float previous = glfwGetTime();
 
@@ -5211,7 +5223,6 @@ int main(void)
 	PosicionsInicialsSistemaSolar();
 	INTERFICIE.inicialitzarImatges();
 	INTERFICIE.inicialitzarSons(engine,so_alerta, so_nau, musica_menu, musica_partida, &volum_nau, &volum_menu, &volum_alerta, &volum_partida);
-	INTERFICIE.inicialitzarTime(&G_DELTA);
 
 
 	nau.setModel(&ObOBJ);
@@ -5231,6 +5242,8 @@ int main(void)
 		// Entorn VGI. Timer: for each timer do this
 		G_TIME = time += delta;
 		if ((time <= 0.0) && (satelit || anima)) OnTimer();
+
+		INTERFICIE.inicialitzarTime(time);
 
 		nau.decPotencia();
 

@@ -33,7 +33,7 @@ void GUI::inicialitzarFonts(ImGuiIO& io) {
 	barlowtitleDown = io.Fonts->AddFontFromFileTTF("textures/menu/BarlowCondensed-ExtraBold.ttf", 400.0f);
 }
 
-void GUI::inicialitzarTime(double* temp) {
+void GUI::inicialitzarTime(float temp) {
 	m_time = temp;
 }
 
@@ -1326,18 +1326,11 @@ void GUI::MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 }
 
-void GUI::DibuixarBarraDistanciaPlaneta(float distancePercentage) {
-	// Obtenir la mida de la finestra
-	ImVec2 windowSize = ImGui::GetIO().DisplaySize;
-	float barWidth = 600.0f;  // Amplada de la barra (80% de l'amplada de la finestra)
-	float barHeight = 50.0f;  // Alçada de la barra
-
-	// Establir la posició per centrar la barra a la part inferior de la pantalla
-	ImVec2 position = ImVec2((windowSize.x - barWidth) / 2, windowSize.y - barHeight - 30.0f);  // 50 px d'espai des de la part inferior
+void GUI::DibuixarBarraDistanciaPlaneta(float distancePercentage, ImVec2 bar, ImVec2 position){
 
 	// Crear una finestra invisible per col·locar la barra en la posició correcta
 	ImGui::SetNextWindowPos(position, ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(barWidth, barHeight), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(bar, ImGuiCond_Always);
 	ImGui::Begin("PlanetaDistanciaBarra", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBackground);
 
 	// Dibuixar la barra horitzontal amb vores rodones
@@ -1749,9 +1742,8 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PopStyleVar();
 
 	if (planetaMoltAprop >= 0) {
-		Alerta(screenSize, &colorVermell, "Alerta !!! Orbita Baixa Perill");
+		AfegirAlerta(3, "Alerta !!! Orbita Baixa Perill",2.0f);
 	}
-
 
 
 	//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 300.0f, 300.0f, 150.0f, true); // RPM speedometer (3000 RPM)
@@ -1769,11 +1761,13 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 
 	if (ImGui::Begin("Velocimetres", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-		ImGui::Text("Velocitat: %.2f LightSpeed", velocitat); // Mostra la velocitat amb dos decimals
-		ImGui::Text("Distancia: %.2f ", dist); // Mostra la velocitat amb dos decimals
-		ImGui::Text("Distancia Origen: %.2f ", distOrigen); // Mostra la velocitat amb dos decimals
-		ImGui::Text("Temps: %.2f ", m_time); // Mostra la velocitat amb dos decimals
-		//ImGui::Text("Puntuació: %.2f ", m_time); // Mostra la velocitat amb dos decimals
+		ImGui::Text("Velocitat: %.2f LightSpeed", velocitat); 
+		if (PlanetOrigen != -1 && PlanetDesti != -1) {
+			ImGui::Text("Distancia: %.2f ", dist);
+			ImGui::Text("Distancia Origen: %.2f ", distOrigen);
+		}
+		ImGui::Text("Temps: %.2f ", m_time);
+		//ImGui::Text("Puntuació: %.2f ", m_time);
 
 		//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 0.0f, 150.0f, 150.0f, true); // RPM speedometer (3000 RPM)
 		//DrawSpeedometer(120.0f, 280.0f, 600.0f, 150.0f, 150.0f, false); // km/h speedometer (120 km/h)
@@ -1783,19 +1777,29 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::End();
 	ImGui::PopStyleVar();
 
-	float totalDistance = distOrigen;  // Distància total
-	float remainingDistance = dist;  // Distància que falta, pot ser negativa
+	if (PlanetOrigen != -1 && PlanetDesti != -1) {
+		float totalDistance = distOrigen;  // Distància total
+		float remainingDistance = dist;  // Distància que falta, pot ser negativa
 
-	// Calcular el percentatge recorregut, permetent distàncies negatives
-	float distanceTravelled = totalDistance - remainingDistance;  // Distància recorreguda
-	float percentage = distanceTravelled / totalDistance;
+		// Calcular el percentatge recorregut, permetent distàncies negatives
+		float distanceTravelled = totalDistance - remainingDistance;  // Distància recorreguda
+		float percentage = distanceTravelled / totalDistance;
 
-	// Assegurar que el percentatge estigui entre 0 i 1 (per la barra de progrés)
-	percentage = ImClamp(percentage, 0.0f, 1.0f);  // Restringir el valor entre 0 i 1
+		// Assegurar que el percentatge estigui entre 0 i 1 (per la barra de progrés)
+		percentage = ImClamp(percentage, 0.0f, 1.0f);  // Restringir el valor entre 0 i 1
 
-	// Dibuixar la barra amb el percentatge calculat
-	DibuixarBarraDistanciaPlaneta(percentage);
+		ImVec2 barra = ImVec2(600.0f,50.0f);  // 50 px d'espai des de la part inferior
+		// Establir la posició per centrar la barra a la part inferior de la pantalla
+		ImVec2 position = ImVec2((screenSize->x - barra.x) / 2, screenSize->y - barra.y - 30.0f);  // 50 px d'espai des de la part inferior
 
+		// Dibuixar la barra amb el percentatge calculat
+		DibuixarBarraDistanciaPlaneta(percentage, barra,position);
+
+		if (percentage >= 0.9f) {
+			//Alerta(screenSize, 1, "Ja queda poc per arribar al Destí");
+			AfegirAlerta(1, "Ja queda poc per arribar al Destí", 2.0f);
+		}
+	}
 
 	ImVec2 espai(0.0f, 30.0f);
 	// Dades de progrés
@@ -2825,44 +2829,108 @@ ImVec2 GUI::convertirAPosicioMiniMapaDesdeJugadorVertical(const glm::vec3& posic
 }
 
 
+void GUI::MostrarAlerta(ImVec2* screenSize, const Alerta& alerta, float posY) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoCollapse;
 
+	ImVec4 color;
+	switch (alerta.tipus) {
+	case 1:
+		color = colorVerd;
+		break;
+	case 2:
+		color = colorTaronja;
+		break;
+	case 3:
+		color = colorVermell;
+		break;
+	case 4:
+		color = colortransparentalerta;
+		break;
+	}
 
-void GUI::Alerta(ImVec2* screenSize, ImVec4* color, const char* text) {
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
-	/*if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-	if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-	if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-	if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-	if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-	if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-	if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-	if (unsaved_document)   window_flags |= ImGuiWindowFlags_UnsavedDocument;
-	if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
-	*/
 	ImVec2 winsize(600, 60);
-	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5f - winsize.x * 0.5f, 10.0f), ImGuiCond_Always);
+	// Dibuixar l'ombra primer
+	ImVec2 shadowOffset(5.0f, 5.0f);
+	ImVec4 shadowColor(0.0f, 0.0f, 0.0f, 0.5f); // Color d'ombra semi-transparent
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5f - winsize.x * 0.5f + shadowOffset.x, posY + shadowOffset.y), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(winsize);
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, *color); // Fons verd brillant (#00bf63)
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, shadowColor);
+	std::string alertText = "Alerta_Shadow" + std::string(alerta.text) + std::to_string(posY);
+	ImGui::Begin(alertText.c_str(), NULL, window_flags);
+	ImGui::End();
+	ImGui::PopStyleColor();
 
-	ImGui::Begin("Alerta", &show_user_windows, window_flags);
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	// Mostrar la finestra principal
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5f - winsize.x * 0.5f, posY), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(winsize);
 
-	ImVec2 textSize = ImGui::CalcTextSize(text);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f); // Rouding més suau
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)); // Afegir espai dins la finestra
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f); // Sense bordes
+	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f)); // Sense bordes
+
+	std::string alertText2 = "Alerta" + std::string(alerta.text) + std::to_string(posY);
+	ImGui::Begin(alertText2.c_str(), NULL, window_flags);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc per al text
+
+	// Centrat del text
+	ImVec2 textSize = ImGui::CalcTextSize(alerta.text);
 	ImVec2 textPos = ImVec2(
-		(winsize.x - textSize.x) * 0.5f, // Centrat horitzontalment dins de la finestra
+		(winsize.x - textSize.x) * 0.5f, // Centrat horitzonalment dins de la finestra
 		(winsize.y - textSize.y) * 0.5f  // Centrat verticalment dins de la finestra
 	);
 	ImGui::SetCursorPos(textPos);
-	ImGui::Text(text);
+	ImGui::Text(alerta.text);
 
 	ImGui::PopStyleColor();
 	ImGui::End();
+
+	// Restablir els canvis al final
+	ImGui::PopStyleColor(2);
+	ImGui::PopStyleVar(3); // Hem canviat el nombre de var per evitar conflictes
 }
 
+
+void GUI::GestionarAlertes(ImVec2* screenSize) {
+	float posY = 10.0f;  // Posició inicial per la primera alerta
+
+	for (auto& alerta : alertes) {
+		// Si l'alerta encara té temps restant per mostrar-se
+		if (alerta.temps > 0.0f) {
+			// Mostrar l'alerta a la pantalla
+			MostrarAlerta(screenSize, alerta, posY);
+			alerta.temps -= ImGui::GetIO().DeltaTime; // Disminuir el temps restant
+
+			// Desplaçar la posició Y per la següent alerta
+			posY += 70.0f;  // Incrementar la posició Y per la següent alerta
+		}
+	}
+
+	// Eliminar alertes amb temps 0
+	alertes.erase(std::remove_if(alertes.begin(), alertes.end(), [](const Alerta& alerta) {
+		return alerta.temps <= 0.0f;
+		}), alertes.end());
+}
+
+void GUI::AfegirAlerta(int tipus, const char* text, float temps) {
+	// Comprovar si ja s'ha afegit una alerta amb aquest tipus i text
+	bool alertaJaAfegida = false;
+	for (auto& alerta : alertes) {
+		if (alerta.tipus == tipus && strcmp(alerta.text, text) == 0) {
+			alertaJaAfegida = true;
+			break;  // Si ja existeix l'alerta, no afegir una nova
+		}
+	}
+
+	// Si no s'ha afegit encara, afegir l'alerta a la llista
+	if (!alertaJaAfegida) {
+		Alerta novaAlerta = { tipus, text, temps };
+		alertes.push_back(novaAlerta);
+	}
+}
 
 
 
