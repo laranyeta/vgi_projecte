@@ -18,7 +18,6 @@ extern std::vector<Planeta> PLANETES;
 extern std::vector<Asteroide> ASTEROIDES;
 extern std::vector<Asteroide> ASTEROIDESCINTURO;
 extern std::vector<objectesEspai> DIPOSITS;
-extern std::vector<objectesEspai> ESTACIONS;
 //extern GUI INTERFICIE;
 
 //--------------- VGI: Tipus de Càmera
@@ -143,6 +142,7 @@ const float DISTANCIA_MINIMA_COMBUSTIBLE = 1.0f;
 const float DISTANCIA_MINIMA_COMBUSTIBLE_2 = DISTANCIA_MINIMA_COMBUSTIBLE * DISTANCIA_MINIMA_COMBUSTIBLE;
 const int NUM_DIPOSITS = 50;
 const int NUM_ESTACIONS = 5;
+const int NUMERO_ESTACIONS[9] = { 0, 5, 4, 6, 5, 5, 5, 5, 5 };
 const float MAX_DISTANCIA_ASTEROIDES = 300.0f;
 const float MAX_DISTANCIA_ASTEROIDES_SQUARED = MAX_DISTANCIA_ASTEROIDES * MAX_DISTANCIA_ASTEROIDES;
 // TRAJ ORBIT ISMAEL
@@ -173,6 +173,7 @@ const double PERIAPSIS[9] = {
 	29.1241, 54.85229, 102.9373, 286.4623, 273.867, 339.392, 96.998857, 273.187, 318.15
 };
 const int NUMERO_DE_LLUNES[9] = { 0, 0, 0, 1, 2, 8, 8, 5, 5 };
+
 const std::string RUTES_TEXTURA_MOONS[29] = {
 	// Earth (1)
 	"moon.jpg",

@@ -41,7 +41,6 @@ std::vector<Planeta> PLANETES;
 std::vector<Asteroide> ASTEROIDES;
 std::vector<Asteroide> ASTEROIDESCINTURO;
 std::vector<objectesEspai> DIPOSITS;
-std::vector<objectesEspai> ESTACIONS;
 GUI INTERFICIE;
 
 using namespace irrklang;
@@ -58,7 +57,6 @@ float volum_alerta = 1;
 float volum_partida = 1;
 
 bool gamepad_conect = false;
-
 /*-----------------------------------------------------------------------------------------------------------------------------------------------*/
 
 void InitGL()
@@ -661,7 +659,7 @@ void dibuixa_Escena(float time) {
 	if (SkyBoxCube) dibuixa_Skybox(skC_programID, cubemapTexture, Vis_Polar, ProjectionMatrix, ViewMatrix);
 
 	//	Dibuix Coordenades Món i Reixes.
-	//dibuixa_Eixos(eixos_programID, eixos, eixos_Id, grid, hgrid, ProjectionMatrix, ViewMatrix);
+	dibuixa_Eixos(eixos_programID, eixos, eixos_Id, grid, hgrid, ProjectionMatrix, ViewMatrix);
 
 	// Escalat d'objectes, per adequar-los a les vistes ortogràfiques (Pràctica 2)
 	//	GTMatrix = glm::scale();
@@ -931,20 +929,32 @@ void draw_Menu_ImGui()
 	INTERFICIE.inicalitzarInterficieGrafica(screenSize);
 
 	if (glfwJoystickPresent(GLFW_JOYSTICK_1) && !gamepad_conect) {
+
 		const char* joystickName = glfwGetJoystickName(GLFW_JOYSTICK_1);
+
 		if (joystickName != nullptr) {
+
 			// Si el joystick està connectat, mostra el nom
+
 			std::cout << "Gamepad connectat: " << joystickName << std::endl;
 
-			// Convertir el nom del joystick a un std::string i concatenar-lo
-			std::string alertText = "Gamepad connectat: " + std::string(joystickName);
-			//INTERFICIE.Alerta(screenSize, 4, alertText.c_str());  // Usar c_str() per passar un const char*
-			INTERFICIE.AfegirAlerta(4, alertText.c_str(), 8.0f);
-		}
-		gamepad_conect = true;
-	}
-	INTERFICIE.GestionarAlertes(screenSize);  // Usar c_str() per passar un const char*
 
+
+			// Convertir el nom del joystick a un std::string i concatenar-lo
+
+			std::string alertText = "Gamepad connectat: " + std::string(joystickName);
+
+			//INTERFICIE.Alerta(screenSize, 4, alertText.c_str());  // Usar c_str() per passar un const char*
+
+			INTERFICIE.AfegirAlerta(4, alertText.c_str(), 8.0f);
+
+		}
+
+		gamepad_conect = true;
+
+	}
+
+	INTERFICIE.GestionarAlertes(screenSize);  // Usar c_str() per passar un const char*
 
 	ImGui::Render();
 }
@@ -1138,12 +1148,6 @@ void IniciarSimulador() {
 		objJoc.setName("Diposit" + std::to_string(i + 1));
 		DIPOSITS.push_back(objJoc);
 	}
-
-	for (size_t i = 0; i < NUM_ESTACIONS; ++i) {
-		objectesEspai objJoc;
-		objJoc.setName("Diposit" + std::to_string(i + 1));
-		ESTACIONS.push_back(objJoc);
-	}
 	
 	// ISMAEL CONTINUAR
 	/*for (int i = 0; i < 10; i++)
@@ -1250,6 +1254,7 @@ void IniciarSimulador() {
 	if (!shader_programID) glUniform1i(glGetUniformLocation(shader_programID, "flag_invert_y"), tFlag_invert_Y);
 
 	nau.setPlanetaDesti(INTERFICIE.getPlanetaDesti());
+	nau.setPlanetaOrigen(INTERFICIE.getPlanetaOrigen());
 
 	free(nomOBJEstacio); 
 }
@@ -5142,6 +5147,10 @@ int main(void)
 	glfwSetErrorCallback(error_callback);											// Error callback
 	glfwSetWindowRefreshCallback(window, (GLFWwindowrefreshfun)OnPaint);			// - Callback to refresh the screen
 
+	if (glfwJoystickPresent(GLFW_JOYSTICK_1)) {
+		std::cout << "Gamepad connectat!" << std::endl;
+	}
+
 	// Entorn VGI; Timer: Lectura temps
 	float previous = glfwGetTime();
 
@@ -5164,6 +5173,11 @@ int main(void)
 
 	io.FontDefault = INTERFICIE.fontPrincipal(); // Assignar la font per defecte
 	int currentIndexLlunes = 0;
+	std::uniform_int_distribution<int> distSign(-1, 1);
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> dist(0.0f, 2.0f * PI);
+	std::uniform_real_distribution<float> distAngle(0.0f, 360.0f);
 	for (int i = 0; i < 9; i++)
 	{
 		Planeta planeta;
@@ -5179,9 +5193,8 @@ int main(void)
 		img = loadIMA_SOIL(buf2.c_str());
 		planeta.setTextureIDMenuSelect(img);
 		
-
 		planeta.setNLlunes(NUMERO_DE_LLUNES[i]);
-		
+		planeta.setNSatelits(NUMERO_ESTACIONS[i]);
 		// ISMAEL: CANVIS LLUNES
 		
 		for (int j = 0; j < planeta.getNLlunes(); j++)
@@ -5217,12 +5230,30 @@ int main(void)
 			currentIndexLlunes++;
 
 		}
+		for (int x = 0; x < planeta.getNSatelits(); x++)
+		{
+			objectesEspai estacio(2);
+			float randomAngle = dist(gen);
+			estacio.setAngleRotacio(glm::degrees(randomAngle));
+			float pitch = distAngle(gen);
+			float yaw = distAngle(gen);
+			float roll = distAngle(gen);
+
+			int directionFlag = distSign(gen) ? 1 : -1;
+			estacio.setDireccioRotacio(directionFlag);
+
+			estacio.setPitch(pitch);
+			estacio.setYaw(yaw);
+			estacio.setRoll(roll);
+			planeta.satelits.push_back(estacio);
+		}
 		PLANETES.push_back(planeta);
 	}
 
 	PosicionsInicialsSistemaSolar();
 	INTERFICIE.inicialitzarImatges();
 	INTERFICIE.inicialitzarSons(engine,so_alerta, so_nau, musica_menu, musica_partida, &volum_nau, &volum_menu, &volum_alerta, &volum_partida);
+	
 
 
 	nau.setModel(&ObOBJ);
@@ -5242,9 +5273,7 @@ int main(void)
 		// Entorn VGI. Timer: for each timer do this
 		G_TIME = time += delta;
 		if ((time <= 0.0) && (satelit || anima)) OnTimer();
-
 		INTERFICIE.inicialitzarTime(time);
-
 		nau.decPotencia();
 
 		// Poll for and process events

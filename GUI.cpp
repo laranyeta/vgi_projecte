@@ -2045,7 +2045,10 @@ void GUI::crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosi
 	}
 
 	if (estacions_minimapa) {
-		for (const auto& estacions : ESTACIONS) {
+		for(auto& planeta : PLANETES)
+		{
+			for (auto& estacions : planeta.satelits)
+			{
 			ImVec2 estacionsPos = convertirAPosicioMiniMapa(estacions.getPosition(), worldSize, minimapSize, p);
 			if (distanciaEntrePunts(estacionsPos, center) <= radius) {
 
@@ -2060,6 +2063,7 @@ void GUI::crearMiniMapaCentratSolCircular(ImVec2 minimapSize, ImVec2 minimapPosi
 				drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
 					ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
 					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+			}
 			}
 		}
 	}
@@ -2195,21 +2199,25 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 	}
 
 	if (estacions_minimapa) {
-		for (const auto& estacions : ESTACIONS) {
-			ImVec2 estacionsPos = convertirAPosicioMiniMapaDesdeJugador(estacions.getPosition(), worldSize, minimapSize, p, nau->getO());
-			if (distanciaEntrePunts(estacionsPos, center) <= radius) {
+		for (auto& planeta : PLANETES)
+		{
+			for (auto& estacions : planeta.satelits)
+			{
+				ImVec2 estacionsPos = convertirAPosicioMiniMapaDesdeJugador(estacions.getPosition(), worldSize, minimapSize, p, nau->getO());
+				if (distanciaEntrePunts(estacionsPos, center) <= radius) {
 
-				// Dimensions de la creu
-				float crossSize = 4.0f; // Mida de la creu (ajustable)
+					// Dimensions de la creu
+					float crossSize = 4.0f; // Mida de la creu (ajustable)
 
-				// Dibuixa les dues línies de la creu
-				drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
-					ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
-					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+					// Dibuixa les dues línies de la creu
+					drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
+						ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
+						colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
 
-				drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
-					ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
-					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+					drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
+						ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
+						colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+				}
 			}
 		}
 	}
@@ -2549,20 +2557,24 @@ void GUI::crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition) {
 	}
 
 	if (estacions_minimapa) {
-		for (const auto& estacions : ESTACIONS) {
-			ImVec2 estacionsPos = convertirAPosicioMiniMapa(estacions.getPosition(), worldSize, minimapSize, p);
+		for (auto& planeta : PLANETES)
+		{
+			for (auto& estacions : planeta.satelits)
+			{
+				ImVec2 estacionsPos = convertirAPosicioMiniMapa(estacions.getPosition(), worldSize, minimapSize, p);
 
-			// Dimensions de la creu
-			float crossSize = 4.0f; // Mida de la creu (ajustable)
+				// Dimensions de la creu
+				float crossSize = 4.0f; // Mida de la creu (ajustable)
 
-			// Dibuixa les dues línies de la creu
-			drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
-				ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
-				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+				// Dibuixa les dues línies de la creu
+				drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
+					ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
+					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
 
-			drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
-				ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
-				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+				drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
+					ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
+					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+			}
 		}
 	}
 
@@ -2682,20 +2694,24 @@ void GUI::crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition
 	}
 
 	if (estacions_minimapa) {
-		for (const auto& estacions : ESTACIONS) {
-			ImVec2 estacionsPos = convertirAPosicioMiniMapaDesdeJugador(estacions.getPosition(), worldSize, minimapSize, p, nau->getO());
+		for (auto& planeta : PLANETES)
+		{
+			for (auto& estacions : planeta.satelits)
+			{
+				ImVec2 estacionsPos = convertirAPosicioMiniMapaDesdeJugador(estacions.getPosition(), worldSize, minimapSize, p, nau->getO());
 
-			// Dimensions de la creu
-			float crossSize = 4.0f; // Mida de la creu (ajustable)
+				// Dimensions de la creu
+				float crossSize = 4.0f; // Mida de la creu (ajustable)
 
-			// Dibuixa les dues línies de la creu
-			drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
-				ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
-				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+				// Dibuixa les dues línies de la creu
+				drawList->AddLine(ImVec2(estacionsPos.x - crossSize, estacionsPos.y),  // Línia horitzontal
+					ImVec2(estacionsPos.x + crossSize, estacionsPos.y),
+					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
 
-			drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
-				ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
-				colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+				drawList->AddLine(ImVec2(estacionsPos.x, estacionsPos.y - crossSize),  // Línia vertical
+					ImVec2(estacionsPos.x, estacionsPos.y + crossSize),
+					colorEstacions, 1.5f); // Amplada de la línia (1.5 píxels)
+			}
 		}
 	}
 

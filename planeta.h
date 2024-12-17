@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>	
 #include <string>
+#include "objectesEspai.h"
 class Planeta
 {
 public:
@@ -21,6 +22,7 @@ public:
 	const char* getRutaTexturaMenu() const { return m_rutaTexturaMenu; }
 	unsigned int  getTextureIDMenu() const { return m_textureIDMenu; }
 	std::vector<Planeta> moons;
+	std::vector<objectesEspai> satelits;
 	size_t getPuntsOrbita() const;
 	unsigned int  getTextureIDMenuSelect() const { return m_textureIDMenuSelect; }
 	std::string getName() const;
@@ -39,6 +41,7 @@ public:
 	glm::vec3 getEixosRotacioPlaneta() const;
 	glm::vec4 getColor() const;
 	glm::vec3 getPosition() const;
+	int getNSatelits() { return m_satelits; }
 	double getPeriapsis();
 	double getSemieixMajor();
 	double getLongitudNodeAscendent();
@@ -72,9 +75,11 @@ public:
 	void setLongitudNodeAscendent(double lon);
 	void setPeriapsis(double periapsis);
 	void setNLlunes(int llunes) { m_llunes = llunes; }
+	void setNSatelits(int s) { m_satelits = s; }
 	void setOffsetInicial(float offset) { m_offsetInicial = offset; }
 private:
 	int m_llunes;
+	int m_satelits;
 	size_t m_puntsOrbita;
 	std::vector<glm::vec3> posicionesHistoricas;
 	std::string m_name;

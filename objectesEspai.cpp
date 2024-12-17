@@ -15,8 +15,25 @@ objectesEspai::objectesEspai()
     m_angle_rotacio_orbita(0.0f),
     m_radi_orbita(0.0),
     m_radi(0.5f), // Default radius for an asteroid
-    m_type(1)
+    m_type(1),
+    m_valor(0.1f)
 {
+    posicionesHistoricas.reserve(m_puntsOrbita);
+}
+
+objectesEspai::objectesEspai(const int type)
+    : m_puntsOrbita(100), // Default number of orbit points
+    m_name("Diposit"),
+    m_position(0.0f, 0.0f, 0.0f),
+    m_massa(1.0), // Default mass
+    m_velocitat(0.0, 0.0, 0.0),
+    m_angle_rotacio_orbita(0.0f),
+    m_radi_orbita(0.0),
+    m_radi(0.013f), // Default radius for an asteroid
+    m_type(type),
+    m_valor(0.1f)
+{
+    lastTimeUsed = 0.0f;
     posicionesHistoricas.reserve(m_puntsOrbita);
 }
 

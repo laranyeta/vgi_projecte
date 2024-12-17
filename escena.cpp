@@ -59,7 +59,7 @@ void dibuixa_Skybox(GLuint sk_programID, GLuint cmTexture, char eix_Polar, glm::
 	else if (eix_Polar == POLARX) ModelMatrix = glm::rotate(ModelMatrix, radians(-90.0f), vec3(0.0f, 0.0f, 1.0f));
 
 	// Escalar Cub Skybox a 5000 per encabir objectes escena a l'interior
-	ModelMatrix = glm::scale(ModelMatrix, vec3(5000.0f, 5000.0f, 5000.0f));		//glScaled(5000.0, 5000.0, 5000.0);
+	ModelMatrix = glm::scale(ModelMatrix, vec3(15000.0f, 15000.0f, 15000.0f));		//glScaled(5000.0, 5000.0, 5000.0);
 	glUniformMatrix4fv(glGetUniformLocation(sk_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 
 	// Activar textura cubemaps del Skybox per encabir objectes escena
@@ -358,6 +358,35 @@ void inicialitzaDades()
 	}
 }
 
+
+int getFinalScore(Nau& nau, float tempsIniciPartida, float time)
+{
+	float lifeNau = nau.getLife();
+	float fuelNau = nau.getFuel();
+	auto posPlanetaOrigen = PLANETES[nau.getPlanetaOrigen()].getPosition();
+	auto posPlanetaDesti = PLANETES[nau.getPlanetaDesti()].getPosition();
+	float distOrigenDesti = glm::distance(posPlanetaOrigen, posPlanetaDesti);
+	float tempsFinalPartida = time - tempsIniciPartida;
+	int nombreColisionsNau = nau.getNumeroColisions();
+
+	if (lifeNau <= 0.0f)
+		return 0;
+	int multiplicadorVida = 500;
+	int multiplicadorFuel = 300;
+	int multiplicadorTemps = 10;
+	int multiplicadorColisions = -50;
+
+	int puntuacioVida = multiplicadorVida * (lifeNau / 1.0f);
+	int puntuacioFuel = multiplicadorFuel * (fuelNau / 1.0f);
+	int puntuacioTemps = multiplicadorTemps * (distOrigenDesti / tempsFinalPartida);
+	
+	int puntuacioBase = puntuacioFuel + puntuacioTemps + puntuacioVida;
+	int puntuacio = puntuacioBase * (multiplicadorColisions * nombreColisionsNau);
+
+	if (puntuacio < 0) return 0;
+
+	return puntuacio;
+}
 
 void processaRotacions()
 {
@@ -858,13 +887,57 @@ void processaObjJoc() {
 	generarDiposits();
 }*/
 
+bool estaForaDelsLimitsDiposit(const objectesEspai& diposit, const Nau& nau)
+{
+	glm::vec3 posDiposit = diposit.getPosition();
+	glm::vec3 posNau = nau.getO();
+
+	glm::vec3 diferencia = posDiposit - posNau;
+	float distanciaCuadrada = glm::dot(diferencia, diferencia);
+
+	return distanciaCuadrada > (MAX_DISTANCIA_ASTEROIDES * MAX_DISTANCIA_ASTEROIDES);
+}
+
+void resetDiposit(objectesEspai& diposit, std::mt19937& gen, const glm::vec3& shipPosition)
+{
+	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI);
+	std::uniform_real_distribution<float> radius_dist(30.0f, 250.0f);
+	std::uniform_real_distribution<float> fuel_dist(0.1f, 0.3f);
+
+	float angle = angle_dist(gen);
+	float radius = radius_dist(gen);
+
+	float x = radius * cos(angle);
+	float y = radius * sin(angle);
+	float z = 0.0f;
+
+	float fuel = fuel_dist(gen);
+
+	diposit.setRadi(1.0f);
+	diposit.setPosition(shipPosition + glm::vec3(x, y, z));
+	diposit.setVelocitat(glm::dvec3(0.0, 0.0, 0.0));
+	diposit.setValor(fuel);
+}
+
+void mainLoopDiposits(Nau& nau)
+{
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+
+	for (size_t i = 0; i < NUM_DIPOSITS; ++i) {
+		if (estaForaDelsLimitsDiposit(DIPOSITS[i], nau)) {
+			resetDiposit(DIPOSITS[i], gen, nau.getO());
+		}
+	}
+}
+
 void generarDiposits() {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI); // Angle al voltant del cercle
 	std::uniform_real_distribution<float> radius_dist(30.0f, 250.0f);              // Radi del cercle (cinturó més gran)
 	//std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);                 // Alçada limitada en l'eix Y
-	std::uniform_real_distribution<float> fuel_dist(0.3f, 1.0f);                // Combustible disponible
+	std::uniform_real_distribution<float> fuel_dist(0.1f, 0.3f);                // Combustible disponible
 
 	for (size_t i = 0; i < NUM_DIPOSITS; ++i) {
 		float angle = angle_dist(gen);    // Angle en radians al voltant del cercle
@@ -1003,6 +1076,21 @@ void checkCollisions(Nau& nau)
 
 		}
 
+	}
+
+	for (auto& planeta : PLANETES)
+	{
+		auto posNau = nau.getO();
+		auto radiPlaneta = planeta.getRadi() * 2.0f;
+		auto posPlaneta = planeta.getPosition();
+		auto radiNau = 0.5f * glm::length(nau.getShipDimensions());	
+
+		double distanceSquared = glm::distance2(glm::dvec3(posPlaneta), glm::dvec3(posNau));
+		double radiusSum = static_cast<double>(radiPlaneta) + static_cast<double>(radiNau);
+
+		bool isCollidingAux = distanceSquared <= (radiusSum * radiusSum);
+
+		if (isCollidingAux) nau.setLife(0.0f);
 	}
 
 	if (!isColliding && nau.getCollisionState() == Nau::Colliding)
@@ -1238,7 +1326,7 @@ void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 
 	// Actualitza la posició dels asteroides del cinturó
 	actualitzarDiposits(deltaTime);
-
+	mainLoopDiposits(nau);
 	for (auto& objJoc : DIPOSITS)
 	{
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
@@ -1251,10 +1339,12 @@ void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-
+		glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_FALSE);
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		CombustibleOBJ->draw_TriVAO_OBJ(sh_programID);
 	}
+	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE);
+
 }
 
 void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
@@ -1291,70 +1381,84 @@ void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 Mat
 	}
 }
 
-void generarEstacions() {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI); // Angle al voltant del cercle
-	std::uniform_real_distribution<float> radius_dist(20.0f, 100.0f);  // Radi de l'òrbita (proper al planeta)
-	std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);    // Alçada limitada
-	std::uniform_real_distribution<float> vida_dist(0.1f, 1.0f);   // Combustible disponible
-	std::uniform_int_distribution<int> num_estacions(3, 8);            // Nombre d'estacions per planeta
-
-	size_t estacio_index = 0;
-
-	for (auto& planeta : PLANETES) {
-		glm::vec3 pos_planeta = planeta.getPosition(); // Posició del planeta
-		int numEstacions = num_estacions(gen);         // Nombre d'estacions per aquest planeta
-
-		for (int i = 0; i < numEstacions; ++i) {
-			if (estacio_index >= NUM_ESTACIONS) break;
-
-			float angle = angle_dist(gen);   // Angle en radians al voltant del planeta
-			float radius = radius_dist(gen); // Radi d'òrbita
-			float height = height_dist(gen); // Alçada respecte al pla orbital
-
-			// Calcula la posició de l'estació en coordenades cartesianes
-			float x = pos_planeta.x + radius * cos(angle);
-			float y = pos_planeta.y + radius * sin(angle);
-			float z = pos_planeta.z + height;
-
-			float vida = vida_dist(gen); // Combustible disponible
-
-			// Configura l'estació
-			ESTACIONS[estacio_index].setRadi(0.01f);
-			ESTACIONS[estacio_index].setPosition(glm::vec3(x, y, z));
-			ESTACIONS[estacio_index].setVelocitat(glm::dvec3(0.0, 0.0, 0.0));
-			ESTACIONS[estacio_index].setValor(vida);
-
-			++estacio_index;
-		}
-	}
-}
-void actualitzarEstacions(double deltaTime)
+void updateEstacionsAnalytical(double time, Planeta& planeta)
 {
-	float velocitatAngulartemp = 0.005f; // Velocitat angular (rad/s). Ajusta segons el que sembli més natural.
-	int i = 0;
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> vel_rand(0.0001f, 0.001f);
-	float velocitatAngular = vel_rand(gen);
+	// If there are no estacions (satelits) for this planet, no work to do.
+	if (planeta.satelits.empty()) return;
 
-	for (auto& objJoc : ESTACIONS)
-	{
-		glm::vec3 pos = objJoc.getPosition();
-		float radiOrbita = glm::length(glm::vec2(pos.x, pos.y)); // Distància al centre en el pla XZ.
+	std::string pname = planeta.getName();
 
-		// Calcular l'angle actual i el nou angle d'òrbita
-		float angleActual = atan2(pos.y, pos.x); // Angle polar en el pla XZ
-		float angleNou = angleActual + velocitatAngular * deltaTime; // Nou angle actualitzat
+	double baseRadius = 0.0;
+	double radiusIncrement = 0.1;
+	double orbitalPeriod = 0.0;
 
-		// Calcula la nova posició orbital al pla XZ
-		pos.x = radiOrbita * cos(angleNou);
-		pos.y = radiOrbita * sin(angleNou);
+	// Just like you did for moons, decide the orbital parameters based on planet name
+	if (pname == "Terra") {
+		baseRadius = 6084400e3;                 // example base radius
+		orbitalPeriod = 67.32 * 86400.0;        // example orbital period
+	}
+	else if (pname == "Mart") {
+		baseRadius = 6084400e3;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Júpiter") {
+		double avgRadius = 5.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Saturn") {
+		double avgRadius = 5.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Urà") {
+		double avgRadius = 2.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else if (pname == "Neptú") {
+		double avgRadius = 2.9911e10;
+		baseRadius = avgRadius;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
+	else {
+		baseRadius = 6084400e3;
+		orbitalPeriod = 67.32 * 86400.0;
+	}
 
-		// Actualitza la posició de l'asteroide
-		objJoc.setPosition(pos);
-		i++;
+	double angularSpeed = TWOPI / orbitalPeriod;
+	double angle = angularSpeed * time * VELOCITAT_SIMULACIO; 
+	angle = fmod(angle, TWOPI);
+
+	glm::vec3 planetPos = planeta.getPosition();
+
+	for (size_t i = 0; i < planeta.satelits.size(); ++i) {
+		objectesEspai& estacio = planeta.satelits[i];
+		angularSpeed* estacio.getDireccioRotacio();
+		double currentRadius = baseRadius + radiusIncrement * i * baseRadius;
+
+		double orbitalRadius = currentRadius * (DISTANCIA_DEFAULT_TERRA / (1.0 * 1.496e11));
+
+		float offsetInicial = estacio.getAngleRotacio(); 
+		double estacioAngle = angle + glm::radians(offsetInicial);
+
+		double x_rel = orbitalRadius * cos(estacioAngle);
+		double y_rel = orbitalRadius * sin(estacioAngle);
+		double z_rel = 0.0;
+
+		float inclinationRad = glm::radians(estacio.getAngleRotacio());
+		glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f),
+			inclinationRad,
+			glm::vec3(1.0f, 0.0f, 0.0f));
+
+		glm::vec4 pos4D(x_rel, y_rel, z_rel, 1.0f);
+		pos4D = rotationMatrix * pos4D;
+		glm::vec3 rotatedPos = glm::vec3(pos4D);
+
+		glm::vec3 estacioPosition = planetPos + rotatedPos;
+		estacio.setPosition(estacioPosition);
+
+		estacio.posicionesHistoricas.push_back(estacioPosition);
 	}
 }
 
@@ -1365,32 +1469,37 @@ void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	static bool inicialitzat = false;
 	static double lastTime = time;
 
-	if (!inicialitzat) {
-		generarEstacions(); // Generar asteroides
-		inicialitzat = true;
-	}
-
 	double deltaTime = time - lastTime; // Calcula el temps entre frames
 	lastTime = time;
 
 	// Actualitza la posició dels asteroides del cinturó
-	actualitzarDiposits(deltaTime);
+	//actualitzarDiposits(deltaTime);
 
-	for (auto& objJoc : ESTACIONS)
+	for (auto& planeta : PLANETES)
 	{
-		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
-		ModelMatrix = glm::translate(MatriuTG, objJoc.getPosition());
-		float radi = objJoc.getRadi();
-		ModelMatrix = glm::rotate(ModelMatrix, radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(radi, radi, radi));
-		//ModelMatrix = glm::rotate(ModelMatrix, radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		updateEstacionsAnalytical(time, planeta);
+		for (auto& objJoc : planeta.satelits)
+		{
+			glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
+			ModelMatrix = glm::translate(MatriuTG, objJoc.getPosition());
+			float radi = objJoc.getRadi();
+			float pitchRad = glm::radians(objJoc.getPitch());
+			float yawRad = glm::radians(objJoc.getYaw());
+			float rollRad = glm::radians(objJoc.getRoll());
 
-		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
-		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
-		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+			ModelMatrix = glm::rotate(ModelMatrix, yawRad, glm::vec3(0.0f, 1.0f, 0.0f));
+			ModelMatrix = glm::rotate(ModelMatrix, pitchRad, glm::vec3(1.0f, 0.0f, 0.0f));
+			ModelMatrix = glm::rotate(ModelMatrix, rollRad, glm::vec3(0.0f, 0.0f, 1.0f));
+			ModelMatrix = glm::scale(ModelMatrix, glm::vec3(radi, radi, radi));
+			//ModelMatrix = glm::rotate(ModelMatrix, radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
-		EstacioOBJ->draw_TriVAO_OBJ(sh_programID);
+			glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
+			NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
+
+			SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+			EstacioOBJ->draw_TriVAO_OBJ(sh_programID);
+		}
 	}
 }
 
@@ -1420,7 +1529,7 @@ std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime )
 
 
 
-void animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecution)
+float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecution)
 {
 	
 	static bool cutScene = false;
@@ -1428,7 +1537,8 @@ void animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecutio
 	static bool returning = false;
 	static bool cutScenePlayed = false;
 	static bool end = false;
-
+	static bool init = false;
+	static float tempsIniciPartida = 0;
 	static float cutSceneStartTime = 0.0f;
 	static float arrivedTimePlaneta = 0.0f;
 	static float cutSceneDuration = 5.0f;
@@ -1540,7 +1650,13 @@ void animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecutio
 	if (end)
 	{
 		nau.setEnableControls(true);
+		if (!init)
+		{
+			tempsIniciPartida = time;
+			init = true;
+		}
 	}
+	return tempsIniciPartida;
 }
 
 void afegirCombustible(Nau& nau)
@@ -1554,9 +1670,13 @@ void afegirCombustible(Nau& nau)
 
 		if (distanciaCuadrada <= DISTANCIA_MINIMA_COMBUSTIBLE_2)
 		{
-			float combustiblePerAfegir = it->getValor();
+			
+			float currentFuel = nau.getFuel();
+			float combustiblePerAfegir = it->getValor() + currentFuel;
+			combustiblePerAfegir = std::min(1.0f, combustiblePerAfegir);
 
-			nau.incFuel(combustiblePerAfegir);
+
+			nau.setFuel(combustiblePerAfegir);
 
 			it = DIPOSITS.erase(it);
 		}
@@ -1567,6 +1687,48 @@ void afegirCombustible(Nau& nau)
 	}
 }
 
+void colisionsPlaneta(Nau& nau)
+{
+	for (auto& planeta : PLANETES)
+	{
+		auto posNau = nau.getO();
+		auto radiPlaneta = planeta.getRadi() * 2.0f;
+		auto posPlaneta = planeta.getPosition();
+		auto radiNau = 0.5f * glm::length(nau.getShipDimensions());
+
+		double distanceSquared = glm::distance2(glm::dvec3(posPlaneta), glm::dvec3(posNau));
+		double radiusSum = static_cast<double>(radiPlaneta) + static_cast<double>(radiNau);
+
+		bool isColliding = distanceSquared <= (radiusSum * radiusSum);
+
+		if (isColliding) nau.setLife(0.0f);
+	}
+}
+
+void afegirLife(Nau& nau, float time)
+{
+	glm::vec3 posNau = nau.getO();
+	for(auto& planeta : PLANETES)
+	{
+		for (auto& estacio : planeta.satelits)
+		{
+			glm::vec3 posEstacio = estacio.getPosition();
+			glm::vec3 diferencia = posNau - posEstacio;
+			float distanciaCuadrada = glm::dot(diferencia, diferencia);
+			if (distanciaCuadrada <= DISTANCIA_MINIMA_COMBUSTIBLE_2)
+			{
+				float lastTimeUsed = estacio.getLastTimeUsed();
+				if (time - lastTimeUsed > 30)
+				{
+					float vida = nau.getLife() + estacio.getValor();
+					vida = std::min(1.0f, vida);
+					nau.setLife(vida);
+					estacio.setLastTimeUsed(time);
+				}
+			}
+		}
+	}
+}
 
 void joc(float time, Nau& nau)
 {
@@ -1577,18 +1739,12 @@ void joc(float time, Nau& nau)
 		timeAtFirstExecution = time;
 		init = true;
 	}
-	animacioInicialPlanetaDesti(time, nau, timeAtFirstExecution);
+	float tempsIniciPartida = animacioInicialPlanetaDesti(time, nau, timeAtFirstExecution);
 	afegirCombustible(nau);
+	afegirLife(nau, time);
 	checkCollisions(nau);
 	static double lastSpawnTime = 0.0;
-	/*
-	for (auto& ast : ASTEROIDES)
-	{
-		float temps = timeToCollision(nau.getO(), nau.getVelocitat(), 0.5f * glm::length(nau.getShipDimensions()), ast.getPosition(), ast.getVelocitat(), ast.getRadi());
-		if (temps != -1)
-			std::cout << temps << std::endl;
-	}
-	*/
+
 	if (time > 20) {
 		if (time - lastSpawnTime >= 2.0) {
 			spawnAsteroidToCollide(10.0, nau.getO(), nau.getVelocitat());
@@ -1624,7 +1780,6 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 	}
 	for (auto& planeta : PLANETES)
 	{
-
 		// Posici� inicial
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 

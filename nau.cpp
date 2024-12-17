@@ -44,7 +44,7 @@ void Nau::resolveCollisionWithAsteroid(Asteroide& asteroid, const glm::vec3& col
     asteroid.setVelocitat(asteroidVelocity);
 
     // Tractar overlapping
-    float shipRadiusApprox = glm::length(m_obb.halfExtents); // Approximate ship's "radius"
+    float shipRadiusApprox = glm::length(m_obb.halfExtents); 
     float overlap = (asteroid.getRadi() + shipRadiusApprox) - distance;
     if (overlap > 0) {
         glm::vec3 correction = (overlap / (scaledShipMass + scaledAsteroidMass)) * (glm::dvec3)normal;
@@ -56,7 +56,8 @@ void Nau::resolveCollisionWithAsteroid(Asteroide& asteroid, const glm::vec3& col
     }
 
     // Actualitzar vida de la nau
-    m_life -= 0.1f;
+    m_life -= 0.2f;
+    m_numeroColisions += 1;
     std::cout << m_life << std::endl;
 
     updateOBB();

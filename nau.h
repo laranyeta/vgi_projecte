@@ -60,7 +60,8 @@ private:
 	CollisionState m_collisionState;
 	int m_planetaDesti;
 	bool m_enableControls;
-
+	int m_numeroColisions;
+	int m_planetaOrigen;
 public:
 	// BASIQUES
 	Nau() {
@@ -95,6 +96,7 @@ public:
 		m_angularVelocity = glm::vec3(0.0f);
 
 		m_enableControls = false;
+		m_numeroColisions = 0;
 	}
 
 	Nau operator=(Nau n) {
@@ -206,12 +208,7 @@ public:
 		}
 	}
 	void incFuel(float temp) {
-		if (m_fuel + temp >= 1.0f) {
-			m_fuel = 1.0f;
-		}
-		else {
-			m_fuel += temp;
-		}
+		m_fuel += temp;
 	}
 	void decFuel() {
 		m_fuel -= 0.001f;
@@ -219,7 +216,7 @@ public:
 	float getPotencia() { return m_potencia; }
 	float getFuel() { return m_fuel; }
 	float getLife() { return m_life; }
-
+	void setLife(float life) { m_life = life; }
 
 	//Extra
 	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
@@ -339,8 +336,13 @@ public:
 	void updatePhysicsWithPlanets(const std::vector<Planeta>& planetas, double deltaTime);
 	void setPlanetaDesti(int planeta) { m_planetaDesti = planeta; }
 	int getPlanetaDesti() { return m_planetaDesti; }
+	void setPlanetaOrigen(int planeta) { m_planetaOrigen = planeta; }
+	int getPlanetaOrigen() { return m_planetaOrigen; }
 	void setEnableControls(bool c) { m_enableControls = c; }
 	bool getEnableControls() { return m_enableControls; }
+	int getNumeroColisions() { return m_numeroColisions; }
+	void setNumeroColisions(int c) { m_numeroColisions = c; }
+	void setFuel(float fuel) { m_fuel = fuel; }
 	glm::vec3 getShipDimensions() { return m_shipDimensions; }
 };
 
