@@ -162,14 +162,6 @@ void GUI::inicalitzarInterficieGrafica(ImVec2* screenSize) {
 	if (show_game_settings) {
 		MostrarPantallaConfiguracio(screenSize);
 	}
-
-	if (show_winner) {
-		MostrarPantallaGuanyador(screenSize);
-	}
-
-	if (show_loser) {
-		MostrarPantallaGuanyador(screenSize);
-	}
 }
 
 void GUI::MostrarPantallaInicial(ImVec2* screenSize) {
@@ -623,6 +615,9 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 
 		if (ImGui::Button("Dibuixa Orbita Completa", tamany_buttons_dins_config)) {
 			paintorbit = !paintorbit;
+		}
+		if (ImGui::Button("Mostra Particules", tamany_buttons_dins_config)) {
+			mostraParticles = !mostraParticles;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Pantalla Completa", tamany_buttons_dins_config)) {
@@ -1776,8 +1771,8 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 0));
 	double velocitat = nau->getSpeed();
 
-	double dist = distanciaEuclidiana(nau->getO(), PLANETES[PlanetDesti].getPosition()) - PLANETES[PlanetDesti].getRadi();
-	double distOrigen = distanciaEuclidiana(PLANETES[PlanetOrigen].getPosition(), PLANETES[PlanetDesti].getPosition()) - PLANETES[PlanetOrigen].getRadi() - PLANETES[PlanetDesti].getRadi();
+	double dist = distanciaEuclidiana(nau->getO(), PLANETES[PlanetDesti].getPosition());
+	double distOrigen = distanciaEuclidiana(PLANETES[PlanetOrigen].getPosition(), PLANETES[PlanetDesti].getPosition());
 
 	if (ImGui::Begin("Velocimetres", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -2336,28 +2331,10 @@ void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix,
 				? IM_COL32(0, 255, 0, 255) // Verd (per sobre)
 				: IM_COL32(255, 0, 0, 255); // Vermell (per sota)
 
-			glm::vec3 astVel = glm::vec3(asteroide.getVelocitat());
-
-			double tCollision = timeToCollision(
-				nau->getO(),
-				nau->getVelocitat(),
-				0.5f * glm::length(nau->getShipDimensions()),
-				asteroide.getPosition(),
-				astVel,
-				(float)asteroide.getRadi()
-			);
-
-			if (tCollision >= 0.0 && tCollision <= 20.0) {
-				// Dibuixar asteroide
-				drawList->AddCircleFilled(asteroidePos, tCollision/2, colorAsteroide);
-			}
-			else {
-				// Dibuixar asteroide
-				drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroide);
-			}
+			// Dibuixar asteroide
+			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroide);
 		}
 	}
-
 	/*
 	for (const auto& asteroide : ASTEROIDESCINTURO) {
 		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugadorVertical(
@@ -2996,45 +2973,6 @@ void GUI::AfegirAlerta(int tipus, const char* text, float temps) {
 	}
 	//}
 }
-
-
-// Funció per mostrar la pantalla de guanyador
-void GUI::MostrarPantallaGuanyador(ImVec2* screenSize) {
-	ImGui::Begin("Pantalla de Guanyador", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
-
-	// Missatge principal
-	ImGui::Text("Has arribat al teu destí!");
-	ImGui::Separator();
-	float score = 0.0;
-	// Puntuació i temps
-	ImGui::Text("Punts Finals: %d", score);
-	ImGui::Text("Temps Final: %.2f segons", m_time);
-
-	// Opcional: altres estadístiques
-	ImGui::Text("Nau intacta: %s", (nau->getLife() > 0.8f) ? "Si" : "No");
-	ImGui::Text("Combustible: %s", nau->getFuel());
-
-	// Espai per estètica
-	ImGui::Spacing();
-	ImGui::Spacing();
-
-	// Botons d'acció
-	/*if (ImGui::Button("Tornar al Menú Principal")) {
-	}
-
-	ImGui::SameLine();
-
-	if (ImGui::Button("Tornar a Jugar")) {
-	}
-
-	ImGui::SameLine();*/
-	if (ImGui::Button("Sortir del Joc")) {
-		glfwSetWindowShouldClose(window, GL_TRUE);  // Marca la finestra per tancar
-	}
-
-	ImGui::End();
-}
-
 
 
 

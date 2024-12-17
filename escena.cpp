@@ -152,6 +152,10 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 	case PROVA_PLANETA:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
+		//LCR - Renderitzat particules
+		//particleSystem(sh_programID, MatriuVista, MatriuTG, time, PLANETES[0].getPosition(), ParticleType::Sol);
+		//glm::vec3 transPos = glm::vec3(nau.getR() * glm::vec4(nau.getO(), 1.0f));
+		particleSystem(sh_programID, MatriuVista, MatriuTG, time, nau.getO(), ParticleType::Nau);
 		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, nau);
 		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
 		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
@@ -1859,8 +1863,21 @@ void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, boo
 		}
 
 	}
-
 }
+
+//LCR - Renderitzat particules
+
+void particleSystem(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, glm::vec3 posObj, ParticleType pt) {
+	Nau nau;
+	static ParticleSystem ps(10000, pt, nau.getO()); //primer paràmetre: nombre particules a generar
+	ps.update(0.016f, posObj, MatriuTG);
+	glUseProgram(sh_programID);
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "viewMatrix"), 1, GL_FALSE, &MatriuVista[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &MatriuTG[0][0]);
+
+	ps.render(sh_programID, MatriuVista, MatriuTG);
+}
+
 
 // Variables globals
 float velocitat_satelit = 1.0f;  // Velocitat vertical del sat�l�lit

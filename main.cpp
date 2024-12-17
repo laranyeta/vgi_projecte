@@ -240,11 +240,12 @@ void InitGL()
 	// Entorn VGI: Variables de control del menú Shaders
 	shader = CAP_SHADER;	shader_programID = 0;
 	shaderLighting.releaseAllShaders();
-	// Càrrega Shader de Gouraud
+
+	// LCR - Shader Solar Sprint
 	shader_programID = 0;
-	fprintf(stderr, "Gouraud_shdrML: \n");
-	if (!shader_programID) shader_programID = shaderLighting.loadFileShaders(".\\shaders\\gouraud_shdrML.vert", ".\\shaders\\gouraud_shdrML.frag");
-	shader = GOURAUD_SHADER;
+	fprintf(stderr, "solarSystem_shdrML: \n");
+	if (!shader_programID) shader_programID = shaderLighting.loadFileShaders(".\\shaders\\solarSystem_shdrML.vert", ".\\shaders\\solarSystem_shdrML.frag");
+	shader = SOLARSYSTEM_SHADER;
 
 	// Càrrega SHADERS
 	// Càrrega Shader Eixos
@@ -263,12 +264,12 @@ void InitGL()
 	{	// load Skybox textures
 		// -------------
 		std::vector<std::string> faces =
-		{ ".\\textures\\skybox\\right.png",
-			".\\textures\\skybox\\left.png",
-			".\\textures\\skybox\\top.png",
-			".\\textures\\skybox\\bottom.png",
-			".\\textures\\skybox\\front.png",
-			".\\textures\\skybox\\back.png"
+		{ ".\\textures\\skybox\\right.jpg",
+			".\\textures\\skybox\\left.jpg",
+			".\\textures\\skybox\\top.jpg",
+			".\\textures\\skybox\\bottom.jpg",
+			".\\textures\\skybox\\front.jpg",
+			".\\textures\\skybox\\back.jpg"
 		};
 		cubemapTexture = loadCubemap(faces);
 	}
@@ -2784,12 +2785,12 @@ void Teclat_Shift(int key, GLFWwindow* window)
 			{	// load Skybox textures
 				// -------------
 				std::vector<std::string> faces =
-				{ ".\\textures\\skybox\\right.png",
-					".\\textures\\skybox\\left.png",
-					".\\textures\\skybox\\top.png",
-					".\\textures\\skybox\\bottom.png",
-					".\\textures\\skybox\\front.png",
-					".\\textures\\skybox\\back.png"
+				{ ".\\textures\\skybox\\right.jpg",
+					".\\textures\\skybox\\left.jpg",
+					".\\textures\\skybox\\top.jpg",
+					".\\textures\\skybox\\bottom.jpg",
+					".\\textures\\skybox\\front.jpg",
+					".\\textures\\skybox\\back.jpg"
 				};
 				cubemapTexture = loadCubemap(faces);
 			}
@@ -3553,7 +3554,6 @@ void Teclat_Nau(int key, int action)
 			//pressM = status;
 			if (press) {
 				INTERFICIE.switchMapaWindow();
-				INTERFICIE.switchPause();
 			}
 			break;
 			// Tecla cursor amunt
@@ -4132,8 +4132,7 @@ void Moviment_Nau2()
 
 			// Lletres A (botó 0)
 			if (buttons[0] == GLFW_PRESS && !buttonsPrev[0]) {
-				INTERFICIE.switchMapaWindow();
-				INTERFICIE.switchPause();
+				INTERFICIE.switchMapaWindow();  // Acció només en el primer "press"
 			}
 			buttonsPrev[0] = (buttons[0] == GLFW_PRESS);
 
@@ -5478,6 +5477,32 @@ int main(void)
 
 		// Poll for and process events
 		glfwPollEvents();
+
+		// LCR - ajustament shader Solar System
+		glUseProgram(shader_programID);
+		glm::vec3 posSol = PLANETES[0].getPosition();
+		glUniform1i(glGetUniformLocation(shader_programID, "LightSource[0].sw_light"), 1);
+		glUniform4f(glGetUniformLocation(shader_programID, "LightSource[0].position"), posSol.x, posSol.y, posSol.z, 1.0f); //sol és font de llum
+
+		glUniform4f(glGetUniformLocation(shader_programID, "LightSource[0].ambient"), 0.15f, 0.15f, 0.15f, 0.15f); //poca llum ambient a l'espai
+		glUniform4f(glGetUniformLocation(shader_programID, "LightSource[0].diffuse"), 1.0f, 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(shader_programID, "LightSource[0].attenuation"), 1.0f, 0.0f, 0.0f);
+
+		glUniform3fv(glGetUniformLocation(shader_programID, "posSol"), 1, glm::value_ptr(posSol));
+		glUniform1f(glGetUniformLocation(shader_programID, "radiSol"), 15.0f);
+		glUniform1f(glGetUniformLocation(shader_programID, "glowRadius"), 10.0f); //activa llum taronja molt aprop del sol
+
+		//il·luminació dels planetes
+		for (auto& p : PLANETES) {
+			glm::vec3 posPlaneta = p.getPosition();
+			glm::mat4 modelMatrix = glm::mat4(1.0f);
+			modelMatrix = glm::translate(modelMatrix, posPlaneta);
+			glUniformMatrix4fv(glGetUniformLocation(shader_programID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+			glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(shader_programID, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(shader_programID, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(ViewMatrix));
+			glUniformMatrix4fv(glGetUniformLocation(shader_programID, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(ProjectionMatrix));
+		}
 
 		// Entorn VGI.ImGui: Dibuixa menú ImGui
 		draw_Menu_ImGui();

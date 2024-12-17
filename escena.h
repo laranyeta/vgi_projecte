@@ -10,6 +10,7 @@
 // Entorn VGI: OBJECTE OBJ. Include per la definici� de l'objecte Obj_OBJ
 #include "objLoader.h"	
 #include "nau.h"
+#include "particleSystem.h"
 
 /* ------------------------------------------------------------------------- */
 /*                            Funcions de les escenes                        */
@@ -40,6 +41,7 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object, Nau& nau);
 void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* CombustibleOBJ, CColor col_object, Nau& nau);
 void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object, Nau& nau);
-//std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);
+void particleSystem(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, glm::vec3 posObj, ParticleType pt);
+std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);
 void joc(float time, Nau& nau);
 #endif
