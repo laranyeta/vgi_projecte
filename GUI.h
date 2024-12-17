@@ -63,6 +63,7 @@ public:
 	void MostrarAlerta(ImVec2* screenSize, const Alerta& alerta, float posY);
 	void GestionarAlertes(ImVec2* screenSize);
 	void AfegirAlerta(int tipus, const char* text, float temps);
+	void MostrarPantallaGuanyador(ImVec2* screenSize);
 	void MostrarPantallaMenuJugador(ImVec2* screenSize);
 	void DibuixarBarraDistanciaPlaneta(float distancePercentage, ImVec2 bar, ImVec2 position);
 	float distanciaEntrePunts(const ImVec2& a, const ImVec2& b);
@@ -119,7 +120,9 @@ private:
 	bool show_config_so = false;
 	bool show_config_controladors = false;
 	bool show_config_credits = false;
-
+	
+	bool show_winner = false;
+	bool show_loser = false;
 
 	//Minimapa
 	bool minimapas_circulars = true;
@@ -233,3 +236,4 @@ void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int siz
 void MostrarMenuDebug(ImVec2* screenSize);
 
 std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);
+double timeToCollision(const glm::vec3& shipPos, const glm::vec3& shipVel, float shipRadius, const glm::vec3& astPos, const glm::vec3& astVel, float astRadius);
