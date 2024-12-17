@@ -790,39 +790,51 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 
 	}
 	else if (show_config_controladors) {
-		float tamany_buttons = 340.0f;
-		//if (ImGui::Button("Controladors", tamany_buttons_dins_config));
-		ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f); // Elimina el marge del "child"
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Fons blanc per al "child"
-		ImGui::BeginChild("Botons controladors", ImVec2(tamany_buttons, subwindowSize.y - espai.y * 2), true, window_flags); // Defineix la regió
+		float tamany_buttons = 360.0f;
+		float text_offset_x = 20.0f; // Espai a l'esquerra per al text dins del botó
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		ImGui::BeginChild("Botons controladors", ImVec2(tamany_buttons, subwindowSize.y - espai.y * 2), true, window_flags);
+
 		ImGui::PushFont(silkscreenh3);
 		ImGui::PushStyleColor(ImGuiCol_Text, ButtonMenuPausa);
 		ImGui::Text("Controls");
 		ImGui::PopStyleColor();
 		ImGui::PopFont();
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		ImGui::Button("Controladors-1", tamany_buttons_dins_config);
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-2", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-3", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-4", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-5", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-6", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-7", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-8", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-9", tamany_buttons_dins_config));
-		ImGui::Dummy(espai); // Afegeix un espai vertical de 10 píxels
-		if (ImGui::Button("Controladors-10", tamany_buttons_dins_config));
+
+		const char* texts[] = {
+			"1 - Rotar Esquerra", "2 - Inc Velocitat", "3 - Rotar Dreta",
+			"4 - Desplaçament Lateral", "5 - Dec Velocitat", "6 - Desplaçament Lateral",
+			"7 - Mirar Cap a Amunt", "8 - Girar Dreta", "9 - Girar Esquerra",
+			"10 - Mirar Cap a Baix", "11 - Camara Interior", "12 - Camara desde Davant",
+			"13 - Camara Principal", "14 - Menu", "15 - Pantalla Completa",
+			"16 - Mapa Gran", "17 - Baixar Nau", "18 - Pujar Nau", "19 - Sense Ús"
+		};
+
+		for (int i = 0; i < IM_ARRAYSIZE(texts); ++i) {
+			ImVec2 buttonSize = tamany_buttons_dins_config;
+			ImVec2 cursorPos = ImGui::GetCursorScreenPos(); // Obtenir la posició actual
+
+			// Crear un botó invisible
+			//ImGui::InvisibleButton(("btn" + std::to_string(i)).c_str(), buttonSize);
+			ImU32 color_u32 = ImGui::ColorConvertFloat4ToU32(ButtonMenuPausa);
+
+			// Dibuixar manualment el text a l'esquerra
+			ImGui::GetWindowDrawList()->AddText(
+				ImVec2(cursorPos.x + text_offset_x, cursorPos.y + buttonSize.y / 2 - ImGui::GetFontSize() / 2),
+				color_u32, // Color del text (negre)
+				texts[i]
+			);
+
+			ImGui::Dummy(ImVec2(espai.x, espai.y * 2)); // Espai entre botons
+		}
+
 		ImGui::EndChild();
-		ImGui::PopStyleColor(); // Restableix el color de fons
-		ImGui::PopStyleVar();   // Restableix els marges
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+
 		ImGui::SameLine();
 
 

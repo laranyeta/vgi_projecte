@@ -1205,9 +1205,9 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrixOrbit[0][0]);
 		asteroide.agregarPosicionHistorica(asteroide.getPosition());
 		drawHistoricalPath(asteroide.getPosicionesHistoricas());
-
+		
 		// DEBUG
-		drawOBBImmediateMode(nau.getOBB());
+		//drawOBBImmediateMode(nau.getOBB());
 	}
 
 }

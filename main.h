@@ -29,6 +29,7 @@ GLFWwindow* window;
 bool statusB;	// Opci� booleana per a mostrar Status Bar per consola [0:NO,1:SI]
 
 // EntornVGI.ImGui: Gesti� de finestres de men� ImGui
+bool buttonsPrev[15] = { false }; // 15 és el nombre màxim de botons d'un gamepad segons GLFW
 
 
 // Entorn V3D: Variables de control per Men� C�mera: Esf�rica, Navega, M�bil, Zoom, Satelit, Polars... 

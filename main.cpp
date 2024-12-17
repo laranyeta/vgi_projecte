@@ -933,15 +933,9 @@ void draw_Menu_ImGui()
 		const char* joystickName = glfwGetJoystickName(GLFW_JOYSTICK_1);
 
 		if (joystickName != nullptr) {
-
 			// Si el joystick està connectat, mostra el nom
-
-			std::cout << "Gamepad connectat: " << joystickName << std::endl;
-
-
-
+			//std::cout << "Gamepad connectat: " << joystickName << std::endl;
 			// Convertir el nom del joystick a un std::string i concatenar-lo
-
 			std::string alertText = "Gamepad connectat: " + std::string(joystickName);
 
 			//INTERFICIE.Alerta(screenSize, 4, alertText.c_str());  // Usar c_str() per passar un const char*
@@ -3507,13 +3501,13 @@ void Teclat_Nau(int key, int action)
 	release = (action == GLFW_RELEASE);
 
 
-	if (press && key == GLFW_KEY_R)
+	/*if (press && key == GLFW_KEY_R)
 	{
 		Nau newNau;
 		//newNau.setModel(nau.getModel());
 		nau = newNau;
 		INTERFICIE.inicialitzarWindow(primary,window,&newNau);
-	}
+	}*/
 
 	if (press || release)
 	{
@@ -3991,18 +3985,29 @@ void Moviment_Nau2()
 			nau.incPotencia();
 			nau.decFuel();
 		}
-		if (pressA)
+
+		if (pressA && fuel > 0) {
 			nau.move(nau.getU() * -(float)fact_nau);
+			nau.incPotencia();
+			nau.decFuel();
+		}
 
-		if (pressD)
+		if (pressD && fuel > 0) {
 			nau.move(nau.getU() * (float)fact_nau);
-
-		if (pressZ)
+			nau.incPotencia();
+			nau.decFuel();
+		}
+		if (pressZ && fuel > 0) {
 			nau.move(nau.getV() * (float)fact_nau);
-
-		if (pressX)
+			nau.incPotencia();
+			nau.decFuel();
+		}
+		if (pressX && fuel > 0) {
 			nau.move(nau.getV() * -(float)fact_nau);
-
+			nau.incPotencia();
+			nau.decFuel();
+		}
+		//Fletxes
 		if (pressLEFT)
 			nau.rotV((float)fact_ang_nau);
 
@@ -4020,6 +4025,196 @@ void Moviment_Nau2()
 
 		if (pressE)
 			nau.rotN((float)fact_ang_nau);
+
+
+
+		//GAMEPAD
+		// Comprovem si el gamepad està connectat
+		if (glfwJoystickPresent(GLFW_JOYSTICK_1))
+		{
+			int buttonCount;
+			const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+			//buttons[0] == GLFW_PRESS
+
+			int axesCount;
+			const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+
+			if ((axes[4] == GLFW_PRESS || axes[5] == GLFW_PRESS || buttons[9] == GLFW_PRESS || buttons[10] == GLFW_PRESS || buttons[11] == GLFW_PRESS || buttons[12] == GLFW_PRESS) && fuel > 0)
+			{
+				if (so_nau)
+				{
+					if (so_nau->getIsPaused())
+					{
+						so_nau->setIsPaused(false);
+					}
+					if (volumNauActual < volum_nau)
+						so_nau->setVolume(so_nau->getVolume() + 0.01);
+				}
+			}
+			else
+			{
+				if (so_nau)
+				{
+					if (!so_nau->getIsPaused())
+					{
+
+					}
+					if (volumNauActual > 0)
+						so_nau->setVolume(so_nau->getVolume() - 0.01);
+					else
+						so_nau->setIsPaused(true);
+				}
+			}
+
+			nau.moveS(G_DELTA);
+
+			if(fuel > 0){
+
+				if (axes[5] > 0.1)
+				{
+					nau.increaseSpeed(fact_nau / 4);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+
+				if (axes[4] == GLFW_PRESS)
+				{
+					nau.increaseSpeed(-fact_nau / 4);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+
+				if (buttons[9] == GLFW_PRESS) {
+					nau.move(nau.getU() * -(float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+
+				if (buttons[10] == GLFW_PRESS) {
+					nau.move(nau.getU() * (float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+
+
+				//Fletxes
+				if (buttons[13] == GLFW_PRESS) {
+					nau.move(nau.getU() * -(float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+				if (buttons[14] == GLFW_PRESS) {
+					nau.move(nau.getU() * (float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+				if (buttons[11] == GLFW_PRESS) {
+					nau.move(nau.getV() * (float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+				if (buttons[12] == GLFW_PRESS) {
+					nau.move(nau.getV() * -(float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+			}
+
+			//Bumpers LB I RB
+			if (buttons[4] == GLFW_PRESS) {
+				nau.rotN(-(float)fact_ang_nau);
+			}
+
+			if (buttons[5] == GLFW_PRESS) {
+				nau.rotN(-(float)-fact_ang_nau);
+			}
+
+			// Lletres A (botó 0)
+			if (buttons[0] == GLFW_PRESS && !buttonsPrev[0]) {
+				INTERFICIE.switchMapaWindow();  // Acció només en el primer "press"
+			}
+			buttonsPrev[0] = (buttons[0] == GLFW_PRESS);
+
+			// Lletres B (botó 1)
+			if (buttons[1] == GLFW_PRESS && !buttonsPrev[1]) {
+				nau.setCamAngle(3);
+				nau.setModel(&ObOBJ);
+			}
+			buttonsPrev[1] = (buttons[1] == GLFW_PRESS);
+
+			// Lletres X (botó 2)
+			if (buttons[2] == GLFW_PRESS && !buttonsPrev[2]) {
+				nau.setCamAngle(1);
+				nau.setModel(&ObOBJnGlass);
+			}
+			buttonsPrev[2] = (buttons[2] == GLFW_PRESS);
+
+			// Lletres Y (botó 3)
+			if (buttons[3] == GLFW_PRESS && !buttonsPrev[3]) {
+				nau.setCamAngle(2);
+				nau.setModel(&ObOBJ);
+			}
+			buttonsPrev[3] = (buttons[3] == GLFW_PRESS);
+
+
+			// BACK (botó 3)
+			if (buttons[6] == GLFW_PRESS && !buttonsPrev[6]) {
+				OnFull_Screen(primary, window);
+
+			}
+			buttonsPrev[6] = (buttons[6] == GLFW_PRESS);
+
+
+			// Comprovació per rotacions (joystick dret)
+			float rotateX = axes[0]; // Eix horitzontal dret
+			float rotateY = axes[1]; // Eix vertical dret
+
+			if (fabs(rotateX) > 0.1f || fabs(rotateY) > 0.1f) { // Només quan els joystick estan en moviment
+
+				// Rotació horitzontal esquerra/dreta (joystick dret eix horitzontal)
+				if (fabs(rotateX) > 0.1f) {
+					// Ajust de la rotació horitzontal amb un factor d'escala
+					angleA = rotateX * fact_ang_nau * 0.4 * -1;
+
+					// Limitar l'angle entre 0 i 360 graus
+					if (angleA >= 360) angleA -= 360;
+					if (angleA < 0) angleA += 360;
+
+					// Realitzar la rotació en l'eix horitzontal
+					/*
+					rotate_vector(vdir, vup, angleA * PI / 180);
+					rotate_vector(vright, vup, angleA * PI / 180);*/
+					nau.rotV((float)angleA);
+				}
+
+				// Rotació vertical amunt/avall (joystick dret eix vertical)
+				if (fabs(rotateY) > 0.1f) {
+					// Ajust de la rotació vertical amb un factor d'escala
+					angleB = rotateY * fact_ang_nau * 0.4 * -1;
+
+					// Limitar l'angle entre 0 i 360 graus
+					if (angleB >= 360) angleB -= 360;
+					if (angleB < 0) angleB += 360;
+
+					// Realitzar la rotació en l'eix vertical
+					/*
+					rotate_vector(vdir, vright, angleB * PI / 180);
+					rotate_vector(vup, vright, angleB * PI / 180);*/
+					nau.rotU((float)angleB);
+				}
+			}
+
+			GLFWgamepadstate state;
+			if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state)) {
+				if (state.buttons[GLFW_GAMEPAD_BUTTON_START] == GLFW_PRESS) {
+					//glfwSetWindowShouldClose(window, GL_TRUE);  // Marca la finestra per tancar
+					INTERFICIE.switchMenuJugadorConfig();
+					//show_menu_jugador_config = !show_menu_jugador_config;
+					INTERFICIE.switchPause();
+					//pause = !pause;
+				}
+			}
+		}
 	}
 	
 }
@@ -5267,7 +5462,10 @@ int main(void)
 		// Entorn VGI. Timer: common part, do this only once
 		now = glfwGetTime();
 		G_DELTA = delta = now - previous;
-		if (INTERFICIE.getPause()) delta = 0;
+		if (INTERFICIE.getPause()) {
+			G_DELTA = 0;
+			delta = 0;
+		}
 		previous = now;
 
 		// Entorn VGI. Timer: for each timer do this
