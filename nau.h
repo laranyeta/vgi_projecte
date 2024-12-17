@@ -206,7 +206,12 @@ public:
 		}
 	}
 	void incFuel(float temp) {
-		m_fuel += temp;
+		if (m_fuel + temp >= 1.0f) {
+			m_fuel = 1.0f;
+		}
+		else {
+			m_fuel += temp;
+		}
 	}
 	void decFuel() {
 		m_fuel -= 0.001f;

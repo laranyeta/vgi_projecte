@@ -231,3 +231,5 @@ void IniciarSimulador();
 void OnFull_Screen(GLFWmonitor* monitor, GLFWwindow* window);
 void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int size_y, ImGuiWindowFlags window_flags);
 void MostrarMenuDebug(ImVec2* screenSize);
+
+std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);

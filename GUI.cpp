@@ -1847,7 +1847,11 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::End();
 	ImGui::PopStyleVar();
 
-	//ImGui::ProgressBar(progress, ImVec2(0.f, 0.f), buf);
+	vector<Asteroide*> asteroidesaprop = findCollidingAsteroids(*nau, 10.0);
+
+	if (asteroidesaprop.size() >= 1) {
+		AfegirAlerta(2, "Alerta Aproximació d'Asteroides !!!", 2.0f);
+	}
 
 	//Crear mini mapa
 	if (minimapas_circulars) {
@@ -2857,7 +2861,10 @@ void GUI::MostrarAlerta(ImVec2* screenSize, const Alerta& alerta, float posY) {
 	ImGui::SetNextWindowPos(ImVec2(screenSize->x * 0.5f - winsize.x * 0.5f + shadowOffset.x, posY + shadowOffset.y), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(winsize);
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, shadowColor);
-	std::string alertText = "Alerta_Shadow" + std::string(alerta.text) + std::to_string(posY);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f); // Rouding més suau
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)); // Afegir espai dins la finestra
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f); // Sense bordes
+	std::string alertText = "Alerta_Shadow"+ std::to_string(posY);
 	ImGui::Begin(alertText.c_str(), NULL, window_flags);
 	ImGui::End();
 	ImGui::PopStyleColor();
@@ -2867,12 +2874,10 @@ void GUI::MostrarAlerta(ImVec2* screenSize, const Alerta& alerta, float posY) {
 	ImGui::SetNextWindowSize(winsize);
 
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, color);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f); // Rouding més suau
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)); // Afegir espai dins la finestra
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f); // Sense bordes
+
 	ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f)); // Sense bordes
 
-	std::string alertText2 = "Alerta" + std::string(alerta.text) + std::to_string(posY);
+	std::string alertText2 = "Alerta" + std::to_string(posY);
 	ImGui::Begin(alertText2.c_str(), NULL, window_flags);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc per al text
 
@@ -2917,9 +2922,14 @@ void GUI::GestionarAlertes(ImVec2* screenSize) {
 
 void GUI::AfegirAlerta(int tipus, const char* text, float temps) {
 	// Comprovar si ja s'ha afegit una alerta amb aquest tipus i text
+	if (text == nullptr || strlen(text) == 0) {
+		std::cout << "Error: el text de l'alerta no pot ser nul o buit." << std::endl;
+		return;  // No afegir alerta si el text no és vàlid
+	}
 	bool alertaJaAfegida = false;
 	for (auto& alerta : alertes) {
 		if (alerta.tipus == tipus && strcmp(alerta.text, text) == 0) {
+			alerta.temps = temps;
 			alertaJaAfegida = true;
 			break;  // Si ja existeix l'alerta, no afegir una nova
 		}
@@ -2930,6 +2940,7 @@ void GUI::AfegirAlerta(int tipus, const char* text, float temps) {
 		Alerta novaAlerta = { tipus, text, temps };
 		alertes.push_back(novaAlerta);
 	}
+	//}
 }
 
 

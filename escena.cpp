@@ -864,7 +864,7 @@ void generarDiposits() {
 	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI); // Angle al voltant del cercle
 	std::uniform_real_distribution<float> radius_dist(30.0f, 250.0f);              // Radi del cercle (cinturó més gran)
 	//std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);                 // Alçada limitada en l'eix Y
-	std::uniform_real_distribution<float> fuel_dist(100.0f, 500.0f);                // Combustible disponible
+	std::uniform_real_distribution<float> fuel_dist(0.3f, 1.0f);                // Combustible disponible
 
 	for (size_t i = 0; i < NUM_DIPOSITS; ++i) {
 		float angle = angle_dist(gen);    // Angle en radians al voltant del cercle
@@ -1297,7 +1297,7 @@ void generarEstacions() {
 	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI); // Angle al voltant del cercle
 	std::uniform_real_distribution<float> radius_dist(20.0f, 100.0f);  // Radi de l'òrbita (proper al planeta)
 	std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);    // Alçada limitada
-	std::uniform_real_distribution<float> fuel_dist(100.0f, 500.0f);   // Combustible disponible
+	std::uniform_real_distribution<float> vida_dist(0.1f, 1.0f);   // Combustible disponible
 	std::uniform_int_distribution<int> num_estacions(3, 8);            // Nombre d'estacions per planeta
 
 	size_t estacio_index = 0;
@@ -1318,13 +1318,13 @@ void generarEstacions() {
 			float y = pos_planeta.y + radius * sin(angle);
 			float z = pos_planeta.z + height;
 
-			float fuel = fuel_dist(gen); // Combustible disponible
+			float vida = vida_dist(gen); // Combustible disponible
 
 			// Configura l'estació
 			ESTACIONS[estacio_index].setRadi(0.01f);
 			ESTACIONS[estacio_index].setPosition(glm::vec3(x, y, z));
 			ESTACIONS[estacio_index].setVelocitat(glm::dvec3(0.0, 0.0, 0.0));
-			ESTACIONS[estacio_index].setValor(fuel);
+			ESTACIONS[estacio_index].setValor(vida);
 
 			++estacio_index;
 		}
