@@ -21,6 +21,7 @@ public:
 	void inicialitzarWindow(GLFWmonitor* temp_primary, GLFWwindow* temp_window, Nau* temp_nau);
 	void inicialitzarImatges();
 	void inicialitzarFonts(ImGuiIO& io);
+	void inicialitzarTime(double* temp);
 	ImFont* fontPrincipal();
 	ImFont* fontDroidsans();
 	void inicialitzarSons(irrklang::ISoundEngine* temp_engine,irrklang::ISound* temp_so_alerta,
@@ -54,6 +55,7 @@ public:
 		const glm::vec3& posicioJugador);
 	ImVec2 convertirAPosicioMiniMapaDesdeJugadorVertical(const glm::vec3& posicioMon, const glm::vec3& worldSize, const ImVec2& minimapSize, const ImVec2& minimapPosition, const glm::vec3& posicioJugador);
 	void MostrarPantallaMenuJugador(ImVec2* screenSize);
+	void DibuixarBarraDistanciaPlaneta(float distancePercentage);
 	float distanciaEntrePunts(const ImVec2& a, const ImVec2& b);
 	void crearMiniMapaCentratJugador(ImVec2 minimapSize, ImVec2 minimapPosition);
 	void crearMiniMapaCentratSol(ImVec2 minimapSize, ImVec2 minimapPosition);
@@ -208,7 +210,7 @@ private:
 	GLFWmonitor* primary;
 	//const GLFWvidmode* mode;
 	GLFWwindow* window;
-
+	double* m_time;
 	Nau* nau;
 };
 

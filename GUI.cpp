@@ -33,6 +33,10 @@ void GUI::inicialitzarFonts(ImGuiIO& io) {
 	barlowtitleDown = io.Fonts->AddFontFromFileTTF("textures/menu/BarlowCondensed-ExtraBold.ttf", 400.0f);
 }
 
+void GUI::inicialitzarTime(double* temp) {
+	m_time = temp;
+}
+
 void GUI::DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos, ImVec2 size, float landa)
 {
 	static float rotation_angle = 0.0f; // Angle inicial
@@ -1322,70 +1326,109 @@ void GUI::MostrarPantallaMenuJugador(ImVec2* screenSize) {
 
 }
 
+void GUI::DibuixarBarraDistanciaPlaneta(float distancePercentage) {
+	// Obtenir la mida de la finestra
+	ImVec2 windowSize = ImGui::GetIO().DisplaySize;
+	float barWidth = 600.0f;  // Amplada de la barra (80% de l'amplada de la finestra)
+	float barHeight = 50.0f;  // Alçada de la barra
+
+	// Establir la posició per centrar la barra a la part inferior de la pantalla
+	ImVec2 position = ImVec2((windowSize.x - barWidth) / 2, windowSize.y - barHeight - 30.0f);  // 50 px d'espai des de la part inferior
+
+	// Crear una finestra invisible per col·locar la barra en la posició correcta
+	ImGui::SetNextWindowPos(position, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(barWidth, barHeight), ImGuiCond_Always);
+	ImGui::Begin("PlanetaDistanciaBarra", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBackground);
+
+	// Dibuixar la barra horitzontal amb vores rodones
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f);  // Vores rodones
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, color_interficie);  // Color de fons de la barra
+	ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ButtonMenuPausa);  // Canviar el color de la barra
+
+	ImGui::SameLine(0.0f, 50.0f);  // Espai entre la imatge i la barra
+	ImGui::Image((void*)(intptr_t)PLANETES[PlanetOrigen].getTextureIDMenu(), ImVec2(30, 30));  // Imatge del planeta origen
+	ImGui::SameLine(0.0f, 10.0f);  // Espai entre la imatge i la barra
+	// Crear la barra horitzontal
+	ImGui::ProgressBar(distancePercentage, ImVec2(0.0f, 0.0f));
+	ImGui::SameLine(0.0f, 10.0f);  // Espai entre la imatge i la barra
+	ImGui::Image((void*)(intptr_t)PLANETES[PlanetDesti].getTextureIDMenu(), ImVec2(30, 30));  // Imatge del planeta destí
+
+	ImGui::PopStyleColor(2);
+	ImGui::PopStyleVar();
+
+	// Dibuixar les imatges dels planetes
+
+	ImGui::End();
+}
+
 void GUI::dibuixarOrbita2D(Planeta& planeta, ImVec2 minimapSize, ImVec2 minimapPosition, ImDrawList* drawList, bool circular, float radius, ImVec2 center, bool centratsol) {
 	const int numPoints = 100;
-	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor en metros escalados
-	double e = planeta.getExcentricitat(); // Excentricidad
-	double inclinacio = planeta.getInclinacio() * DEG_A_RAD; // Inclinación en radianes
-	double longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del nodo ascendente en radianes
-	double periapsis = planeta.getPeriapsis() * DEG_A_RAD; // Argumento del periapsis en radianes
+	double a = planeta.getSemieixMajor() * AU_IN_METERS * ESCALA_DISTANCIA; // Semieje mayor escalado
+	double e = planeta.getExcentricitat(); // Excentricitat
+	double inclinacio = planeta.getInclinacio() * DEG_A_RAD; // Inclinació en radians
+	double longNodeAsc = planeta.getLongitudNodeAscendent() * DEG_A_RAD; // Longitud del node ascendent
+	double periapsis = planeta.getPeriapsis() * DEG_A_RAD; // Argument del periapsis
 
-	// Matrices de rotación para transformar la órbita del plano orbital al espacio 3D
+	// Matrius de rotació per transformar l'òrbita del pla orbital al espai 3D
 	glm::mat3 R_periapsis = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)periapsis, glm::vec3(0.0f, 0.0f, 1.0f)));
 	glm::mat3 R_inclinacio = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)inclinacio, glm::vec3(1.0f, 0.0f, 0.0f)));
 	glm::mat3 R_longNodeAsc = glm::mat3(glm::rotate(glm::mat4(1.0f), (float)longNodeAsc, glm::vec3(0.0f, 0.0f, 1.0f)));
 	glm::mat3 R = R_longNodeAsc * R_inclinacio * R_periapsis;
 
-	// Contenidor per als punts de l'òrbita
+	// Contenidor per a punts de l'òrbita
 	std::vector<ImVec2> orbitPoints;
-	// Comenzar a dibujar la órbita
-	std::vector<std::vector<ImVec2>> orbitSegments; // Conté segments vàlids
+	std::vector<std::vector<ImVec2>> orbitSegments;
 	std::vector<ImVec2> currentSegment;
 
 	for (int i = 0; i < numPoints; ++i) {
 		// Càlcul de coordenades
 		double nu = 2.0 * PI * i / numPoints;
-		double r = a * (1 - e * e) / (1 + e * cos(nu));
+		double r = a * (1 - e * e) / (1 + e * cos(nu));  // Radi en cada punt
 		double x_orb = r * cos(nu);
 		double y_orb = r * sin(nu);
 		double z_orb = 0.0;
 		glm::dvec3 posicion_orb(x_orb, y_orb, 0.0);
 		ImVec2 minimapPoint;
+
 		if (centratsol) {
 			minimapPoint = convertirAPosicioMiniMapa(glm::vec3(x_orb, y_orb, z_orb), glm::vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition);
 		}
 		else {
 			minimapPoint = convertirAPosicioMiniMapaDesdeJugador(glm::vec3(x_orb, y_orb, z_orb), glm::vec3(tamanySS, tamanySS, 0), minimapSize, minimapPosition, nau->getO());
 		}
-		// Filtrat circular
+
+		// Comprovar si el punt està dins del radi
 		bool insideCircle = (circular) ? distanciaEntrePunts(minimapPoint, center) <= radius : true;
 
+		// Afegir el punt només si compleix les condicions
 		if (insideCircle) {
 			currentSegment.push_back(minimapPoint);
 		}
 		else if (!currentSegment.empty()) {
-			// Si el punt està fora i el segment actual no està buit, emmagatzema'l
+			// Si el segment actual té punts, emmagatzema'l i comença un de nou
 			orbitSegments.push_back(currentSegment);
 			currentSegment.clear();
 		}
 	}
 
-	// Guarda l'últim segment
+	// Emmagatzemar l'últim segment
 	if (!currentSegment.empty()) {
 		orbitSegments.push_back(currentSegment);
 	}
 
+	// Tancar el cercle connectant l'últim punt amb el primer
 	if (orbitSegments.size() >= 1) {
 		orbitSegments[orbitSegments.size() - 1].push_back(orbitSegments[0][0]);
 	}
 
-	// Dibuixar tots els segments
+	// Dibuixar els segments de l'òrbita
 	for (const auto& segment : orbitSegments) {
 		if (segment.size() > 1) {
 			drawList->AddPolyline(segment.data(), segment.size(), IM_COL32(200, 200, 200, 255), false, 1.0f);
 		}
 	}
 }
+
 
 void GUI::DrawSpeedometer(float value, float maxValue, float centerX, float centerY, float radius, bool isRPM) {
 	float startAngle = 0; // Starting angle (90 degrees)
@@ -1714,25 +1757,50 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 300.0f, 300.0f, 150.0f, true); // RPM speedometer (3000 RPM)
 	//DrawSpeedometer(120.0f, 280.0f, 600.0f, 150.0f, 150.0f, false); // km/h speedometer (120 km/h)
 
-	ImVec2 windowSizeVelocimetres(800, 180);
-	ImVec2 windowPosVelocimetres = ImVec2(20, screenSize->y - windowSizeVelocimetres.y);
+	ImVec2 windowSizeVelocimetres(400, 180);
+	ImVec2 windowPosVelocimetres = ImVec2(20, screenSize->y - windowSizeVelocimetres.y-180);
 	ImGui::SetNextWindowPos(windowPosVelocimetres, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(windowSizeVelocimetres);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 0));
+	double velocitat = nau->getSpeed();
 
-	if (ImGui::Begin("Velocimetres", nullptr, window_flags)) {
+	double dist = distanciaEuclidiana(nau->getO(), PLANETES[PlanetDesti].getPosition());
+	double distOrigen = distanciaEuclidiana(PLANETES[PlanetOrigen].getPosition(), PLANETES[PlanetDesti].getPosition());
+
+	if (ImGui::Begin("Velocimetres", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+		ImGui::Text("Velocitat: %.2f LightSpeed", velocitat); // Mostra la velocitat amb dos decimals
+		ImGui::Text("Distancia: %.2f ", dist); // Mostra la velocitat amb dos decimals
+		ImGui::Text("Distancia Origen: %.2f ", distOrigen); // Mostra la velocitat amb dos decimals
+		ImGui::Text("Temps: %.2f ", m_time); // Mostra la velocitat amb dos decimals
+		//ImGui::Text("Puntuació: %.2f ", m_time); // Mostra la velocitat amb dos decimals
+
 		//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 0.0f, 150.0f, 150.0f, true); // RPM speedometer (3000 RPM)
 		//DrawSpeedometer(120.0f, 280.0f, 600.0f, 150.0f, 150.0f, false); // km/h speedometer (120 km/h)
+		ImGui::PopStyleColor();
 	}
 
 	ImGui::End();
 	ImGui::PopStyleVar();
 
+	float totalDistance = distOrigen;  // Distància total
+	float remainingDistance = dist;  // Distància que falta, pot ser negativa
+
+	// Calcular el percentatge recorregut, permetent distàncies negatives
+	float distanceTravelled = totalDistance - remainingDistance;  // Distància recorreguda
+	float percentage = distanceTravelled / totalDistance;
+
+	// Assegurar que el percentatge estigui entre 0 i 1 (per la barra de progrés)
+	percentage = ImClamp(percentage, 0.0f, 1.0f);  // Restringir el valor entre 0 i 1
+
+	// Dibuixar la barra amb el percentatge calculat
+	DibuixarBarraDistanciaPlaneta(percentage);
+
 
 	ImVec2 espai(0.0f, 30.0f);
 	// Dades de progrés
 	ImVec2 windowSize(800, 180);
-	ImVec2 windowPos = ImVec2(820, screenSize->y - windowSize.y);
+	ImVec2 windowPos = ImVec2(20, screenSize->y - windowSize.y);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(windowSize);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 0));

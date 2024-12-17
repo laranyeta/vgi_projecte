@@ -209,7 +209,7 @@ public:
 		m_fuel += temp;
 	}
 	void decFuel() {
-		m_fuel -= 0.00001f;
+		m_fuel -= 0.001f;
 	}
 	float getPotencia() { return m_potencia; }
 	float getFuel() { return m_fuel; }

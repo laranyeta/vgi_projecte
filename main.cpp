@@ -3918,17 +3918,58 @@ void Moviment_Nau2()
 	double fact_nau = 10.0 * G_DELTA;
 	double fact_ang_nau = 45.0 * G_DELTA;
 	float zoom = 10.0f * G_DELTA;
+	float fuel = nau.getFuel();
+	float volumNauActual = so_nau->getVolume();
 
 	if (nau.getEnableControls())
 	{
+		if ((pressW || pressS || pressA || pressD) && fuel > 0)
+		{
+			if (so_nau)
+			{
+				if (so_nau->getIsPaused())
+				{
+					so_nau->setIsPaused(false);
+				}
+				if (volumNauActual < volum_nau)
+					so_nau->setVolume(so_nau->getVolume() + 0.01);
+			}
+		}
+		else
+		{
+			if (so_nau)
+			{
+				if (!so_nau->getIsPaused())
+				{
+
+				}
+				if (volumNauActual > 0)
+					so_nau->setVolume(so_nau->getVolume() - 0.01);
+				else
+					so_nau->setIsPaused(true);
+			}
+		}
+
+
+
 		nau.moveS(G_DELTA);
 
-		if (pressW)
+		/*if (pressW)
 			nau.increaseSpeed(fact_nau / 4);
 
 		if (pressS)
 			nau.increaseSpeed(-fact_nau / 4);
-
+		*/
+		if (pressW && fuel > 0) {
+			nau.increaseSpeed(fact_nau / 4);
+			nau.incPotencia();
+			nau.decFuel();
+		}
+		if (pressS && fuel > 0) {
+			nau.increaseSpeed(-fact_nau / 4);
+			nau.incPotencia();
+			nau.decFuel();
+		}
 		if (pressA)
 			nau.move(nau.getU() * -(float)fact_nau);
 
@@ -5170,6 +5211,7 @@ int main(void)
 	PosicionsInicialsSistemaSolar();
 	INTERFICIE.inicialitzarImatges();
 	INTERFICIE.inicialitzarSons(engine,so_alerta, so_nau, musica_menu, musica_partida, &volum_nau, &volum_menu, &volum_alerta, &volum_partida);
+	INTERFICIE.inicialitzarTime(&G_DELTA);
 
 
 	nau.setModel(&ObOBJ);
