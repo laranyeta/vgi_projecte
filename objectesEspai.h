@@ -22,6 +22,7 @@ public:
     glm::dvec3 getVelocitat() const;
     float getAngleRotacio() const;
     glm::vec3 getPosition() const;
+    float getValor() const { return m_valor; }
 
     // Setters
     void setName(const std::string& name);

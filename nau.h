@@ -90,7 +90,7 @@ public:
 
 		//Colisions
 		updateOBB();
-		m_massa = 1.0e22;
+		m_massa = 1.0e12;
 		m_collisionState = NotColliding;
 		m_angularVelocity = glm::vec3(0.0f);
 
@@ -336,6 +336,7 @@ public:
 	int getPlanetaDesti() { return m_planetaDesti; }
 	void setEnableControls(bool c) { m_enableControls = c; }
 	bool getEnableControls() { return m_enableControls; }
+	glm::vec3 getShipDimensions() { return m_shipDimensions; }
 };
 
 #endif

@@ -154,9 +154,9 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, nau);
 		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
-		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object);
-		objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object);
-		estacions(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, EstacioOBJ, col_object);
+		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
+		objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object, nau);
+		estacions(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, EstacioOBJ, col_object, nau);
 		joc(time, nau);
 		// Activar transpar�ncia
 		glEnable(GL_BLEND);
@@ -223,6 +223,53 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 
 	// Enviar les comandes gr�fiques a pantalla
 	//	glFlush();
+}
+
+double timeToCollision(const glm::vec3& shipPos, const glm::vec3& shipVel, float shipRadius, const glm::vec3& astPos, const glm::vec3& astVel, float astRadius)
+{
+	glm::vec3 D0 = shipPos - astPos;
+	glm::vec3 Dv = shipVel - astVel;
+	float sumRadius = shipRadius + astRadius;
+
+	float A = glm::dot(Dv, Dv);
+	float B = 2.0f * glm::dot(D0, Dv);
+	float C = glm::dot(D0, D0) - sumRadius * sumRadius;
+
+	if (std::fabs(A) < 1e-9f) {
+		if (C <= 0.0f) {
+			return 0.0;
+		}
+		else {
+			return -1.0;
+		}
+	}
+
+	float discriminant = B * B - 4.0f * A * C;
+
+	if (discriminant < 0.0f) {
+		return -1.0;
+	}
+
+	float sqrtDisc = std::sqrt(discriminant);
+	float t1 = (-B - sqrtDisc) / (2.0f * A);
+	float t2 = (-B + sqrtDisc) / (2.0f * A);
+
+	double collisionTime = -1.0;
+
+	if (t1 >= 0.0f && t2 >= 0.0f) {
+		collisionTime = std::min(t1, t2);
+	}
+	else if (t1 >= 0.0f && t2 < 0.0f) {
+		collisionTime = t1;
+	}
+	else if (t2 >= 0.0f && t1 < 0.0f) {
+		collisionTime = t2;
+	}
+	else {
+		collisionTime = -1.0;
+	}
+
+	return collisionTime;
 }
 
 void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5])
@@ -657,11 +704,15 @@ void drawHistoricalPath(std::vector<glm::vec3> posiciones) {
 	glEnd();
 }
 
-bool estaForaDelsLimits(const Asteroide& asteroide)
+bool estaForaDelsLimits(const Asteroide& asteroide, Nau& nau)
 {
-	glm::vec3 pos = asteroide.getPosition();
-	float distanceSquared = glm::dot(pos, pos);
-	return distanceSquared > (MAX_DISTANCIA_ASTEROIDES * MAX_DISTANCIA_ASTEROIDES);
+	glm::vec3 posAsteroide = asteroide.getPosition();
+	glm::vec3 posObjeto = nau.getO();
+
+	glm::vec3 diferencia = posAsteroide - posObjeto;
+	float distanciaCuadrada = glm::dot(diferencia, diferencia);
+
+	return distanciaCuadrada > (MAX_DISTANCIA_ASTEROIDES * MAX_DISTANCIA_ASTEROIDES);
 }
 /*
 	Mètode per evitar que els asteroides es moguin massa lluny del punt d'origen (el sol)
@@ -669,23 +720,26 @@ bool estaForaDelsLimits(const Asteroide& asteroide)
 	massa, en comptes d'eliminar-lo, tornem a utilitzar un generador aleatori per alterar les
 	seves propietats i el moguem a la zona de generació d'asteroides.
 */
-void resetAsteroide(Asteroide& asteroide, std::mt19937& gen)
+void resetAsteroide(Asteroide& asteroide, std::mt19937& gen, const glm::vec3& shipPosition)
 {
-	std::uniform_real_distribution<float> pos_dist(-MAX_DISTANCIA_ASTEROIDES / 2.0f, MAX_DISTANCIA_ASTEROIDES / 2.0f);
-	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
-	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
+	std::uniform_real_distribution<float> pos_dist(-MAX_DISTANCIA_ASTEROIDES / 2.0f,
+		MAX_DISTANCIA_ASTEROIDES / 2.0f);
+	std::uniform_real_distribution<double> vel_dist(-3.5, 3.5);
+	std::uniform_real_distribution<float>  radius_dist(0.05f, 0.4f);
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
-	float radius = radius_dist(gen);
+	float  radius = radius_dist(gen);
 	double mass = mass_dist(gen);
 
-	glm::vec3 position(pos_dist(gen), pos_dist(gen), pos_dist(gen));
+	glm::vec3 position = shipPosition + glm::vec3(pos_dist(gen), pos_dist(gen), pos_dist(gen));
+
 	glm::dvec3 velocity(vel_dist(gen), vel_dist(gen), vel_dist(gen));
 
 	asteroide.setRadi(radius);
 	asteroide.setMassa(mass);
 	asteroide.setVelocitat(velocity);
 	asteroide.setPosition(position);
+
 	asteroide.posicionesHistoricas.clear();
 }
 
@@ -713,8 +767,8 @@ void generarAsteroides()
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> pos_dist(-2000.0f, 2000.0f);
-	std::uniform_real_distribution<double> vel_dist(-0.5, 0.5);
-	std::uniform_real_distribution<float> radius_dist(0.5f, 1.5f);
+	std::uniform_real_distribution<double> vel_dist(-3.5, 3.5);
+	std::uniform_real_distribution<float>  radius_dist(0.05f, 0.4f);
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);
 
 	for (size_t i = 0; i < NUM_ASTEROIDES; ++i) {
@@ -808,7 +862,7 @@ void generarDiposits() {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * PI); // Angle al voltant del cercle
-	std::uniform_real_distribution<float> radius_dist(30.0f, 1250.0f);              // Radi del cercle (cinturó més gran)
+	std::uniform_real_distribution<float> radius_dist(30.0f, 250.0f);              // Radi del cercle (cinturó més gran)
 	//std::uniform_real_distribution<float> height_dist(-5.0f, 5.0f);                 // Alçada limitada en l'eix Y
 	std::uniform_real_distribution<float> fuel_dist(100.0f, 500.0f);                // Combustible disponible
 
@@ -833,17 +887,13 @@ void generarDiposits() {
 	}
 }
 
-void spawnAsteroidToCollide(
-	double t,
-	const glm::vec3& shipPosition,
-	const glm::dvec3& shipVelD
-) {
+void spawnAsteroidToCollide(double t,const glm::vec3& shipPosition,const glm::dvec3& shipVelD) {
 	glm::vec3 shipVelocity = glm::vec3(shipVelD);
 
 	glm::vec3 shipFuturePos = shipPosition + shipVelocity * (float)t;
 	//std::cout << "Posición futura nave: X: " << shipFuturePos.x << " Y: " << shipFuturePos.y << " Z: " << shipFuturePos.z << std::endl;
 	glm::vec3 asteroidDir = randomUnitVector();
-	float asteroidSpeed = 2.5f + static_cast<float>(rand()) / RAND_MAX;
+	float asteroidSpeed = 10.5f + static_cast<float>(rand()) / RAND_MAX;
 	glm::vec3 asteroidVelocity = asteroidDir * asteroidSpeed;
 	glm::vec3 asteroidInitialPos = shipFuturePos - (asteroidVelocity * (float)t);
 	//std::cout << "Posición inicial asteroide X: " << asteroidInitialPos.x << " Y: " << asteroidInitialPos.y << " Z: " << asteroidInitialPos.z << std::endl;
@@ -934,6 +984,27 @@ void checkCollisions(Nau& nau)
 		}
 
 	}
+	for (size_t i = 0; i < ASTEROIDESCINTURO.size(); ++i)
+	{
+		
+		Asteroide& asteroidA = ASTEROIDESCINTURO[i];
+		// Col·lisió asteroide amb nau (OBB)
+		glm::vec3 closestPointOut(0.0f, 0.0f, 0.0f);
+		if (OBBvsSphere(nau.getOBB(), asteroidA.getPosition(), asteroidA.getRadi() * 2.2, closestPointOut))
+		{
+			std::cout << nau.getCollisionState() << std::endl;
+			isColliding = true;
+			if (nau.getCollisionState() == Nau::NotColliding)
+			{
+				// Tractar col·lisió
+				nau.resolveCollisionWithAsteroid(asteroidA, closestPointOut);
+				nau.setCollisionState(Nau::Colliding);
+			}
+
+		}
+
+	}
+
 	if (!isColliding && nau.getCollisionState() == Nau::Colliding)
 	{
 		nau.setCollisionState(Nau::NotColliding);
@@ -998,20 +1069,16 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	}
 	double deltaTime = time - lastTime;
 	lastTime = time;
-	static double lastSpawnTime = 0.0;
-
-	// Inside your update/render loop:
-	if (time > 10) {
-		if (time - lastSpawnTime >= 3.0) {
-			//spawnAsteroidToCollide(40.0, nau.getO(), nau.getVelocitat());
-			lastSpawnTime = time;
-		}
-	}
+	
 	int count = 0;
 	actualitzarAsteroides(deltaTime);
-	checkCollisions(nau);
+	
 	for (auto& asteroide : ASTEROIDES)
 	{
+		if (ASTEROIDES.size() > NUM_ASTEROIDES_TOTAL)
+		{
+			ASTEROIDES.erase(ASTEROIDES.begin() + NUM_ASTEROIDES); 
+		}
 		/*
 		if (count == 2)
 		{
@@ -1032,7 +1099,7 @@ void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 		count++;
 		*/
 		// Si se'n va molt lluny, reset asteroide amb nous paràmetres
-		if (estaForaDelsLimits(asteroide)) resetAsteroide(asteroide, gen);
+		if (estaForaDelsLimits(asteroide, nau)) resetAsteroide(asteroide, gen, nau.getO());
 
 		glm::mat4 NormalMatrix(1.0), ModelMatrix(1.0);
 		ModelMatrix = glm::translate(MatriuTG, asteroide.getPosition());
@@ -1155,7 +1222,7 @@ void actualitzarDiposits(double deltaTime)
 }
 
 void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
-	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* CombustibleOBJ, CColor col_object) {
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* CombustibleOBJ, CColor col_object, Nau& nau) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	static bool inicialitzat = false;
@@ -1191,7 +1258,7 @@ void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 }
 
 void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
-	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object) {
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object, Nau& nau) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	static bool inicialitzat = false;
@@ -1292,7 +1359,7 @@ void actualitzarEstacions(double deltaTime)
 }
 
 void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,
-	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object) {
+	GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object, Nau& nau) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	static bool inicialitzat = false;
@@ -1327,15 +1394,35 @@ void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, b
 	}
 }
 
-void animacioInicialPlanetaDesti(float time, Nau& nau)
+std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime )
 {
-	static bool init = false;
-	static float timeAtFirstExecution = 0;
-	if (!init)
-	{
-		timeAtFirstExecution = time;
-		init = true;
+	std::vector<Asteroide*> collidingAsteroids;
+
+	for (auto& ast : ASTEROIDES) {
+		glm::vec3 astVel = glm::vec3(ast.getVelocitat());
+
+		double tCollision = timeToCollision(
+			nau.getO(),
+			nau.getVelocitat(),
+			0.5f * glm::length(nau.getShipDimensions()),
+			ast.getPosition(),
+			astVel,
+			(float)ast.getRadi()
+		);
+
+		if (tCollision >= 0.0 && tCollision <= maxTime) {
+			collidingAsteroids.push_back(&ast);
+		}
 	}
+
+	return collidingAsteroids;
+}
+
+
+
+void animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecution)
+{
+	
 	static bool cutScene = false;
 	static bool arrivedPlaneta = false;
 	static bool returning = false;
@@ -1456,9 +1543,58 @@ void animacioInicialPlanetaDesti(float time, Nau& nau)
 	}
 }
 
+void afegirCombustible(Nau& nau)
+{
+	glm::vec3 posNau = nau.getO();
+	for (auto it = DIPOSITS.begin(); it != DIPOSITS.end(); )
+	{
+		glm::vec3 posDiposit = it->getPosition();
+		glm::vec3 diferencia = posNau - posDiposit;
+		float distanciaCuadrada = glm::dot(diferencia, diferencia);
+
+		if (distanciaCuadrada <= DISTANCIA_MINIMA_COMBUSTIBLE_2)
+		{
+			float combustiblePerAfegir = it->getValor();
+
+			nau.incFuel(combustiblePerAfegir);
+
+			it = DIPOSITS.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+
 void joc(float time, Nau& nau)
 {
-	animacioInicialPlanetaDesti(time, nau);
+	static bool init = false;
+	static float timeAtFirstExecution = 0;
+	if (!init)
+	{
+		timeAtFirstExecution = time;
+		init = true;
+	}
+	animacioInicialPlanetaDesti(time, nau, timeAtFirstExecution);
+	afegirCombustible(nau);
+	checkCollisions(nau);
+	static double lastSpawnTime = 0.0;
+	/*
+	for (auto& ast : ASTEROIDES)
+	{
+		float temps = timeToCollision(nau.getO(), nau.getVelocitat(), 0.5f * glm::length(nau.getShipDimensions()), ast.getPosition(), ast.getVelocitat(), ast.getRadi());
+		if (temps != -1)
+			std::cout << temps << std::endl;
+	}
+	*/
+	if (time > 20) {
+		if (time - lastSpawnTime >= 2.0) {
+			spawnAsteroidToCollide(10.0, nau.getO(), nau.getVelocitat());
+			lastSpawnTime = time;
+		}
+	}
 }
 
 
