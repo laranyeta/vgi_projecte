@@ -133,6 +133,9 @@ const int NUM_MAX_LLUMS = 8;
 #define FILE_SHADER 'F'
 #define PROG_BINARY_SHADER 'p'
 #define PROG_BINARY_SHADERW 'W'
+//LCR - definicio shader
+#define SOLARSYSTEM_SHADER 's'
+
 // ASTEROIDES ISMAEL
 const int NUM_ASTEROIDES = 150;
 const int NUM_ASTEROIDES_TOTAL = 200;
