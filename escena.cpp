@@ -84,6 +84,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	COBJModel* objecteOBJ,
 	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ)
 {
+	vec3 pos_particules;
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
 	int i, j, k;
@@ -149,13 +150,14 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material pel color de l'objecte.
 		nau_face(sh_programID, MatriuVista, MatriuTG, sw_mat, time);
 		break;
-
+		
 	case PROVA_PLANETA:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		//LCR - Renderitzat particules
 		//particleSystem(sh_programID, MatriuVista, MatriuTG, time, PLANETES[0].getPosition(), ParticleType::Sol);
 		//glm::vec3 transPos = glm::vec3(nau.getR() * glm::vec4(nau.getO(), 1.0f));
-		particleSystem(sh_programID, MatriuVista, MatriuTG, time, nau.getO(), ParticleType::Nau);
+		pos_particules = nau.getO() - vec3(nau.getR() * vec4(vec3(0.3f, 0, 0.00f), 1.0f));
+		particleSystem(sh_programID, MatriuVista, MatriuTG, time, pos_particules, ParticleType::Nau);
 		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, nau);
 		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
 		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);

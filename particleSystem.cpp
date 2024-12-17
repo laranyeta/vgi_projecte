@@ -84,8 +84,7 @@ void ParticleSystem::update(float deltaTime, glm::vec3 nouOrigen, glm::mat4 Matr
 void ParticleSystem::generaParticle(glm::vec3 origen, glm::mat4 MatriuTG) {
     for (auto& p : particles) {
         if (!p.isActiva()) {
-            glm::vec3 offset = glm::vec3(0.3f, 0.0f, 0.0f); //sumem 0.3 a eix X
-            glm::vec3 origenParticle = origen + offset; //particules es generen al tub d'escap, no al centre de la nau
+            glm::vec3 origenParticle = origen; //particules es generen al tub d'escap, no al centre de la nau
             glm::vec4 transOrigen = MatriuTG * glm::vec4(origenParticle, 1.0f);
             glm::vec3 novaDireccio = glm::normalize(glm::vec3(
                 (static_cast<float>(rand()) / RAND_MAX - 0.05f),
