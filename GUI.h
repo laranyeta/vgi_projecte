@@ -64,6 +64,8 @@ public:
 	void MostrarAlerta(ImVec2* screenSize, const Alerta& alerta, float posY);
 	void GestionarAlertes(ImVec2* screenSize);
 	void AfegirAlerta(int tipus, const char* text, float temps);
+	void MostrarPantallaGuanyador(ImVec2* screenSize);
+	void MostrarPantallaPerdedor(ImVec2* screenSize);
 	void MostrarPantallaMenuJugador(ImVec2* screenSize);
 	void DibuixarBarraDistanciaPlaneta(float distancePercentage, ImVec2 bar, ImVec2 position);
 	float distanciaEntrePunts(const ImVec2& a, const ImVec2& b);
@@ -121,6 +123,8 @@ private:
 	bool show_config_controladors = false;
 	bool show_config_credits = false;
 
+	bool show_winner = false;
+	bool show_loser = false;
 
 	//Minimapa
 	bool minimapas_circulars = true;
@@ -146,9 +150,9 @@ private:
 	ImFont* barlowtitleDown;
 
 	int PlanetOrigen = -1;
-	int PlanetDesti = -1;
+	int PlanetDesti = 1;
 	//static int selectedIndex = 0;  // Índex del botó seleccionat
-	int tamanySS = 200;
+	int tamanySS = 400;
 
 	GLuint mars;
 	GLuint soyut;

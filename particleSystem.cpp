@@ -164,4 +164,4 @@ void ParticleSystem::render(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat
         glBindVertexArray(0);
     }
 }
-bool mostraParticles = true;
+bool mostraParticles = false;

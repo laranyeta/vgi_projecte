@@ -1658,6 +1658,7 @@ float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecuti
 		{
 			tempsIniciPartida = time;
 			init = true;
+			mostraParticles = false;
 		}
 	}
 	return tempsIniciPartida;

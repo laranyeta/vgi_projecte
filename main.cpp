@@ -4099,7 +4099,7 @@ void Moviment_Nau2()
 
 
 				//Fletxes
-				if (buttons[13] == GLFW_PRESS) {
+				/*if (buttons[13] == GLFW_PRESS) {
 					nau.move(nau.getU() * -(float)fact_nau);
 					nau.incPotencia();
 					nau.decFuel();
@@ -4118,7 +4118,30 @@ void Moviment_Nau2()
 					nau.move(nau.getV() * -(float)fact_nau);
 					nau.incPotencia();
 					nau.decFuel();
+				}*/
+
+				if (axes[2] < -0.5f) {
+					nau.move(nau.getU() * -(float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
 				}
+				if (axes[2] > 0.5f) {
+					nau.move(nau.getU() * (float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+				if (axes[3] < -0.5f) {
+					nau.move(nau.getV() * (float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+				if (axes[3] > 0.5f) {
+					nau.move(nau.getV() * -(float)fact_nau);
+					nau.incPotencia();
+					nau.decFuel();
+				}
+
+				
 			}
 
 			//Bumpers LB I RB

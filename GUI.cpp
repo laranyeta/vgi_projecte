@@ -25,7 +25,7 @@ void GUI::inicialitzarImatges() {
 void GUI::inicialitzarFonts(ImGuiIO& io) {
 	droidsans = io.Fonts->AddFontFromFileTTF("textures/menu/DroidSans.ttf", 18.0f);
 	silkscreen = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Regular.ttf", 24.0f);
-	silkscreentitle = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 150.0f);
+	silkscreentitle = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 90.0f);
 	silkscreensubtitle = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 58.0f);
 	silkscreenh3 = io.Fonts->AddFontFromFileTTF("textures/menu/Silkscreen-Bold.ttf", 36.0f);
 	rainyhearts = io.Fonts->AddFontFromFileTTF("textures/menu/rainyhearts.ttf", 18.0f);
@@ -44,7 +44,7 @@ void GUI::DrawRotatedImage(ImVec2* screenSize, ImTextureID texture, ImVec2 pos, 
 
 	ImGui::SetNextWindowPos(ImVec2(screenSize->x * pos.x, screenSize->y * pos.y));
 	ImGui::SetNextWindowSize(ImVec2(1920, 1080));
-	ImGui::Begin("Imatge Terra rot", &show_user_windows, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar);
+	ImGui::Begin("Imatge Terra rot", &show_user_windows, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoTitleBar);
 
 	// Calcula el centre de la imatge dins la finestra
 	ImVec2 window_pos = ImGui::GetWindowPos();
@@ -99,7 +99,7 @@ void GUI::inicialitzarSons(irrklang::ISoundEngine* temp_engine, irrklang::ISound
 
 void GUI::inicalitzarInterficieGrafica(ImVec2* screenSize) {
 	if (show_fons) {
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav |
 			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoInputs;
 
 		//GLuint my_image_texture = loadIMA_SOIL("textures/menu/space2.jpg");
@@ -161,6 +161,12 @@ void GUI::inicalitzarInterficieGrafica(ImVec2* screenSize) {
 
 	if (show_game_settings) {
 		MostrarPantallaConfiguracio(screenSize);
+	}
+	if (show_winner) {
+		MostrarPantallaGuanyador(screenSize);
+	}
+	if (show_loser) {
+		MostrarPantallaPerdedor(screenSize);
 	}
 }
 
@@ -227,7 +233,7 @@ void GUI::MostrarPantallaInicial(ImVec2* screenSize) {
 	float windowY = screenSize->y * 0.2f;  // Centrar verticalment a la posició 20% de l'altura de la pantalla
 	ImGui::SetNextWindowPos(ImVec2(windowX + 160, windowY - 40));
 	ImGui::SetNextWindowSize(ImVec2(700, 200));
-	ImGui::Begin("TitolUp", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::Begin("TitolUp", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav);
 	ImGui::PushFont(opensanstitleUp);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
 	ImGui::Text("S   O   L   A   R");
@@ -237,7 +243,7 @@ void GUI::MostrarPantallaInicial(ImVec2* screenSize) {
 
 	ImGui::SetNextWindowPos(ImVec2(windowX, windowY));
 	ImGui::SetNextWindowSize(ImVec2(900, 400));
-	ImGui::Begin("TitolDown", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::Begin("TitolDown", &show_user_windows, window_flags | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoInputs);
 	ImGui::PushFont(barlowtitleDown);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
 	ImGui::Text("SPRINT");
@@ -616,6 +622,7 @@ void GUI::MostrarPantallaConfiguracio(ImVec2* screenSize) {
 		if (ImGui::Button("Dibuixa Orbita Completa", tamany_buttons_dins_config)) {
 			paintorbit = !paintorbit;
 		}
+		ImGui::SameLine();
 		if (ImGui::Button("Mostra Particules", tamany_buttons_dins_config)) {
 			mostraParticles = !mostraParticles;
 		}
@@ -1662,7 +1669,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	//std::cout << " x :" << posnau.x << "  y :" << posnau.y << "  z :" << posnau.z << std::endl;
 	//bool isNearAnyPlanet = false;
 	float llindar = DISTANCIA_DEFAULT_TERRA * 0.4;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
-	float llindarAlertaPerill = DISTANCIA_DEFAULT_TERRA * 0.1;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
+	//float llindarAlertaPerill = DISTANCIA_DEFAULT_TERRA * 0.05;  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
 	float minim = std::numeric_limits<float>::infinity();  // Llindar de distància per determinar si estàs a prop (per exemple, 10 unitats)
 	int planetaAprop = -1;
 	int planetaMoltAprop = -1;
@@ -1684,7 +1691,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 			minim = dist;
 			planetaAprop = i;
 			// Comprovar si el punt està MOLT a prop del planeta
-			if (dist < llindarAlertaPerill) {
+			if (dist < PLANETES[i].getRadi()*1.5) {
 				planetaMoltAprop = i;
 				//isNearAnyPlanet = true;
 				//std::cout << "Estàs MOLT APROP " << PLANETES[i].getName() << "!" << std::endl;
@@ -1720,7 +1727,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	}*/
 	//std::cout << PLANETES[PlanetOrigen].getPosition().x << std::endl;
 	ImVec2 winsize(200, 35);
-	ImGui::SetNextWindowPos(ImVec2(screenSize->x - winsize.x - 10, 10.0f), ImGuiCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(screenSize->x - winsize.x - 10, (screenSize->y - winsize.y)/2), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(winsize);
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, colorVerd); // Fons verd brillant (#00bf63)
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 15.0f);
@@ -1757,7 +1764,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PopStyleVar();
 
 	if (planetaMoltAprop >= 0) {
-		AfegirAlerta(3, "Alerta !!! Orbita Baixa Perill",2.0f);
+		AfegirAlerta(3, "Alerta !!! Orbita Baixa Perill",1.0f);
 	}
 
 
@@ -1771,8 +1778,8 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 0));
 	double velocitat = nau->getSpeed();
 
-	double dist = distanciaEuclidiana(nau->getO(), PLANETES[PlanetDesti].getPosition());
-	double distOrigen = distanciaEuclidiana(PLANETES[PlanetOrigen].getPosition(), PLANETES[PlanetDesti].getPosition());
+	double dist = distanciaEuclidiana(nau->getO(), PLANETES[PlanetDesti].getPosition()) - PLANETES[PlanetDesti].getRadi()*1.5;
+	double distOrigen = distanciaEuclidiana(PLANETES[PlanetOrigen].getPosition(), PLANETES[PlanetDesti].getPosition()) - PLANETES[PlanetOrigen].getRadi() * 1.5 - PLANETES[PlanetDesti].getRadi() * 1.5;
 
 	if (ImGui::Begin("Velocimetres", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -1814,7 +1821,24 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 			//Alerta(screenSize, 1, "Ja queda poc per arribar al Destí");
 			AfegirAlerta(1, "Ja queda poc per arribar al Destí", 2.0f);
 		}
+
+		//Comprovar si ha guanyat
+		if (percentage >= 0.95f) {
+			show_game_window = false;
+			pause = true;
+			so_alerta->setIsPaused(true);
+			show_winner = true;
+		}
+
+		if (nau->getLife() <= 0.0f) {
+			show_game_window = false;
+			pause = true;
+			so_alerta->setIsPaused(true);
+			show_loser = true;
+		}
 	}
+
+
 
 	ImVec2 espai(0.0f, 30.0f);
 	// Dades de progrés
@@ -2974,6 +2998,153 @@ void GUI::AfegirAlerta(int tipus, const char* text, float temps) {
 	//}
 }
 
+
+
+// Funció per mostrar la pantalla de guanyador
+void GUI::MostrarPantallaGuanyador(ImVec2* screenSize) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse| ImGuiWindowFlags_NoScrollbar;
+
+	// Configurar la finestra principal
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(*screenSize);
+	ImGui::Begin("Pantalla de Guanyador", &show_winner, window_flags | ImGuiWindowFlags_NoBackground);
+
+	// Calcular la posició centrada
+	float centerX = screenSize->x * 0.5f;  // Centre horitzontal
+	float startY = screenSize->y * 0.3f;   // Posició inicial vertical (30% altura)
+	float child_height = 80;
+	float child_width = 1500;
+	float spacing = 20;                    // Espai entre els Childs
+
+	// --- Primer Child: Missatge principal ---
+
+	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY));  // Centrar el text
+	ImGui::BeginChild("TitolUp_G", ImVec2(child_width, child_height), false, ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(silkscreentitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Has arribat al teu destí!");
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::EndChild();
+
+	// --- Segon Child: Missatge de puntuació ---
+
+	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + child_height + spacing));  // Centrar el text
+	ImGui::BeginChild("TitolDown_G_Punts", ImVec2(child_width, child_height), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(silkscreensubtitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Has obtingut 4000 Punts");
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::EndChild();
+
+	// --- Tercer Child: Resultats finals ---
+	
+	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + 2 * (child_height + spacing)));  // Centrar el text
+	ImGui::BeginChild("TitolDown_G_Resultats", ImVec2(child_width, child_height*3), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(silkscreenh3);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Temps Final: %.2f segons", m_time);
+	ImGui::Text("Vida restant: %.2f %", nau->getLife() * 100.0f);
+	ImGui::Text("Combustible restant: %.2f %", nau->getFuel() * 100.0f);
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::EndChild();
+
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HoverButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ActiveButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_Text, TextMenuPausa);
+	// Arrodoniment
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
+	// --- Botó centrat ---
+	float buttonWidth = 200;  // Amplada del botó
+	float buttonHeight = 50;  // Alçada del botó
+	ImGui::SetCursorPos(ImVec2(centerX - buttonWidth * 0.5f, startY + 6 * (child_height + spacing) + 10));  // Centrar el botó
+	if (ImGui::Button("Sortir del Joc", ImVec2(buttonWidth, buttonHeight))) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(4);
+	ImGui::End();
+}
+
+// Funció per mostrar la pantalla de guanyador
+void GUI::MostrarPantallaPerdedor(ImVec2* screenSize) {
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
+
+	// Configurar la finestra principal
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(*screenSize);
+	ImGui::Begin("Pantalla de Guanyador", &show_winner, window_flags | ImGuiWindowFlags_NoBackground);
+
+	// Calcular la posició centrada
+	float centerX = screenSize->x * 0.5f;  // Centre horitzontal
+	float startY = screenSize->y * 0.3f;   // Posició inicial vertical (30% altura)
+	float child_height = 80;
+	float child_width = 1500;
+	float spacing = 20;                    // Espai entre els Childs
+
+	// --- Primer Child: Missatge principal ---
+
+	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY));  // Centrar el text
+	ImGui::BeginChild("TitolUp_G", ImVec2(child_width, child_height), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(silkscreentitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, colorVermell); // Color blanc
+	ImGui::Text("No ho has Aconseguit");
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::EndChild();
+
+	// --- Segon Child: Missatge de puntuació ---
+
+	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + child_height + spacing));  // Centrar el text
+	ImGui::BeginChild("TitolDown_G_Punts", ImVec2(child_width, child_height), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(silkscreensubtitle);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Has obtingut 4000 Punts");
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::EndChild();
+
+	// --- Tercer Child: Resultats finals ---
+
+	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + 2 * (child_height + spacing)));  // Centrar el text
+	ImGui::BeginChild("TitolDown_G_Resultats", ImVec2(child_width, child_height * 3), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
+	ImGui::PushFont(silkscreenh3);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
+	ImGui::Text("Temps Final: %.2f segons", m_time);
+	ImGui::Text("Vida restant: %.2f", nau->getLife() * 100.0f);
+	ImGui::Text("Combustible restant: %.2f", nau->getFuel() * 100.0f);
+	ImGui::PopStyleColor();
+	ImGui::PopFont();
+	ImGui::EndChild();
+
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HoverButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ActiveButtonMenuPausa);
+	ImGui::PushStyleColor(ImGuiCol_Text, TextMenuPausa);
+	// Arrodoniment
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 15.0f); // Canvia el valor per ajustar el grau d'arrodoniment
+
+	// --- Botó centrat ---
+	float buttonWidth = 200;  // Amplada del botó
+	float buttonHeight = 50;  // Alçada del botó
+	ImGui::SetCursorPos(ImVec2(centerX - buttonWidth * 0.5f, startY + 6 * (child_height + spacing) + 10));  // Centrar el botó
+	if (ImGui::Button("Sortir del Joc", ImVec2(buttonWidth, buttonHeight))) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(4);
+	ImGui::End();
+}
 
 
 
