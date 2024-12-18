@@ -1075,7 +1075,8 @@ void IniciarSimulador() {
 
 
 	//std::cout << PlanetOrigen << std::endl;
-	nau.setPosition(vec3(PLANETES[INTERFICIE.getPlanetaOrigen()].getPosition().x + 20.0f, PLANETES[INTERFICIE.getPlanetaOrigen()].getPosition().y + 20.0f, 0));
+
+	
 	//nau.getCam().getO().x
 	
 	//opvN.x = PLANETES[PlanetOrigen].getPosition().x + 20.0f;
@@ -1250,6 +1251,11 @@ void IniciarSimulador() {
 
 	nau.setPlanetaDesti(INTERFICIE.getPlanetaDesti());
 	nau.setPlanetaOrigen(INTERFICIE.getPlanetaOrigen());
+
+	if (INTERFICIE.getEsExploracio())
+		nau.setPosition(vec3(20.0f, 20.0f, 0));
+	else
+		nau.setPosition(vec3(PLANETES[INTERFICIE.getPlanetaOrigen()].getPosition().x + 20.0f, PLANETES[INTERFICIE.getPlanetaOrigen()].getPosition().y + 20.0f, 0));
 
 	free(nomOBJEstacio); 
 }
@@ -3932,6 +3938,7 @@ void Moviment_Nau()
 }
 void Moviment_Nau2()
 {
+	std::cout << " X: " << nau.getO().x << " Y: " << nau.getO().y << " Z: " << nau.getO().z << std::endl;
 	double fact_nau = 2.0 * G_DELTA;
 	double fact_ang_nau = 45.0 * G_DELTA;
 	float zoom = 10.0f * G_DELTA;
@@ -4028,7 +4035,7 @@ void Moviment_Nau2()
 
 		if (pressE)
 			nau.rotN((float)fact_ang_nau);
-
+		
 
 
 		//GAMEPAD
