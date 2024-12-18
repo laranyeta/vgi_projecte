@@ -154,7 +154,8 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	case PROVA_PLANETA:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		//LCR - Renderitzat particules
-
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		tubEscapR = nau.getO() - vec3(nau.getR() * vec4(vec3(0.3f, 0.08f, 0.0f), 1.0f));
 		tubEscapL = nau.getO() - vec3(nau.getR() * vec4(vec3(0.3f, -0.09f, 0.0f), 1.0f));
 		particleSystem(sh_programID, MatriuVista, MatriuTG, time, tubEscapR, ParticleType::Nau);
@@ -166,13 +167,6 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object, nau);
 		estacions(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, EstacioOBJ, col_object, nau);
 		joc(time, nau);
-		// Activar transpar�ncia
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		// Dibuix geometria Mar
-		color_Mar.r = 0.5;	color_Mar.g = 0.4; color_Mar.b = 0.9; color_Mar.a = 0.5;
-		// Definici� propietats de reflexi� (emissi�, ambient, difusa, especular) del material pel color de l'objecte.
-		SeleccionaColorMaterial(sh_programID, color_Mar, sw_mat);
 		// Pas ModelView Matrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
@@ -1237,13 +1231,12 @@ void renderSaturnRings(GLuint sh_programID, glm::mat4 MatriuVista, Planeta& satu
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 	glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	std::string buf("textures/saturn_ring.png");
-	GLuint img = loadIMA_SOIL(buf.c_str());
+	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, img);
+	glBindTexture(GL_TEXTURE_2D, img_anells);
 	glUniform1i(glGetUniformLocation(sh_programID, "texture0"), 0);
 
-	SetTextureParameters(img, true, true, false, true);
+	SetTextureParameters(img_anells, true, true, false, true);
 
 	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE);
 	glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);

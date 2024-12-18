@@ -143,7 +143,7 @@ void ParticleSystem::render(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat
         glUniformMatrix4fv(matLoc, 1, GL_FALSE, glm::value_ptr(modelViewProjection));
 
         std::string buf("textures/particle.png");  //carrega textura particle.png
-        GLuint texture = loadIMA_SOIL(buf.c_str());
+        GLuint texture = SOIL_load_OGL_texture("textures/particle.png", SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(glGetUniformLocation(sh_programID, "texture0"), 0);
