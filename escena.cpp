@@ -84,7 +84,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	COBJModel* objecteOBJ,
 	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ)
 {
-	vec3 pos_particules;
+	vec3 tubEscapL, tubEscapR;
 	float altfar = 0;
 	GLint npunts = 0, nvertexs = 0;
 	int i, j, k;
@@ -154,10 +154,12 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	case PROVA_PLANETA:
 		SeleccionaColorMaterial(sh_programID, col_object, sw_mat);
 		//LCR - Renderitzat particules
-		//particleSystem(sh_programID, MatriuVista, MatriuTG, time, PLANETES[0].getPosition(), ParticleType::Sol);
-		//glm::vec3 transPos = glm::vec3(nau.getR() * glm::vec4(nau.getO(), 1.0f));
-		pos_particules = nau.getO() - vec3(nau.getR() * vec4(vec3(0.3f, 0, 0.00f), 1.0f));
-		particleSystem(sh_programID, MatriuVista, MatriuTG, time, pos_particules, ParticleType::Nau);
+
+		tubEscapR = nau.getO() - vec3(nau.getR() * vec4(vec3(0.3f, 0.08f, 0.0f), 1.0f));
+		tubEscapL = nau.getO() - vec3(nau.getR() * vec4(vec3(0.3f, -0.09f, 0.0f), 1.0f));
+		particleSystem(sh_programID, MatriuVista, MatriuTG, time, tubEscapR, ParticleType::Nau);
+		particleSystem(sh_programID, MatriuVista, MatriuTG, time, tubEscapL, ParticleType::Nau);
+		
 		planeta(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, nau);
 		asteroide(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
 		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
@@ -1235,12 +1237,13 @@ void renderSaturnRings(GLuint sh_programID, glm::mat4 MatriuVista, Planeta& satu
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 	glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MatriuVista * ModelMatrix));
 	glUniformMatrix4fv(glGetUniformLocation(sh_programID, "normalMatrix"), 1, GL_FALSE, &NormalMatrix[0][0]);
-	
+	std::string buf("textures/saturn_ring.png");
+	GLuint img = loadIMA_SOIL(buf.c_str());
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, img_anells);
+	glBindTexture(GL_TEXTURE_2D, img);
 	glUniform1i(glGetUniformLocation(sh_programID, "texture0"), 0);
 
-	SetTextureParameters(img_anells, true, true, false, true);
+	SetTextureParameters(img, true, true, false, true);
 
 	glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE);
 	glUniform1i(glGetUniformLocation(sh_programID, "modulate"), GL_TRUE);
