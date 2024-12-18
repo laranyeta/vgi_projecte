@@ -1538,7 +1538,6 @@ std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime )
 
 float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecution, bool esExploracio)
 {
-	mostraParticles = false;
 
 	static bool cutScene = false;
 	static bool arrivedPlaneta = false;
@@ -1760,6 +1759,7 @@ void joc(float time, Nau& nau, bool esExploracio)
 	{
 		timeAtFirstExecution = time;
 		init = true;
+		mostraParticles = false;
 	}
 	float tempsIniciPartida = animacioInicialPlanetaDesti(time, nau, timeAtFirstExecution, esExploracio);
 	timeStartGame = tempsIniciPartida;

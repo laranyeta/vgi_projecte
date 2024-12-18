@@ -1836,7 +1836,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 			show_winner = true;
 		}
 
-		if (nau->getLife() <= 0.0f) {
+		if (nau->getLife() <= 0.05f) {
 			show_game_window = false;
 			pause = true;
 			so_alerta->setIsPaused(true);
