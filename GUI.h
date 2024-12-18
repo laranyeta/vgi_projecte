@@ -139,6 +139,7 @@ private:
 	bool estacions_minimapa = true;
 	bool orbites_minimapa = true;
 
+	float profunditatMaxima = 120.0f;
 
 	ImFont* rainyhearts;
 	ImFont* silkscreen;
@@ -227,6 +228,8 @@ private:
 	//const GLFWvidmode* mode;
 	GLFWwindow* window;
 	float m_time;
+	float m_time_inici;
+	bool init = false;
 	Nau* nau;
 	vector<Alerta> alertes;
 };
@@ -238,3 +241,5 @@ void ShowEntornVGIWindow(bool* p_open, int pos_x, int pos_y, int size_x, int siz
 void MostrarMenuDebug(ImVec2* screenSize);
 
 std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);
+int getFinalScore(Nau& nau, float tempsIniciPartida, float time);
+double timeToCollision(const glm::vec3& shipPos, const glm::vec3& shipVel, float shipRadius, const glm::vec3& astPos, const glm::vec3& astVel, float astRadius);

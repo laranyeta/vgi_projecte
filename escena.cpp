@@ -381,9 +381,14 @@ int getFinalScore(Nau& nau, float tempsIniciPartida, float time)
 	int puntuacioVida = multiplicadorVida * (lifeNau / 1.0f);
 	int puntuacioFuel = multiplicadorFuel * (fuelNau / 1.0f);
 	int puntuacioTemps = multiplicadorTemps * (distOrigenDesti / tempsFinalPartida);
-	
+	//std::cout << "puntuacioVida " << puntuacioVida << std::endl;
+	//std::cout << "puntuacioFuel " << puntuacioFuel << std::endl;
+	//std::cout << "puntuacioTemps " << puntuacioTemps << std::endl;
+
 	int puntuacioBase = puntuacioFuel + puntuacioTemps + puntuacioVida;
-	int puntuacio = puntuacioBase * (multiplicadorColisions * nombreColisionsNau);
+	//std::cout << "puntuacioBase " << puntuacioBase << std::endl;
+	int puntuacio = puntuacioBase + (multiplicadorColisions * nombreColisionsNau);
+	//std::cout << "puntuacio " << puntuacio << std::endl;
 
 	if (puntuacio < 0) return 0;
 
@@ -848,8 +853,8 @@ void generarAsteroidesCinturo() {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * glm::pi<float>()); // Angle al voltant del cercle
-	std::uniform_real_distribution<float> radius_dist(160.0f, 180.0f);               // Radi del cercle (cinturó 1)
-	std::uniform_real_distribution<float> radius_dist2(1560.0f, 1580.0f);               // Radi del cercle (cinturó 2)
+	std::uniform_real_distribution<float> radius_dist(DISTANCIA_DEFAULT_TERRA*2.6, DISTANCIA_DEFAULT_TERRA*2.8);               // Radi del cercle (cinturó 1)
+	std::uniform_real_distribution<float> radius_dist2(DISTANCIA_DEFAULT_TERRA * 30, DISTANCIA_DEFAULT_TERRA * 30.2);               // Radi del cercle (cinturó 2)
 	std::uniform_real_distribution<float> height_dist(-8.0f, 8.0f);                // Alçada limitada en l'eix Y
 	std::uniform_real_distribution<float> scale_dist(0.1f, 0.5f);                    // Escala dels asteroides
 	std::uniform_real_distribution<double> mass_dist(1.0e12, 1.0e13);                // Massa dels asteroides
@@ -862,10 +867,10 @@ void generarAsteroidesCinturo() {
 		//std::cout << NUM_ASTEROIDES_CINTURO / 2 << std::endl;
 		//std::cout << i << std::endl;
 		//std::cout << "  " << std::endl;
-		if (i >= NUM_ASTEROIDES_CINTURO/2) {
-			radius = radius_dist2(gen);
-		}else{
+		if (i <= NUM_ASTEROIDES_CINTURO / 3) {
 			radius = radius_dist(gen);
+		}else{
+			radius = radius_dist2(gen);
 		}
 		float height = height_dist(gen); // Posició en l'eix vertical (Y)
 
@@ -1533,7 +1538,8 @@ std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime )
 
 float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecution)
 {
-	
+	mostraParticles = false;
+
 	static bool cutScene = false;
 	static bool arrivedPlaneta = false;
 	static bool returning = false;
@@ -1656,7 +1662,7 @@ float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecuti
 		{
 			tempsIniciPartida = time;
 			init = true;
-			mostraParticles = false;
+			mostraParticles = true;
 		}
 	}
 	return tempsIniciPartida;

@@ -1589,7 +1589,7 @@ void GUI::MostrarMapaSistemaSolar(ImVec2* screenSize) {
 		ImGui::SetCursorPos(MapaPosition);
 		ImGui::BeginChild("Mapa Sistema Solar", MapaSize, false, ImGuiWindowFlags_NoBackground);
 		float temp = tamanySS;
-		tamanySS = tamanySS * 10;
+		tamanySS = tamanySS * 20;
 		crearMiniMapaCentratSol(MapaSize, MapaPosition);
 		tamanySS = temp;
 		ImGui::EndChild();
@@ -1601,7 +1601,10 @@ void GUI::MostrarMapaSistemaSolar(ImVec2* screenSize) {
 }
 
 void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
-
+	if (!init) {
+		init = true;
+		m_time_inici = m_time;
+	}
 	if (musica_menu) {
 		if (!musica_menu->getIsPaused())
 		{
@@ -1788,7 +1791,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 			ImGui::Text("Distancia: %.2f ", dist);
 			ImGui::Text("Distancia Origen: %.2f ", distOrigen);
 		}
-		ImGui::Text("Temps: %.2f ", m_time);
+		ImGui::Text("Temps: %.2f ", m_time - m_time_inici);
 		//ImGui::Text("Puntuació: %.2f ", m_time);
 
 		//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 0.0f, 150.0f, 150.0f, true); // RPM speedometer (3000 RPM)
@@ -1817,7 +1820,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 		// Dibuixar la barra amb el percentatge calculat
 		DibuixarBarraDistanciaPlaneta(percentage, barra,position);
 
-		if (percentage >= 0.9f) {
+		if (percentage >= 0.7f) {
 			//Alerta(screenSize, 1, "Ja queda poc per arribar al Destí");
 			AfegirAlerta(1, "Ja queda poc per arribar al Destí", 2.0f);
 		}
@@ -1865,6 +1868,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 		}
 		else if (fuel < 0.25f) {
 			colorFuel = colorVermell;
+			AfegirAlerta(2, "Tens Poc Combustible busca un Diposit", 2.0f);
 		}
 		float life = nau->getLife();
 		if (life < 0.50f && life > 0.25f) {
@@ -1872,6 +1876,7 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 		}
 		else if (life < 0.25f) {
 			colorLife = colorVermell;
+			AfegirAlerta(2, "Tens Poca Vida busca una Estació", 2.0f);
 		}
 		CircularProgressBar("Combustible", fuel, ImVec2(100, 100), colorFuel);
 		ImGui::SameLine();
@@ -2299,7 +2304,7 @@ void GUI::crearMiniMapaCentratJugadorCircular(ImVec2 minimapSize, ImVec2 minimap
 void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix, float borderThickness) {
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	ImVec2 p = ImGui::GetCursorScreenPos();
-	vec3 worldSize(tamanySS, tamanySS, 0);
+	vec3 worldSize(tamanySS, tamanySS, tamanySS);
 
 	// Centre del radar i radi
 	ImVec2 center = ImVec2(radarPosition.x + radarSize.x / 2, radarPosition.y + radarSize.y / 2);
@@ -2341,24 +2346,64 @@ void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix,
 		2.0f            // Gruix de la línia
 	);
 
+	// Dibuixar el triangle que representa el jugador
+	float triangleSize = 5.0f; // Mida del triangle
+	float orientacioJugador = nau->getAngleV(); // Orientació del jugador en radians
+
+	// Calcular els tres punts del triangle
+	auto calcularPuntRotat = [&](float offsetX, float offsetY) {
+		float cosAngle = cos(orientacioJugador);
+		float sinAngle = sin(orientacioJugador);
+		float x = offsetX * cosAngle - offsetY * sinAngle;
+		float y = offsetX * sinAngle + offsetY * cosAngle;
+		return ImVec2(center.x + x, center.y + y);
+		};
+
+	ImVec2 puntSuperior = calcularPuntRotat(0.0f, -triangleSize); // Punt superior (cap del triangle)
+	ImVec2 puntEsquerra = calcularPuntRotat(-triangleSize / 2.0f, triangleSize); // Punt inferior esquerre
+	ImVec2 puntDret = calcularPuntRotat(triangleSize / 2.0f, triangleSize); // Punt inferior dret
+
+	// Dibuixar el triangle
+	drawList->AddTriangleFilled(puntSuperior, puntEsquerra, puntDret, colorPlanetes); // Color groc
+
 
 	// Dibuixar asteroides que estan a 20 unitats davant o darrere
 	for (const auto& asteroide : ASTEROIDES) {
-		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugadorVertical(asteroide.getPosition(), worldSize, radarSize, radarPosition, nau->getO());
+		glm::vec3 posicioObjecte = asteroide.getPosition();
+		float distanciaJugadorAsteroide = glm::distance(posicioObjecte, nau->getO());
 
-		// Comparar l'altura de l'asteroide amb la del jugador
-		float diferenciaAltura = asteroide.getPosition().z - nau->getO().z;
+		// Comprovar si l'asteroide està dins d'un radi de perill al voltant del jugador
+		float radiPerill = 100.0f; // Radi màxim per considerar un asteroide proper
 
-		if (distanciaEntrePunts(asteroidePos, center) <= radius) {
-			// Diferenciar visualment si està per sobre o per sota
-			ImU32 colorAsteroide = diferenciaAltura > 0
-				? IM_COL32(0, 255, 0, 255) // Verd (per sobre)
-				: IM_COL32(255, 0, 0, 255); // Vermell (per sota)
+		if (distanciaJugadorAsteroide <= radiPerill) {
+			ImVec2 objectePos = convertirAPosicioMiniMapaDesdeJugadorVertical(
+				posicioObjecte, worldSize, radarSize, radarPosition, nau->getO()
+			);
 
-			// Dibuixar asteroide
-			drawList->AddCircleFilled(asteroidePos, 2.0f, colorAsteroide);
+			// Comprovar si l'asteroide està dins del radar
+			if (distanciaEntrePunts(objectePos, center) <= radius) {
+				// Comprovar si l'asteroide està per sobre o per sota del jugador
+				float diferenciaAltura = posicioObjecte.y - nau->getO().y;
+
+				// Depenent de la diferència d'altura, definir el color (més clars per sobre, més foscos per sota)
+				ImU32 colorAsteroide = (diferenciaAltura > 0)
+					? IM_COL32(0, 255, 0, 255)  // Verd (per sobre del jugador)
+					: IM_COL32(255, 0, 0, 255); // Vermell (per sota del jugador)
+
+				// Escalar el radi segons la distància al jugador
+				float radiMinim = 2.0f;  // Radi mínim quan està lluny
+				float radiMaxim = 20.0f; // Radi màxim quan està molt a prop
+				float radiAsteroide = radiMinim + (1.0f - (distanciaJugadorAsteroide / radiPerill)) * (radiMaxim - radiMinim);
+
+				// Dibuixar l'asteroide amb el radi escalat
+				drawList->AddCircleFilled(objectePos, radiAsteroide, colorAsteroide);
+			}
 		}
 	}
+
+
+
+
 	/*
 	for (const auto& asteroide : ASTEROIDESCINTURO) {
 		ImVec2 asteroidePos = convertirAPosicioMiniMapaDesdeJugadorVertical(
@@ -2428,36 +2473,6 @@ void GUI::crearRadarVertical(ImVec2 radarSize, ImVec2 radarPosition, bool abaix,
 			}
 		}
 	}*/
-
-	// Calcula la posició del jugador al radar
-	/*ImVec2 jugadorPos = convertirAPosicioMiniMapaDesdeJugador(nau->getO(), worldSize, radarSize, p, nau->getO());
-
-	// Configuració del triangle rectangular
-	float baseAmple = 8.0f;    // Ample de la base del triangle
-	float orientacio_2 = nau->getAngle(); // Orientació en radians
-
-	// Càlcul del vèrtex de la punta (a la direcció del jugador)
-	ImVec2 p1 = ImVec2(
-		jugadorPos.x + cos(orientacio_2) * baseAmple,
-		jugadorPos.y + sin(orientacio_2) * baseAmple
-	);
-
-	// Càlcul del primer vèrtex de la base (esquerra)
-	ImVec2 p2 = ImVec2(
-		jugadorPos.x + cos(orientacio_2 + IM_PI / 2.0f) * baseAmple,
-		jugadorPos.y + sin(orientacio_2 + IM_PI / 2.0f) * baseAmple
-	);
-
-	// Càlcul del segon vèrtex de la base (dreta)
-	ImVec2 p3 = ImVec2(
-		jugadorPos.x + cos(orientacio_2 - IM_PI / 2.0f) * baseAmple,
-		jugadorPos.y + sin(orientacio_2 - IM_PI / 2.0f) * baseAmple
-	);
-
-	// Dibuixar el triangle al radar
-	drawList->AddTriangleFilled(p1, p2, p3, colorJugador); // Color groc
-	*/
-
 
 	// Border del radar
 	drawList->AddCircle(center, radius + (borderThickness / 2), color_interficie, 64, borderThickness);
@@ -2876,15 +2891,15 @@ ImVec2 GUI::convertirAPosicioMiniMapaDesdeJugadorVertical(const glm::vec3& posic
 	// Desplaçar les coordenades del món perquè el centre sigui la posició del jugador
 	glm::vec3 posicioDesplacada = posicioMon - posicioJugador;
 
-	// Calcular l'escala per als eixos X i Y
-	float scaleX = minimapSize.x / worldSize.x; // Amplada del radar (eix X del món)
-	float scaleY = minimapSize.y / worldSize.y; // Alçada del radar (eix Y del món)
+	// Calcular l'escala per als eixos Y i Z
+	float scaleY = minimapSize.x / worldSize.y; // Amplada del radar (eix Y del món)
+	float scaleZ = minimapSize.y / worldSize.z; // Alçada del radar (eix Z del món)
 
-	// Convertir a coordenades 2D del radar vertical
-	float posX = minimapPosition.x + (posicioDesplacada.x * scaleX) + (minimapSize.x / 2.0f);
-	float posY = minimapPosition.y + (posicioDesplacada.y * scaleY) + (minimapSize.y / 2.0f);
+	// Convertir a coordenades 2D del radar YZ
+	float posY = minimapPosition.x + (posicioDesplacada.y * scaleY) + (minimapSize.x / 2.0f);
+	float posZ = minimapPosition.y + (posicioDesplacada.z * scaleZ) + (minimapSize.y / 2.0f);
 
-	return ImVec2(posX, posY);
+	return ImVec2(posY, posZ);
 }
 
 
@@ -3002,6 +3017,7 @@ void GUI::AfegirAlerta(int tipus, const char* text, float temps) {
 
 // Funció per mostrar la pantalla de guanyador
 void GUI::MostrarPantallaGuanyador(ImVec2* screenSize) {
+	nau->setEnableControls(false);
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse| ImGuiWindowFlags_NoScrollbar;
 
@@ -3033,19 +3049,24 @@ void GUI::MostrarPantallaGuanyador(ImVec2* screenSize) {
 	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + child_height + spacing));  // Centrar el text
 	ImGui::BeginChild("TitolDown_G_Punts", ImVec2(child_width, child_height), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
 	ImGui::PushFont(silkscreensubtitle);
+	//std::cout << "Temps_inici " << m_time_inici << std::endl;
+	//std::cout << "Temps_total " << m_time << std::endl;
+	//std::cout << "Punts " << getFinalScore(*nau, m_time_inici, m_time) << std::endl;
+
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
-	ImGui::Text("Has obtingut 4000 Punts");
+	std::string texts_punts = "Has obtingut " + to_string(getFinalScore(*nau, m_time_inici, m_time))+" Punts";
+	
+	ImGui::Text(texts_punts.c_str());
 	ImGui::PopStyleColor();
 	ImGui::PopFont();
 	ImGui::EndChild();
-
 	// --- Tercer Child: Resultats finals ---
 	
 	ImGui::SetCursorPos(ImVec2(centerX - child_width * 0.5f, startY + 2 * (child_height + spacing)));  // Centrar el text
 	ImGui::BeginChild("TitolDown_G_Resultats", ImVec2(child_width, child_height*3), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
 	ImGui::PushFont(silkscreenh3);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
-	ImGui::Text("Temps Final: %.2f segons", m_time);
+	ImGui::Text("Temps Final: %.2f segons", m_time-m_time_inici);
 	ImGui::Text("Vida restant: %.2f %", nau->getLife() * 100.0f);
 	ImGui::Text("Combustible restant: %.2f %", nau->getFuel() * 100.0f);
 	ImGui::PopStyleColor();
@@ -3075,6 +3096,7 @@ void GUI::MostrarPantallaGuanyador(ImVec2* screenSize) {
 
 // Funció per mostrar la pantalla de guanyador
 void GUI::MostrarPantallaPerdedor(ImVec2* screenSize) {
+	nau->setEnableControls(false);
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
 
@@ -3107,7 +3129,7 @@ void GUI::MostrarPantallaPerdedor(ImVec2* screenSize) {
 	ImGui::BeginChild("TitolDown_G_Resultats", ImVec2(child_width, child_height * 3), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs);
 	ImGui::PushFont(silkscreenh3);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f)); // Color blanc
-	ImGui::Text("Temps Final: %.2f segons", m_time);
+	ImGui::Text("Temps Final: %.2f segons", m_time-m_time_inici);
 	ImGui::Text("Vida restant: %.2f", nau->getLife() * 100.0f);
 	ImGui::Text("Combustible restant: %.2f", nau->getFuel() * 100.0f);
 	ImGui::PopStyleColor();

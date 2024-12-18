@@ -3554,6 +3554,7 @@ void Teclat_Nau(int key, int action)
 			//pressM = status;
 			if (press) {
 				INTERFICIE.switchMapaWindow();
+				INTERFICIE.switchPause();
 			}
 			break;
 			// Tecla cursor amunt
@@ -4156,6 +4157,7 @@ void Moviment_Nau2()
 			// Lletres A (botó 0)
 			if (buttons[0] == GLFW_PRESS && !buttonsPrev[0]) {
 				INTERFICIE.switchMapaWindow();  // Acció només en el primer "press"
+				INTERFICIE.switchPause();
 			}
 			buttonsPrev[0] = (buttons[0] == GLFW_PRESS);
 
@@ -4184,7 +4186,6 @@ void Moviment_Nau2()
 			// BACK (botó 3)
 			if (buttons[6] == GLFW_PRESS && !buttonsPrev[6]) {
 				OnFull_Screen(primary, window);
-
 			}
 			buttonsPrev[6] = (buttons[6] == GLFW_PRESS);
 
