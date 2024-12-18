@@ -82,7 +82,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 	COBJModel* objecteOBJ,
-	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ)
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ, bool esExploracio)
 {
 	vec3 tubEscapL, tubEscapR;
 	float altfar = 0;
@@ -166,7 +166,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 		asteroidesCinturo(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, TestOBJ, col_object, nau);
 		objectes(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, CombustibleOBJ, col_object, nau);
 		estacions(sh_programID, MatriuVista, MatriuTG, sw_mat, time, texturID, textur, EstacioOBJ, col_object, nau);
-		joc(time, nau);
+		joc(time, nau, esExploracio);
 		// Pas ModelView Matrix a shader
 		glUniformMatrix4fv(glGetUniformLocation(sh_programID, "modelMatrix"), 1, GL_FALSE, &ModelMatrix[0][0]);
 		NormalMatrix = transpose(inverse(MatriuVista * ModelMatrix));
@@ -373,14 +373,14 @@ int getFinalScore(Nau& nau, float tempsIniciPartida, float time)
 
 	if (lifeNau <= 0.0f)
 		return 0;
-	int multiplicadorVida = 500;
-	int multiplicadorFuel = 300;
-	int multiplicadorTemps = 10;
+	int multiplicadorVida = 1000;
+	int multiplicadorFuel = 600;
+	int multiplicadorTemps = 500;
 	int multiplicadorColisions = -50;
 
 	int puntuacioVida = multiplicadorVida * (lifeNau / 1.0f);
 	int puntuacioFuel = multiplicadorFuel * (fuelNau / 1.0f);
-	int puntuacioTemps = multiplicadorTemps * (distOrigenDesti / tempsFinalPartida);
+	int puntuacioTemps = multiplicadorTemps * (2*distOrigenDesti / tempsFinalPartida);
 	//std::cout << "puntuacioVida " << puntuacioVida << std::endl;
 	//std::cout << "puntuacioFuel " << puntuacioFuel << std::endl;
 	//std::cout << "puntuacioTemps " << puntuacioTemps << std::endl;
@@ -1536,7 +1536,7 @@ std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime )
 
 
 
-float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecution)
+float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecution, bool esExploracio)
 {
 	mostraParticles = false;
 
@@ -1553,11 +1553,25 @@ float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecuti
 	static float stayDurationPlaneta = 3.0f;
 	Planeta& planetaDesti = PLANETES[nau.getPlanetaDesti()];
 
-	
+	vec3 newUp = vec3(1.0f, 1.0f, 0.0f);
 	static vec3 offsetPlaneta = vec3(8.0f, 3.0f, 8.0f);
+	if (nau.getPlanetaDesti() == 0)
+	{
+		offsetPlaneta = vec3(40.0f, 16.0f, 40.0f);
+	}
 	if (nau.getPlanetaDesti() > 4)
 	{
+		offsetPlaneta = vec3(30.0f, 12.0f, 30.0f);
+	}
+	if (nau.getPlanetaDesti() > 6)
+	{
 		offsetPlaneta = vec3(20.0f, 8.0f, 20.0f);
+	}
+
+	if (esExploracio)
+	{
+		offsetPlaneta = vec3(0.0f, 0.0f, 500.0f);
+		vec3 newUp = vec3(0.0f, 0.0f, 0.0f);
 	}
 
 	static vec3 originPlaneta, planetaN, planetaV, planetaU, planetaP;
@@ -1565,7 +1579,7 @@ float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecuti
 
 	float currentTime = time;
 
-	if (time - timeAtFirstExecution > 4.0f && !cutScene && !arrivedPlaneta && !returning && !cutScenePlayed)
+	if (time - timeAtFirstExecution > 9.0f && !cutScene && !arrivedPlaneta && !returning && !cutScenePlayed)
 	{
 		cutScene = true;
 		cutSceneStartTime = currentTime;
@@ -1587,7 +1601,6 @@ float animacioInicialPlanetaDesti(float time, Nau& nau, float timeAtFirstExecuti
 
 		planetaN = normalize(planetPos - originPlaneta);
 
-		vec3 newUp = vec3(1.0f, 1.0f, 0.0f);
 		planetaV = normalize(cross(newUp, -planetaN));
 		planetaU = cross(planetaN, planetaV);
 		planetaP = originPlaneta + planetaN;
@@ -1738,8 +1751,8 @@ void afegirLife(Nau& nau, float time)
 		}
 	}
 }
-
-void joc(float time, Nau& nau)
+float timeStartGame = 0.0f;
+void joc(float time, Nau& nau, bool esExploracio)
 {
 	static bool init = false;
 	static float timeAtFirstExecution = 0;
@@ -1748,18 +1761,23 @@ void joc(float time, Nau& nau)
 		timeAtFirstExecution = time;
 		init = true;
 	}
-	float tempsIniciPartida = animacioInicialPlanetaDesti(time, nau, timeAtFirstExecution);
+	float tempsIniciPartida = animacioInicialPlanetaDesti(time, nau, timeAtFirstExecution, esExploracio);
+	timeStartGame = tempsIniciPartida;
 	afegirCombustible(nau);
 	afegirLife(nau, time);
 	checkCollisions(nau);
 	static double lastSpawnTime = 0.0;
 
-	if (time > 20) {
-		if (time - lastSpawnTime >= 2.0) {
+	if (tempsIniciPartida > 10) {
+		if (time - lastSpawnTime >= 1.0) {
 			spawnAsteroidToCollide(10.0, nau.getO(), nau.getVelocitat());
 			lastSpawnTime = time;
 		}
 	}
+}
+float getTimeStartGame()
+{
+	return timeStartGame;
 }
 
 

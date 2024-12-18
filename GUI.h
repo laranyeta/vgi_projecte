@@ -10,7 +10,7 @@
 #include <ImGui/imgui_internal.h>
 #include "visualitzacio.h"
 #include "particleSystem.h"
-
+#include "escena.h"
 using namespace irrklang;
 
 //#include "main.h"
@@ -92,6 +92,7 @@ public:
 	bool* getMapaWindow();
 	int getPlanetaOrigen();
 	int getPlanetaDesti();
+	bool getEsExploracio() { return es_exploracio; }
 
 	//Setters
 	void switchMenuJugadorConfig();
@@ -99,7 +100,7 @@ public:
 	void switchMapaWindow();
 private:
 	bool pause = false;
-
+	bool es_exploracio = false;
 	bool show_demo_window = false;
 	bool show_another_window = false;
 	bool show_EntornVGI_window = false;

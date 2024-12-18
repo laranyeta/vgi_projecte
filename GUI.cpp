@@ -388,6 +388,7 @@ void GUI::MostrarPantallaMenu(ImVec2* screenSize) {
 		show_pantalla_carrega = false;
 		show_game_window = true;
 		show_fons = false;
+		es_exploracio = true;
 		IniciarSimulador();
 	}
 
@@ -1786,12 +1787,14 @@ void GUI::MostrarPantallaJoc(ImVec2* screenSize) {
 
 	if (ImGui::Begin("Velocimetres", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-		ImGui::Text("Velocitat: %.2f LightSpeed", velocitat); 
+		ImGui::Text("Velocitat: %.2f m/s", velocitat*200); 
 		if (PlanetOrigen != -1 && PlanetDesti != -1) {
 			ImGui::Text("Distancia: %.2f ", dist);
 			ImGui::Text("Distancia Origen: %.2f ", distOrigen);
 		}
-		ImGui::Text("Temps: %.2f ", m_time - m_time_inici);
+		float currentTime = m_time - getTimeStartGame();
+		if (getTimeStartGame() == 0.0f) currentTime = 0.0f;
+		ImGui::Text("Temps: %.2f ", currentTime);
 		//ImGui::Text("Puntuació: %.2f ", m_time);
 
 		//DrawSpeedometer(nau->getPotencia() * 1000, 10000.0f, 0.0f, 150.0f, 150.0f, true); // RPM speedometer (3000 RPM)

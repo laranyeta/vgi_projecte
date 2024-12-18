@@ -219,7 +219,7 @@ public:
 	void setLife(float life) { m_life = life; }
 
 	//Extra
-	void increaseSpeed(double s) { m_s = m_s + s > 25 ? 25 : m_s + s < -25 ? -25 : m_s + s; }
+	void increaseSpeed(double s) { m_s = m_s + s > 10 ? 10 : m_s + s < -5 ? -5 : m_s + s; }
 	void moveS(double delta) {
 		updateVelocity();
 		move((float)(m_s * delta) * m_n);

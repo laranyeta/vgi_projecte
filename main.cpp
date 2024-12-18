@@ -670,7 +670,7 @@ void dibuixa_Escena(float time) {
 		textura, texturesID, textura_map, tFlag_invert_Y,
 		npts_T, PC_t, pas_CS, sw_Punts_Control, dibuixa_TriedreFrenet,
 		ObOBJ,				// Classe de l'objecte OBJ que conté els VAO's
-		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau, TestOBJ, CombustibleOBJ,EstacioOBJ);
+		ViewMatrix, GTMatrix, time, PROPULSIO_NAU, nau, TestOBJ, CombustibleOBJ,EstacioOBJ, INTERFICIE.getEsExploracio());
 }
 
 
@@ -3932,7 +3932,7 @@ void Moviment_Nau()
 }
 void Moviment_Nau2()
 {
-	double fact_nau = 10.0 * G_DELTA;
+	double fact_nau = 2.0 * G_DELTA;
 	double fact_ang_nau = 45.0 * G_DELTA;
 	float zoom = 10.0f * G_DELTA;
 	float fuel = nau.getFuel();
@@ -3987,7 +3987,7 @@ void Moviment_Nau2()
 			nau.incPotencia();
 			nau.decFuel();
 		}
-
+		/*
 		if (pressA && fuel > 0) {
 			nau.move(nau.getU() * -(float)fact_nau);
 			nau.incPotencia();
@@ -3999,6 +3999,7 @@ void Moviment_Nau2()
 			nau.incPotencia();
 			nau.decFuel();
 		}
+		*/
 		if (pressZ && fuel > 0) {
 			nau.move(nau.getV() * (float)fact_nau);
 			nau.incPotencia();

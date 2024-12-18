@@ -12,6 +12,8 @@
 #include "nau.h"
 #include "particleSystem.h"
 
+
+
 /* ------------------------------------------------------------------------- */
 /*                            Funcions de les escenes                        */
 /* ------------------------------------------------------------------------- */
@@ -24,7 +26,7 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 	COBJModel* objecteOBJ,
-	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ);
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ, bool esExploracio);
 
 /*MODIFIED*/
 void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5]);
@@ -43,5 +45,6 @@ void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bo
 void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object, Nau& nau);
 void particleSystem(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, glm::vec3 posObj, ParticleType pt);
 std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);
-void joc(float time, Nau& nau);
+void joc(float time, Nau& nau, bool esExploracio);
+float getTimeStartGame();
 #endif
