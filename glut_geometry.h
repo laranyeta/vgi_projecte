@@ -1,6 +1,6 @@
-//******** PRACTICA VISUALITZACIÓ GRÀFICA INTERACTIVA (Escola Enginyeria - UAB)
-//******** Entorn bàsic VS2022 MONOFINESTRA amb OpenGL 4.3, interfície GLFW, ImGui i llibreries GLM
-//******** Enric Martí Gòdia (Setembre 2024)
+//******** PRACTICA VISUALITZACIï¿½ GRï¿½FICA INTERACTIVA (Escola Enginyeria - UAB)
+//******** Entorn bï¿½sic VS2022 MONOFINESTRA amb OpenGL 4.3, interfï¿½cie GLFW, ImGui i llibreries GLM
+//******** Enric Martï¿½ Gï¿½dia (Setembre 2024)
 // glut_geometry.h: interface de de glut_geometry.cpp.
 
 /*
@@ -39,19 +39,19 @@
 /*
  * TODO BEFORE THE STABLE RELEASE:
  *
- * Following functions have been contributed by Andreas Umbach, updated by Enric Martí to VBO.
+ * Following functions have been contributed by Andreas Umbach, updated by Enric Martï¿½ to VBO.
  *
  *      glutSolidCube()          -- looks OK, VAO functions separated (*_VAO(), draw*(), deleteVBO(GL*)
  *      glutSolidCubeRGB()       -- looks OK, VAO functions separated (*_VAO(), draw*(), deleteVBO(GL*)
  *
  *  The Following functions have been updated by Nigel Stewart, based
- *  on FreeGLUT 2.0.0 implementations, updated by Enric Martí to VBO:
+ *  on FreeGLUT 2.0.0 implementations, updated by Enric Martï¿½ to VBO:
  *
  *      glutSolidSphere()       -- looks OK
  *      glutSolidCone()         -- looks OK
  *      glutSolidCylinder()     -- looks OK
  *
- * Those functions have been implemented by John Fay, updated by Enric Martí to VBO..
+ * Those functions have been implemented by John Fay, updated by Enric Martï¿½ to VBO..
  *
  *      glutSolidTorus()				-- looks OK, VBO functions separated (*_VBO(), draw*(), deleteVBO(GL*)
  *      glutSolidDodecahedron()			-- looks OK
@@ -62,7 +62,7 @@
  *      glutSolidSierpinskiSponge()		-- looks OK
  *      glutSolidTeapot()				-- looks OK, VBO functions separated (*_VBO(), draw*(), deleteVBO(GL*)
  *
- *  The Following functions have been updated by Enric Martí, based
+ *  The Following functions have been updated by Enric Martï¿½, based
  *  on GLU 9.0.0 implementations (include texture coordinates) to VBO:
  *
  *      gluCylinder()			-- looks OK, VBO functions separated (*_VBO(), draw*(), deleteVBO(GL*)
@@ -80,7 +80,7 @@
 
  /* -- INTERFACE CONSTANTS -------------------------------------------------- */
 
-//--------------- VGI: Màxim tamany vector vaoList
+//--------------- VGI: Mï¿½xim tamany vector vaoList
 #define MAX_SIZE_VAOID 50
 
 //--------------- VGI: Apuntadors a l'estructura VAOList per primitives
@@ -165,7 +165,8 @@ void draw_LinEBO_Object(GLint k);
 void glutSolidCube(GLdouble dSize);		// Generates solid cube. Code contributed by Andreas Umbach <marvin@dataway.ch>
 CVAO loadglutSolidCube_VAO(GLdouble dSize);
 CVAO loadglutSolidCube_EBO(GLdouble dSize);
-
+// ISMAEL ASTEROIDES
+CVAO loadIcosahedron_EBO(GLdouble radius, int subdivisions);
 // ---------- CUBE RGB--------------------------------------------------------
 void glutSolidCubeRGB(GLdouble dSize);// Draws a solid cube coloured by RGB with VAO. Code contributed by Enric Marti <enric.marti@uab.cat>
 CVAO loadglutSolidCubeRGB_VAO(GLdouble dSize);// Draws a solid cube coloured by RGB with VAO. Code contributed by Enric Marti <enric.marti@uab.cat>
@@ -2647,14 +2648,14 @@ CVAO loadglutSolidSquare_EBO(GLdouble dSize);
 // ------------------------------- DIBUIX DE CORBES i SUPERFICIES --------------------------------
 
 // ------------------------------- DIBUIX DE CORBES ----------------------------------------------
-const int MAX_PATCH_CORBA = 25;		// Màxim tamany vector Punts de control per a Corbes
-const double MIN_STEP_CORBA = 0.01;	// Minim pas del Paràmetre t per a dibuixar una corba
-const double MAX_STEP_CORBA = 1.0;	// Màxim pas del Paràmetre t per a dibuixar una corba
+const int MAX_PATCH_CORBA = 25;		// Mï¿½xim tamany vector Punts de control per a Corbes
+const double MIN_STEP_CORBA = 0.01;	// Minim pas del Parï¿½metre t per a dibuixar una corba
+const double MAX_STEP_CORBA = 1.0;	// Mï¿½xim pas del Parï¿½metre t per a dibuixar una corba
 
-// Càlcul Vector Normal de dos vectors 
+// Cï¿½lcul Vector Normal de dos vectors 
 //CPunt3D VNormal(CPunt3D v1, CPunt3D v2);
 
-// Càlcul Producte Vectorial de dos vectors 
+// Cï¿½lcul Producte Vectorial de dos vectors 
 CPunt3D Prod_Vectorial(CPunt3D v1, CPunt3D v2);
 
 // Vector Normal Principal del Triedre de Frenet (VBNxVT)
@@ -2666,18 +2667,18 @@ void dibuixa_Triedre_Frenet(GLuint sh_programID, CPunt3D vertex, CPunt3D VT, CPu
 CColor SetColorPatch(int ptch);
 
 //----------------------------  POLYLINE
-const GLdouble PAS_POLYLINE = 0.10;	// Pas Polyline. Precisió del Polyline
+const GLdouble PAS_POLYLINE = 0.10;	// Pas Polyline. Precisiï¿½ del Polyline
 
 void draw_PolyLine(CPunt3D* ctr_points, int nptsPolyLine, float pas);
 CVAO load_PolyLine_VAO(CPunt3D* ctr_points, int nptsPolyLine, float pas);
 void draw_TFPolyLine(GLuint sh_programID, CPunt3D* ctr_points, int nptsPolyLine, float pas);
 CPunt3D Punt_PolyLine(float t, CPunt3D* ctr);
-// D_Polyline: Funció per a calcular la primera derivada de la Polylinesegons:
-//     * t: paràmetre entre (0,1).
+// D_Polyline: Funciï¿½ per a calcular la primera derivada de la Polylinesegons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Extrems del segment de recta.
 CPunt3D D_PolyLine(CPunt3D* ctr);
-// D2_Polyline: Funció per a calcular la segona derivada de la Polyline segons:
-//     * t: paràmetre entre (0,1).
+// D2_Polyline: Funciï¿½ per a calcular la segona derivada de la Polyline segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Extrems del segment de recta.
 CPunt3D D2_PolyLine(CPunt3D* ctr);
 
@@ -2730,7 +2731,7 @@ const CPunt3D corbaH1[] = { { 256.0 + 16.0, 256.0, 30.0 }, { -256.0, 256.0, -10.
 { -16.0, 64.0 + 32.0 + 32.0, 150.0 }, { 256.0 - 32.0, 64.0 - 32.0, 75.0 }, { 256.0 + 16.0, 256.0, 30.0 }, { -256.0, 256.0, -10.0 }, { -256.0, 0.0, 30.0 } };
 // Numero Pts control corbaH1
 const int nptsCH1 = 9;
-const GLdouble PAS_HERMITTE = 0.10;	// Pas Hermitte. Precisió de la corba
+const GLdouble PAS_HERMITTE = 0.10;	// Pas Hermitte. Precisiï¿½ de la corba
 
 void draw_Hermitte_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
 CVAO load_Hermitte_Curve_VAO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
@@ -2738,13 +2739,13 @@ CVAO load_Hermitte_Curve_EBO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA],
 void draw_TFHermitte_Curve(GLuint sh_programID, CPunt3D* ctr_points, int nptsCorba, float pas);
 CPunt3D Punt_Corba_Hermitte(float t, CPunt3D* ctr);
 
-// D_Hermitte_Curve: Funció per a calcular la primera derivada de la corba Hermitte segons:
-//     * t: paràmetre entre (0,1).
+// D_Hermitte_Curve: Funciï¿½ per a calcular la primera derivada de la corba Hermitte segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D_Hermitte_Curve(float t, CPunt3D* ctr);
 
-// D2_Hermitte_Curve: Funció per a calcular la segona derivada de la corba Hermitte segons:
-//     * t: paràmetre entre (0,1).
+// D2_Hermitte_Curve: Funciï¿½ per a calcular la segona derivada de la corba Hermitte segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D2_Hermitte_Curve(float t, CPunt3D* ctr);
 
@@ -2773,7 +2774,7 @@ const CPunt3D corbaCR1[] = { { 256.0 + 16.0, 256.0, 30.0 }, { -256.0, 256.0, -10
 { -16.0, 64.0 + 32.0 + 32.0, 150.0 }, { 256.0 - 32.0, 64.0 - 32.0, 75.0 }, { 256.0 + 16.0, 256.0, 30.0 }, { -256.0, 256.0, -10.0 }, { -256.0, 0.0, 30.0 } };
 // Numero Pts control corbaCR1
 const int nptsCR1 = 9;
-const GLdouble PAS_CATMULL_ROM = 0.10;	// Pas Catmull-Rom. Precisió de la corba
+const GLdouble PAS_CATMULL_ROM = 0.10;	// Pas Catmull-Rom. Precisiï¿½ de la corba
 
 void draw_CatmullRom_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
 CVAO load_CatmullRom_Curve_VAO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
@@ -2781,13 +2782,13 @@ CVAO load_CatmullRom_Curve_EBO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA
 void draw_TFCatmullRom_Curve(GLuint sh_programID, CPunt3D* ctr_points, int nptsCorba, float pas);
 CPunt3D Punt_Corba_CatmullRom(float t, CPunt3D* ctr);
 
-// D_CatmullRom_Curve: Funció per a calcular la primera derivada de la corba Hermitte segons:
-//     * t: paràmetre entre (0,1).
+// D_CatmullRom_Curve: Funciï¿½ per a calcular la primera derivada de la corba Hermitte segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D_CatmullRom_Curve(float t, CPunt3D* ctr);
 
-// D2_CatmullRom_Curve: Funció per a calcular la segona derivada de la corba Hermitte segons:
-//     * t: paràmetre entre (0,1).
+// D2_CatmullRom_Curve: Funciï¿½ per a calcular la segona derivada de la corba Hermitte segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D2_CatmullRom_Curve(float t, CPunt3D* ctr);
 
@@ -2825,7 +2826,7 @@ const CPunt3D corbaS1[] = { { 256.0 + 16.0, 256.0, 30.0 }, { -256.0, 256.0, -10.
 { -16.0, 64.0 + 32.0 + 32.0, 150.0 }, { 256.0 - 32.0, 64.0 - 32.0, 75.0 }, { 256.0 + 16.0, 256.0, 30.0 }, { -256.0, 256.0, -10.0 }, { -256.0, 0.0, 30.0 } };
 // Numero Pts control corbaS1
 const int nptsCS1 = 9;
-const GLdouble PAS_BSPLINE = 0.10;	// Pas Spline. Precisió de la corba
+const GLdouble PAS_BSPLINE = 0.10;	// Pas Spline. Precisiï¿½ de la corba
 
 void draw_BSpline_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
 CVAO load_BSpline_Curve_VAO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], float pas);
@@ -2833,13 +2834,13 @@ CVAO load_BSpline_Curve_EBO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], 
 void draw_TFBSpline_Curve(GLuint sh_programID, CPunt3D* ctr_points, int nptsCorba, float pas);
 CPunt3D Punt_Corba_BSpline(float t, CPunt3D * ctr);
 
-// D_BSpline_Curve: Funció per a calcular la primera derivada de la corba B-Spline segons:
-//     * t: paràmetre entre (0,1).
+// D_BSpline_Curve: Funciï¿½ per a calcular la primera derivada de la corba B-Spline segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D_BSpline_Curve(float t, CPunt3D* ctr);
 
-// D2BSpline_Curve: Funció per a calcular la segona derivada de la corba B-Spline segons:
-//     * t: paràmetre entre (0,1).
+// D2BSpline_Curve: Funciï¿½ per a calcular la segona derivada de la corba B-Spline segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D2_BSpline_Curve(float t, CPunt3D* ctr);
 
@@ -2861,8 +2862,8 @@ const double AB[4][4] =
 	{ 1.0, 0.0, 0.0, 0.0 }
 };
 // Variables Corbes Bezier
-const int MAX_PATCH_BEZIER = 25;	// Màxim tamany vector Punts de control
-const GLdouble PAS_BEZIER = 0.10;	// Pas Bezier. Precisió de la corba
+const int MAX_PATCH_BEZIER = 25;	// Mï¿½xim tamany vector Punts de control
+const GLdouble PAS_BEZIER = 0.10;	// Pas Bezier. Precisiï¿½ de la corba
 
 // Dibuix Corba de Bezier en VBO
 void draw_Bezier_Curve(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA],  float pas, bool tancat);
@@ -2871,13 +2872,13 @@ CVAO load_Bezier_Curve_EBO(int nptsCorba, CPunt3D ctr_points[MAX_PATCH_CORBA], f
 void draw_TFBezier_Curve(GLuint sh_programID, CPunt3D* ctr_points, int nptsCorba, float pas, bool tancat);
 CPunt3D Punt_Bezier_Curve(float t, CPunt3D * ctr);
 
-// D_CBezier: Funció per a calcular la primera derivada de la corba Bezier segons:
-//     * t: paràmetre entre (0,1).
+// D_CBezier: Funciï¿½ per a calcular la primera derivada de la corba Bezier segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D_Bezier_Curve(float t, CPunt3D* ctr);
 
-// D2_CBezier: Funció per a calcular la segona derivada de la corba Bezier segons:
-//     * t: paràmetre entre (0,1).
+// D2_CBezier: Funciï¿½ per a calcular la segona derivada de la corba Bezier segons:
+//     * t: parï¿½metre entre (0,1).
 //     * ctr: Punts de control.
 CPunt3D D2_Bezier_Curve(float t, CPunt3D* ctr);
 
@@ -2889,7 +2890,7 @@ CPunt3D VT_Bezier_Curve(float t, CPunt3D* ctr);
 CPunt3D VBN_Bezier_Curve(float t, CPunt3D* ctr);
 //----------------------------  FI CORBA BEZIER
 
-// ------------------------- ACTIVACIÓ VERTEX ARRAY DE CADA FORMA GL_* PER A VBO
+// ------------------------- ACTIVACIï¿½ VERTEX ARRAY DE CADA FORMA GL_* PER A VBO
 CVAO load_LINES_VAO(std::vector <double> vertices, std::vector <double> colors);
 void draw_LINES_VAO(GLint vaoList_indx);
 CVAO load_LINES_EBO(std::vector <double> vertices, std::vector <double> colors, std::vector <uint> indices);
@@ -2908,7 +2909,7 @@ void draw_GL_TRIANGLE_STRIP_VAO(std::vector <double> vertices, std::vector <doub
 void draw_LINES_EBO(GLint vaoList_indx);
 void draw_TRIANGLES_EBO(GLint vaoList_indx);
 
-// --- ACTIVACIÓ DEFINICIÓ COORDENADES TEXTURA PER A OBJECTES GLUT ------------------------ 
+// --- ACTIVACIï¿½ DEFINICIï¿½ COORDENADES TEXTURA PER A OBJECTES GLUT ------------------------ 
 void Activa_Coordenades_Textura();
 void Desactiva_Coordenades_Textura();
 

@@ -51,7 +51,7 @@ void EixAngleToQuat(double X, double Y, double Z, double degree, GL_Quat &q)
 				
 // First we want to convert the degrees to radians 
 //		since the angle is assumed to be in radians
-	double angle = double((degree / 180.0f) * pi);
+	double angle = double((degree / 180.0f) * PI);
 
 // Here we calculate the sin( theta / 2) once for optimization
 	double result = (double)sin( angle / 2.0f );
@@ -113,7 +113,7 @@ void QuatToEixAngle(GL_Quat quat, GLdouble &x, GLdouble &y, GLdouble &z, GLdoubl
 		y = ty * (1.0f / len);	if (y<DELTA) y=0;
 		z = tz * (1.0f / len);	if (z<DELTA) z=0;
 	    dgr_rad = (GLdouble)(2.0 * acos(quat.w)); // Angle en radians
-		degree= GLdouble((dgr_rad * 180.0f) / pi); // Angle en graus
+		degree= GLdouble((dgr_rad * 180.0f) / PI); // Angle en graus
 		while (degree>=360)	degree=degree-360;
 		while (degree<0)	degree=degree+360;
     }
@@ -793,7 +793,7 @@ void QuatLog(GL_Quat q1, GL_Quat &q2)
 //make sure we do not divide by 0
 	if (q1.w != 0.0) 
 		length = atan (length / q1.w); 
-	else length = (GLdouble)pi/2;
+	else length = (GLdouble)PI/2;
 
 	q2.w = 0.0f;
 	q2.x = q1.x * length;
@@ -816,7 +816,7 @@ void QuatLnDif(GL_Quat q1, GL_Quat q2, GL_Quat &res)
 	QuatMul(inv, q2, dif);
 	len = sqrt (dif.x*dif.x + dif.y*dif.y + dif.z*dif.z);
 	s = QuatDot (q1, q2);
-	if (s != 0.0) len1 = atan (len / s); else len1 = pi/2;
+	if (s != 0.0) len1 = atan (len / s); else len1 = PI/2;
 	if (len != 0.0) len1 /= len;
 	res.w = 0.0;
 	res.x = dif.x * len1;

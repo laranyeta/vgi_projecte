@@ -1,14 +1,18 @@
-//******** PRACTICA VISUALITZACIÓ GRÀFICA INTERACTIVA (Escola Enginyeria - UAB)
-//******** Entorn bàsic VS2022 MONOFINESTRA amb OpenGL 4.3, interfície GLFW, ImGui i llibreries GLM
-//******** Ferran Poveda, Marc Vivet, Carme Julià, Débora Gil, Enric Martí (Setembre 2024)
+//******** PRACTICA VISUALITZACIï¿½ GRï¿½FICA INTERACTIVA (Escola Enginyeria - UAB)
+//******** Entorn bï¿½sic VS2022 MONOFINESTRA amb OpenGL 4.3, interfï¿½cie GLFW, ImGui i llibreries GLM
+//******** Ferran Poveda, Marc Vivet, Carme Juliï¿½, Dï¿½bora Gil, Enric Martï¿½ (Setembre 2024)
 // escena.h : interface de escena.cpp
 //
 
 #ifndef GLSOURCE_H
 #define GLSOURCE_H
 
-// Entorn VGI: OBJECTE OBJ. Include per la definició de l'objecte Obj_OBJ
+// Entorn VGI: OBJECTE OBJ. Include per la definiciï¿½ de l'objecte Obj_OBJ
 #include "objLoader.h"	
+#include "nau.h"
+#include "particleSystem.h"
+
+static float timeStartGame = 0.0f;
 
 /* ------------------------------------------------------------------------- */
 /*                            Funcions de les escenes                        */
@@ -22,29 +26,24 @@ void dibuixa_EscenaGL(GLuint sh_programID, bool eix, GLuint axis_Id, CMask3D rei
 	bool textur, GLuint texturID[NUM_MAX_TEXTURES], bool textur_map, bool flagInvertY,
 	int nptsU, CPunt3D PC_u[MAX_PATCH_CORBA], GLfloat pasCS, bool sw_PC, bool dib_TFrenet,
 	COBJModel* objecteOBJ,
-	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time);
+	glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, bool propulsat, Nau& nau, COBJModel* TestOBJ, COBJModel* CombustibleOBJ, COBJModel* EstacioOBJ, bool esExploracio);
 
-// Entorn VGI: dibuixa -> Funció que dibuixa objectes simples de la llibreria GLUT segons obj
-void dibuixa(GLuint sh_programID, char obj, glm::mat4 MatriuVista, glm::mat4 MatriuTG);
-
-// Entorn VGI: Objecte Arc
-void arc(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5]);
-//oid sea(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, CColor colorM);
-CVAO loadSea_VAO(CColor colorM);
-
-// Entorn VGI: Tie (Nau enemiga Star Wars) - Objecte fet per alumnes.
-void tie(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[4]);
-void Alas(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[4]);
-void Motor(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[4]);
-void Canon(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[4]);
-void Cuerpo(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[4]);
-void Cabina(GLint shaderId, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[4]);
-
-// Entorn VGI: Funcions locals a escena.cpp
-// CString2char: Funció de conversió de variable CString a char * per a noms de fitxers 
-//char* CString2Char(CString entrada);
-
-/*MAV MODIFIED*/
+/*MODIFIED*/
 void objecte_t(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5]);
-void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time);
+void sputnik(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, bool propulsat);
+void donut_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time);
+void nau_face(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time);
+void d_nau(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], const Nau nau);
+void drawOrbitPath(Planeta& planeta);
+
+
+/* MODIFIED*/
+void planeta(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES],bool textur, Nau& nau);
+void asteroide(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time,GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object, Nau& nau);
+void asteroidesCinturo(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* TestOBJ, CColor col_object, Nau& nau);
+void objectes(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* CombustibleOBJ, CColor col_object, Nau& nau);
+void estacions(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, bool sw_mat[5], float time, GLuint texturID[NUM_MAX_TEXTURES], bool textur, COBJModel* EstacioOBJ, CColor col_object, Nau& nau);
+void particleSystem(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat4 MatriuTG, float time, glm::vec3 posObj, ParticleType pt);
+std::vector<Asteroide*> findCollidingAsteroids(Nau& nau, double maxTime);
+void joc(float time, Nau& nau, bool esExploracio);
 #endif

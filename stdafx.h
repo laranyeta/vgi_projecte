@@ -54,6 +54,8 @@ using namespace glm;
 // VGI: Constants de l'aplicació EntornVGI
 #include "constants.h"
 
+
+
 // Desactivar en llistat compilació warning C4244: 'argumento': conversión de 'double' a 'GLfloat'; posible pérdida de datos
 #  pragma warning (disable:4244)  // Disable bogus VC++ 4.2 conversion warnings.
 #  pragma warning (disable:4305)  // VC++ 5.0 version of above warning.

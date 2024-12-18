@@ -100,7 +100,7 @@ class OBJLOADER_CLASS_DECL COBJModel
 		  const Material *pMaterials);
 	  void _stdcall loadToVAOList(const Face* pFaces, const unsigned int iFaceCount,
 		  const Material* pMaterials);
-	  void _stdcall GetFaceNormal(float fNormalOut[3], const Face *pFace);
+	  void _stdcall GetFaceNormal(float fNormalOut[], const Face *pFace);
 	  void _stdcall ParseFaceString(char szFaceString[], Face *FaceOut, const Vector3D *pVertices,
 		  const Vector3D *pNormals, const Vector2D *pTexCoords, const unsigned int iMaterialIndex);
 	  void _stdcall GetFileInfo(FILE *hStream, OBJFileInfo *Stat, const char szConstBasePath[]);
