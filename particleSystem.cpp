@@ -42,9 +42,9 @@ void ParticleSystem::initParticles_Nau(glm::vec3 origen, glm::vec3 direccio) {
 
         //dispersio de les particules
         glm::vec3 dispersio = glm::vec3(
-            (static_cast<float>(rand()) / RAND_MAX - 0.5f) * 0.05f, //x (cap enrera)
-            (static_cast<float>(rand()) / RAND_MAX - 0.5f) * 0.5f, //y
-            (static_cast<float>(rand()) / RAND_MAX - 0.5f) * 0.05f //z
+            (static_cast<float>(rand()) / RAND_MAX - 0.5f) * 0.02f, //x (cap enrera)
+            (static_cast<float>(rand()) / RAND_MAX - 0.5f) * 0.02f, //y (cap als costats)
+            (static_cast<float>(rand()) / RAND_MAX - 0.5f) * 0.02f //z
         );
 
         glm::vec3 direccionFinal = glm::normalize(direccionBase + dispersio);
@@ -146,7 +146,7 @@ void ParticleSystem::render(GLuint sh_programID, glm::mat4 MatriuVista, glm::mat
         GLuint texture = SOIL_load_OGL_texture("textures/particle.png", SOIL_LOAD_RGBA, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(glGetUniformLocation(sh_programID, "texture0"), 0);
+        glUniform1i(glGetUniformLocation(sh_programID, "textur"), GL_TRUE);
 
         SetTextureParameters(texture, true, true, false, true);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

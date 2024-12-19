@@ -5522,7 +5522,7 @@ int main(void)
 
 		glUniform3fv(glGetUniformLocation(shader_programID, "posSol"), 1, glm::value_ptr(posSol));
 		glUniform1f(glGetUniformLocation(shader_programID, "radiSol"), 15.0f);
-		glUniform1f(glGetUniformLocation(shader_programID, "glowRadius"), 10.0f); //activa llum taronja molt aprop del sol
+		glUniform1f(glGetUniformLocation(shader_programID, "glowRadius"), 30.0f); //activa llum taronja molt aprop del sol
 
 		//il·luminació dels planetes
 		for (auto& p : PLANETES) {
